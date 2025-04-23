@@ -13,7 +13,7 @@ import {
 const logo = require('../../../assets/logo.png');
 import React, {useState} from 'react';
 import CustomInputField from '../../../components/InputFields';
-import CustomButton from '../../../components/Button/Index';
+import CustomButton from '../../../components/Button';
 
 const RegisterScreen = () => {
   const [isLoading, setIsLoading] = useState(false);

@@ -8,8 +8,11 @@ interface CustomInputProp {
   value?: any;
   onChangeText?: (text: any) => void;
   InputWidth?: number;
+  InputHeight?: number;
   maxLength?: number;
   numeric ?: boolean;
+  radius?: number;
+  fontSize?: number;
 }
 
 const CustomInputField: React.FC<CustomInputProp> = ({
@@ -19,14 +22,17 @@ const CustomInputField: React.FC<CustomInputProp> = ({
   onChangeText,
   secureTextEntry = false,
   InputWidth = 100,
+  InputHeight = 50,
   maxLength,
-  numeric
+  numeric,
+  radius = 8,
+  fontSize = 16,
 }) => {
   return (
-    <View style={[styles.container, {width: `${InputWidth}%`}]}>
+    <View style={[styles.container, {width: `${InputWidth}%`, height: InputHeight}]}> 
       {label && <Text style={styles.label}>{label}</Text>}
       <TextInput
-        style={styles.input}
+        style={[styles.input, {borderRadius: radius, fontSize: fontSize}]}
         placeholder={placeholder}
         placeholderTextColor="#000"
         value={value}

@@ -1,10 +1,13 @@
 import React from 'react';
-import {SafeAreaView, StatusBar, StyleSheet, Platform} from 'react-native';
+import {SafeAreaView, StatusBar, StyleSheet, Platform, Text} from 'react-native';
 // import {NavigationContainer} from '@react-navigation/native';
 // import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import SignupScreen from './src/pages/authScreen/signupScreen';
 import RegisterScreen from './src/pages/authScreen/registerScreen';
 import HomeScreen from './src/pages/homeScreen/index';
+import HomeServiceScreen from './src/pages/homeServiceScreen';
+import LaundaryScreen from './src/pages/laundaryScreen';
+import HomePageScreen from './src/pages/HomePageScreen';
 
 // const Stack = createNativeStackNavigator();
 
@@ -24,7 +27,10 @@ const App = () => {
         </Stack.Navigator>
       </NavigationContainer> */}
       {/* <RegisterScreen /> */}
-      <SignupScreen />
+      {/* <SignupScreen /> */}
+       {/* <HomeServiceScreen /> */}
+      {/* <LaundaryScreen />  */}
+      <HomePageScreen />
     </SafeAreaView>
   );
 };
