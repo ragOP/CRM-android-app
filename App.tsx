@@ -8,6 +8,7 @@ import HomeScreen from './src/pages/homeScreen/index';
 import HomeServiceScreen from './src/pages/homeServiceScreen';
 import LaundaryScreen from './src/pages/laundaryScreen';
 import HomePageScreen from './src/pages/HomePageScreen';
+import PharmacyScreen from './src/pages/PharmacyScreen';
 
 // const Stack = createNativeStackNavigator();
 
@@ -30,7 +31,8 @@ const App = () => {
       {/* <SignupScreen /> */}
        {/* <HomeServiceScreen /> */}
       {/* <LaundaryScreen />  */}
-      <HomePageScreen />
+      {/* <HomePageScreen /> */}
+      <PharmacyScreen />
     </SafeAreaView>
   );
 };

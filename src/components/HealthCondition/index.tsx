@@ -60,7 +60,7 @@ export default HealthConditionSection;
 
 const styles = StyleSheet.create({
   container: {
-    margin: 20,
+    marginVertical: 10,
   },
   text: {
     fontSize: 20,

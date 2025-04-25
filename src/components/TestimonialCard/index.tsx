@@ -4,20 +4,31 @@ interface TestimonialCardProps {
   name: string;
   testimonial: string;
   image?: any;
+  isHomePage?: boolean;
 }
 
 const TestimonialCard: React.FC<TestimonialCardProps> = ({
   name,
   testimonial,
   image,
+  isHomePage = false,
 }) => {
   return (
-    <View style={styles.container}>
-      <View style={{flex: 1, flexDirection: 'row', alignItems: 'center', gap: 10}}>
-        {image && <Image source={image} style={styles.image} />}
-        <Text style={styles.name}>{name}</Text>
+    <View style={[styles.container, isHomePage ? {backgroundColor: '#82C8E533', shadowColor: '#fff', borderRadius: 25} : {}]}>
+      <View style={{flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 10}}>
+        {isHomePage ? (
+          <> 
+            <Text style={[styles.name, {color: '#0F1030', }]}>{name}</Text>
+            {image && <Image source={image} style={styles.image} />}
+          </>
+        ) : (
+          <> 
+            {image && <Image source={image} style={styles.image} />}
+            <Text style={styles.name}>{name}</Text>
+          </>
+        )}
       </View>
-      <Text style={styles.testimonial}>{testimonial}</Text>
+      <Text style={[styles.testimonial, isHomePage ? {color: '#243858'} : {}]}>{testimonial}</Text>
     </View>
   );
 };
@@ -30,7 +41,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#ffffff',
     borderRadius: 10,
     padding: 20,
-    margin: 10,
+    marginRight: 10,
+    marginVertical: 10,
     shadowColor: '#000',
     shadowOffset: {
       width: 0,

@@ -1,4 +1,4 @@
-import {View, Text, StyleSheet, ScrollView} from 'react-native';
+import {View, Text, StyleSheet, ScrollView, Image} from 'react-native';
 import GradientHeader from '../../components/GradientHeader';
 import ImageCarousel from '../../components/ImageCarousel';
 import ProductGrid from '../../components/ProductGrid';
@@ -134,11 +134,38 @@ const testimonialsData = [
   },
 ];
 
+const categories = [
+  {
+    id: '1',
+    image: require('../../assets/medicine.png'),
+    title: 'Medicines',
+    discount: 'SAVE 20 % OFF',
+  },
+  {
+    id: '2',
+    image: require('../../assets/medicine.png'),
+    title: 'Medicines',
+    discount: 'SAVE 20 % OFF',
+  },
+  {
+    id: '3',
+    image: require('../../assets/medicine.png'),
+    title: 'Medicines',
+    discount: 'SAVE 20 % OFF',
+  },
+  {
+    id: '4',
+    image: require('../../assets/medicine.png'),
+    title: 'Medicines',
+    discount: 'SAVE 20 % OFF',
+  }
+];
+
 const index = () => {
   return (
     <ScrollView style={styles.container}>
       <GradientHeader title="" description="" isHomePage />
-      <ImageCarousel /> {/* Add the Slider component here */}
+      <ImageCarousel />
       <ProductGrid title='Sale is Live' highlight={{'live': true}} rows={2} data={products} />
       <CustomCTA
         leftImage={require('../../assets/left-cta-img.png')}
@@ -151,13 +178,17 @@ const index = () => {
       <ProductGrid title='Our House Cleaning Services' highlight={{'cleaning': true}} data={services} />
       <HealthConditionSection />
       <ProductGrid title='Top Picks For You' highlight={{'picks': true}} data={products} />
+      <Image
+        source={require('../../assets/healthBanner.png')}
+        style={styles.healthBanner}
+      />
       <ProductGrid title='Big Deals On Sports Drinks' highlight={{'sports': true, 'drinks': true}} data={services} />
-      <ProductGrid title='Shop By Catergories' highlight={{'catergories': true}} data={services} />
+      <ProductGrid title='Shop By Categories' highlight={{'categories': true}} data={categories} isCategory rows={2} />
       <ProductGrid title='Best Services for You' highlight={{'you': true}} data={services} />
       <Blog />
        {/* Testimonial */}
        <View style={styles.testimonialContainer}>
-          <Text style={{color: '#04050B', fontSize: 14, fontWeight: 'bold'}}>
+          <Text style={{color: '#00008B', fontSize: 20, fontWeight: 'bold'}}>
             Our clients praise us for great service.
           </Text>
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
@@ -167,6 +198,7 @@ const index = () => {
                 name={testimonial.name}
                 testimonial={testimonial.testimonial}
                 image={testimonial.image}
+                isHomePage
               />
             ))}
           </ScrollView>
@@ -183,7 +215,11 @@ const styles = StyleSheet.create({
     backgroundColor: '#F8F8F8',
   },
   testimonialContainer: {
-    padding: 10,
-    marginVertical: 20,
+    padding: 20,
+  },
+  healthBanner: {
+    width: '100%',
+    resizeMode: 'cover',
+    marginVertical: 10,
   },
 });

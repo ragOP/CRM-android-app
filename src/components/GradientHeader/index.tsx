@@ -8,23 +8,26 @@ interface GradientHeaderProps {
   description: string;
   height?: number;
   isHomePage?: boolean;
+  isSearchNeeded?: boolean;
 }
+
+const categories = [
+  {
+    label: 'Pharmaceuticals',
+    image: require('../../assets/pharmaceutical.png'),
+  },
+  {label: 'Laundry', image: require('../../assets/laundry.png')},
+  {label: 'Blog', image: require('../../assets/blog.png')},
+  {label: 'Home Cleaning', image: require('../../assets/homecleaning.png')},
+];
 
 const index: React.FC<GradientHeaderProps> = ({
   title,
   description,
   height = 100,
   isHomePage,
+  isSearchNeeded = false,
 }) => {
-  const categories = [
-    {
-      label: 'Pharmaceuticals',
-      image: require('../../assets/pharmaceutical.png'),
-    },
-    {label: 'Laundry', image: require('../../assets/laundry.png')},
-    {label: 'Blog', image: require('../../assets/blog.png')},
-    {label: 'Home Cleaning', image: require('../../assets/homecleaning.png')},
-  ];
   return (
     <LinearGradient
       colors={['#82C8E5', '#F7F7F7']}
