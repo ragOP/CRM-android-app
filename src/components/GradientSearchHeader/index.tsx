@@ -19,7 +19,7 @@ const GradientSearchHeader = () => {
         <Text style={styles.heading}>What are you looking for?</Text>
         <TouchableOpacity style={styles.upload}>
           <Image
-            source={require('../../assets/prescription-icon.png')} // replace with your actual icon
+            source={require('../../assets/prescriptionIcon.png')} // replace with your actual icon
             style={styles.icon}
           />
           <Text style={styles.prescriptionText}>Order with prescription. </Text>

@@ -8,7 +8,6 @@ interface GradientHeaderProps {
   description: string;
   height?: number;
   isHomePage?: boolean;
-  isSearchNeeded?: boolean;
 }
 
 const categories = [
@@ -26,7 +25,6 @@ const index: React.FC<GradientHeaderProps> = ({
   description,
   height = 100,
   isHomePage,
-  isSearchNeeded = false,
 }) => {
   return (
     <LinearGradient
