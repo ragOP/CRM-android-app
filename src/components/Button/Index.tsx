@@ -1,3 +1,4 @@
+import React from 'react';
 import {
   View,
   Text,
@@ -6,7 +7,6 @@ import {
   ActivityIndicator,
   Image,
 } from 'react-native';
-import React from 'react';
 
 interface ButtonProps {
   title: string;

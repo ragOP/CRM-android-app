@@ -8,16 +8,76 @@ import {
   ScrollView,
   KeyboardAvoidingView,
   Platform,
+  Alert,
 } from 'react-native';
+import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import {useNavigation} from '@react-navigation/native';
 
 const logo = require('../../../assets/logo.png');
 import CustomInputField from '../../../components/InputFields';
 import CustomButton from '../../../components/Button';
+import {loginUser} from '../../../apis/login';
 
 const SignupScreen = () => {
   const [isLoading, setIsLoading] = useState(false);
-  const [email, setEmail] = useState(''); // NEW
-  const [password, setPassword] = useState(''); // NEW
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const navigation = useNavigation();
+
+  const handleLogin = async () => {
+    if (!email || !password) {
+      Alert.alert('Error', 'Please fill in all fields');
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      const payload = {
+        email: email,
+        password: password,
+      };
+      console.log('Payload:', payload);
+      const apiResponse = await loginUser({payload});
+      const response = apiResponse?.response;
+      console.log('API Response:', apiResponse, response);
+
+      if (response?.success) {
+        const userData = response?.data;
+        const localStoragePayload = {
+          token: userData?.token,
+          userId: userData?.id,
+          role: userData?.role,
+          name: userData?.name,
+        };
+
+        // Save user data to AsyncStorage
+        await AsyncStorage.setItem(
+          'userData',
+          JSON.stringify(localStoragePayload),
+        );
+
+        Alert.alert('Success', 'Login successful');
+
+        // Navigate to Home or Dashboard
+        navigation.reset({
+          index: 0,
+          routes: [{name: 'Home'}], // Replace 'Home' with your actual route name
+        });
+      } else {
+        Alert.alert('Error', response?.message || 'Login failed');
+      }
+    } catch (error: any) {
+      console.error(error);
+      Alert.alert(
+        'Error',
+        error?.response?.data?.message || 'Something went wrong',
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <KeyboardAvoidingView
@@ -44,7 +104,6 @@ const SignupScreen = () => {
               value={email}
               onChangeText={setEmail}
             />
-            {/* <CustomInputField label="Mobile Number" InputWidth={100} numeric={true}/> */}
             <CustomInputField
               label="Password"
               InputWidth={100}
@@ -53,9 +112,10 @@ const SignupScreen = () => {
               onChangeText={setPassword}
             />
             <CustomButton
-              title="Log In"
+              title={isLoading ? 'Logging in...' : 'Log In'}
               buttonWidth={100}
               isLoading={isLoading}
+              onPress={handleLogin}
             />
           </View>
 
@@ -78,6 +138,8 @@ const SignupScreen = () => {
 };
 
 export default SignupScreen;
+
+// your styles below...
 
 const styles = StyleSheet.create({
   mainContainer: {

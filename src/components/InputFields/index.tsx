@@ -10,7 +10,7 @@ interface CustomInputProp {
   InputWidth?: number;
   InputHeight?: number;
   maxLength?: number;
-  numeric ?: boolean;
+  numeric?: boolean;
   radius?: number;
   fontSize?: number;
 }
@@ -29,7 +29,11 @@ const CustomInputField: React.FC<CustomInputProp> = ({
   fontSize = 16,
 }) => {
   return (
-    <View style={[styles.container, {width: `${InputWidth}%`,  height: InputHeight}]}> 
+    <View
+      style={[
+        styles.container,
+        {width: `${InputWidth}%`, height: InputHeight},
+      ]}>
       {label && <Text style={styles.label}>{label}</Text>}
       <TextInput
         style={[styles.input, {borderRadius: radius, fontSize: fontSize}]}

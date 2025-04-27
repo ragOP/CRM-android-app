@@ -1,3 +1,4 @@
+import React, {useState} from 'react';
 import {
   View,
   Text,
@@ -11,9 +12,7 @@ import {
   Keyboard,
 } from 'react-native';
 const logo = require('../../../assets/logo.png');
-import React, {useState} from 'react';
 import CustomInputField from '../../../components/InputFields';
-import CustomButton from '../../../components/Button';
 
 const RegisterScreen = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -52,11 +51,11 @@ const RegisterScreen = () => {
                 InputWidth={100}
                 secureTextEntry={true}
               />
-              <CustomButton
+              {/* <CustomButton
                 title="Register"
                 buttonWidth={100}
                 isLoading={isLoading}
-              />
+              /> */}
             </View>
           </View>
         </ScrollView>
