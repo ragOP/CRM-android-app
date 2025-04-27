@@ -9,7 +9,7 @@ interface CustomInputProp {
   onChangeText?: (text: any) => void;
   InputWidth?: number;
   maxLength?: number;
-  numeric ?: boolean;
+  numeric?: boolean;
 }
 
 const CustomInputField: React.FC<CustomInputProp> = ({
@@ -20,7 +20,7 @@ const CustomInputField: React.FC<CustomInputProp> = ({
   secureTextEntry = false,
   InputWidth = 100,
   maxLength,
-  numeric
+  numeric,
 }) => {
   return (
     <View style={[styles.container, {width: `${InputWidth}%`}]}>
@@ -33,10 +33,10 @@ const CustomInputField: React.FC<CustomInputProp> = ({
         onChangeText={onChangeText}
         secureTextEntry={secureTextEntry}
         autoFocus={true}
-        editable={true}  
+        editable={true}
         selectTextOnFocus={true}
         maxLength={maxLength}
-        keyboardType={numeric ? 'number-pad': 'default'}
+        keyboardType={numeric ? 'number-pad' : 'default'}
       />
     </View>
   );
@@ -62,6 +62,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     backgroundColor: '#fff',
     color: '#000',
-    fontWeight: 100
+    fontWeight: 100,
   },
 });

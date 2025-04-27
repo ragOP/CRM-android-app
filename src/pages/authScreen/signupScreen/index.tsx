@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, {useState} from 'react';
 import {
   View,
   Text,
@@ -16,14 +16,15 @@ import CustomButton from '../../../components/Button/Index';
 
 const SignupScreen = () => {
   const [isLoading, setIsLoading] = useState(false);
+  const [email, setEmail] = useState(''); // NEW
+  const [password, setPassword] = useState(''); // NEW
 
   return (
     <KeyboardAvoidingView
-      style={{ flex: 1 }}
+      style={{flex: 1}}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
-    >
-      <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}>
+      <ScrollView contentContainerStyle={{flexGrow: 1}}>
         <View style={styles.mainContainer}>
           <View style={styles.topContainer}>
             <Image style={styles.images} source={logo} />
@@ -37,19 +38,35 @@ const SignupScreen = () => {
           </View>
 
           <View style={styles.middleContainer}>
-            <CustomInputField label="Mobile Number" InputWidth={100} numeric={true}/>
-            <CustomInputField label="Password" InputWidth={100} secureTextEntry />
-            <CustomButton title="Log In" buttonWidth={100} isLoading={isLoading} />
+            <CustomInputField
+              label="Email"
+              InputWidth={100}
+              value={email}
+              onChangeText={setEmail}
+            />
+            {/* <CustomInputField label="Mobile Number" InputWidth={100} numeric={true}/> */}
+            <CustomInputField
+              label="Password"
+              InputWidth={100}
+              value={password}
+              secureTextEntry
+              onChangeText={setPassword}
+            />
+            <CustomButton
+              title="Log In"
+              buttonWidth={100}
+              isLoading={isLoading}
+            />
           </View>
 
           <View style={styles.bottomContainer}>
             <Text style={styles.footerText}>
               By signing up, you agree to the{' '}
-              <Text style={{ fontWeight: 'bold', color: '#000' }}>
+              <Text style={{fontWeight: 'bold', color: '#000'}}>
                 Terms of Service
               </Text>{' '}
               and{' '}
-              <Text style={{ fontWeight: 'bold', color: '#000' }}>
+              <Text style={{fontWeight: 'bold', color: '#000'}}>
                 Data Processing Agreement
               </Text>
             </Text>
@@ -76,7 +93,7 @@ const styles = StyleSheet.create({
   bottomContainer: {
     backgroundColor: '#fff',
     width: '100%',
-    paddingHorizontal: 30
+    paddingHorizontal: 30,
   },
   middleContainer: {
     backgroundColor: '#fff',
