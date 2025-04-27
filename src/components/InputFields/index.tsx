@@ -22,14 +22,14 @@ const CustomInputField: React.FC<CustomInputProp> = ({
   onChangeText,
   secureTextEntry = false,
   InputWidth = 100,
-  InputHeight = 50,
+  InputHeight = 80,
   maxLength,
   numeric,
   radius = 8,
   fontSize = 16,
 }) => {
   return (
-    <View style={[styles.container, {width: `${InputWidth}%`, height: InputHeight}]}> 
+    <View style={[styles.container, {width: `${InputWidth}%`,  height: InputHeight}]}> 
       {label && <Text style={styles.label}>{label}</Text>}
       <TextInput
         style={[styles.input, {borderRadius: radius, fontSize: fontSize}]}

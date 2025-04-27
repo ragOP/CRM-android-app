@@ -12,6 +12,11 @@ import HomeServiceScreen from './src/pages/homeServiceScreen';
 import LaundaryScreen from './src/pages/laundaryScreen';
 import HomePageScreen from './src/pages/HomePageScreen';
 import PharmacyScreen from './src/pages/PharmacyScreen';
+import DryCleanScreen from './src/pages/dryCleanScreen';
+import UniversalSearchScreen from './src/pages/universalSearchScreen';
+import ContactUsScreen from './src/pages/contactUsScreen';
+import ProductScreen from './src/pages/productScreen';
+import CartScreem from './src/pages/cartScreen';
 
 // const Stack = createNativeStackNavigator();
 
@@ -38,7 +43,12 @@ const App = () => {
        {/* <HomeServiceScreen /> */}
       {/* <LaundaryScreen />  */}
       {/* <HomePageScreen /> */}
-      <PharmacyScreen />
+      {/* <PharmacyScreen /> */}
+      {/* <DryCleanScreen /> */}
+      <UniversalSearchScreen />
+      {/* <ContactUsScreen /> */}
+      {/* <ProductScreen /> */}
+      {/* <CartScreem /> */}
     </SafeAreaView>
   </QueryClientProvider>
   );
