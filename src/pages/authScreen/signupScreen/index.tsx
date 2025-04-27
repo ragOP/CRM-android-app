@@ -12,7 +12,7 @@ import {
 
 const logo = require('../../../assets/logo.png');
 import CustomInputField from '../../../components/InputFields';
-import CustomButton from '../../../components/Button/Index';
+import CustomButton from '../../../components/Button';
 
 const SignupScreen = () => {
   const [isLoading, setIsLoading] = useState(false);

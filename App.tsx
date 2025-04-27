@@ -1,5 +1,5 @@
 import React from 'react';
-import {SafeAreaView, StatusBar, StyleSheet, Platform} from 'react-native';
+import {SafeAreaView, StatusBar, StyleSheet, Platform, Text} from 'react-native';
 // import {NavigationContainer} from '@react-navigation/native';
 // import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import SignupScreen from './src/pages/authScreen/signupScreen';
@@ -8,6 +8,10 @@ import HomeScreen from './src/pages/homeScreen/index';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 const queryClient = new QueryClient();
+import HomeServiceScreen from './src/pages/homeServiceScreen';
+import LaundaryScreen from './src/pages/laundaryScreen';
+import HomePageScreen from './src/pages/HomePageScreen';
+import PharmacyScreen from './src/pages/PharmacyScreen';
 
 // const Stack = createNativeStackNavigator();
 
@@ -29,8 +33,14 @@ const App = () => {
       </NavigationContainer> */}
         {/* <RegisterScreen /> */}
         <SignupScreen />
-      </SafeAreaView>
-    </QueryClientProvider>
+      {/* <RegisterScreen /> */}
+      {/* <SignupScreen /> */}
+       {/* <HomeServiceScreen /> */}
+      {/* <LaundaryScreen />  */}
+      {/* <HomePageScreen /> */}
+      <PharmacyScreen />
+    </SafeAreaView>
+  </QueryClientProvider>
   );
 };
 
