@@ -42,7 +42,7 @@ export const apiService = async ({
       signal,
     };
 
-    console.log('Request Object:', requestObj);
+    // console.log('Request Object:', requestObj);
 
     if (token || _token) {
       requestObj.headers = {

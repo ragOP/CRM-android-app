@@ -29,6 +29,8 @@ import {store} from './src/redux/store';
 // const Stack = createNativeStackNavigator();
 
 const App = () => {
+
+  
   return (
     <NavigationContainer>
       <Provider store={store}>

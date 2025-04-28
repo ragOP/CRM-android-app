@@ -20,7 +20,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
 }) => {
   return (
     <View style={styles.card}>
-      <Image source={image} style={styles.image} />
+      <Image source={{uri: image}} style={styles.image} />
       <View style={styles.priceRow}>
         <Text style={styles.price}>₹{price}</Text>
         <Text style={styles.original}>/{originalPrice}</Text>

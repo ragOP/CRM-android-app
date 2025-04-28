@@ -2,21 +2,21 @@ import {createSlice, createAsyncThunk, PayloadAction} from '@reduxjs/toolkit';
 import {apiService} from '../../utils/api/apiService';
 import {endpoints} from '../../utils/endpoints';
 
-export interface Category {
+export interface Service {
   id: string;
   name: string;
   [key: string]: any;
 }
 
-export interface CategoriesState {
+export interface ServicesState {
   isFetching: boolean;
   isFetched: boolean;
-  data: Category[];
+  data: Service[];
   params: Record<string, any>;
   error: string | null;
 }
 
-const initialState: CategoriesState = {
+const initialState: ServicesState = {
   isFetching: false,
   isFetched: false,
   data: [],
@@ -24,40 +24,41 @@ const initialState: CategoriesState = {
   error: null,
 };
 
-export const fetchCategories = createAsyncThunk<
-  {data: Category[]; params: Record<string, any>},
+export const fetchServices = createAsyncThunk<
+  {data: Service[]; params: Record<string, any>},
   Record<string, any>,
   {rejectValue: string}
->('categories/fetchCategories', async (params = {}, {rejectWithValue}) => {
+>('services/fetchServices', async (params = {}, {rejectWithValue}) => {
   try {
-    const response = await apiService({endpoint: endpoints.category});
-    return {data: response.response.data.categories, params};
+    const response = await apiService({endpoint: endpoints.service});
+    console.log('Services response:', response);
+    return {data: response.response.data, params};
   } catch (error: any) {
     return rejectWithValue(error?.response?.data || 'Something went wrong');
   }
 });
 
-const categoriesSlice = createSlice({
-  name: 'categories',
+const servicesSlice = createSlice({
+  name: 'services',
   initialState,
   reducers: {
-    resetCategories: state => {
+    resetServices: state => {
       Object.assign(state, initialState);
     },
   },
   extraReducers: builder => {
     builder
-      .addCase(fetchCategories.pending, state => {
+      .addCase(fetchServices.pending, state => {
         state.isFetching = true;
         state.isFetched = false;
         state.error = null;
       })
       .addCase(
-        fetchCategories.fulfilled,
+        fetchServices.fulfilled,
         (
           state,
           action: PayloadAction<{
-            data: Category[];
+            data: Service[];
             params: Record<string, any>;
           }>,
         ) => {
@@ -67,17 +68,18 @@ const categoriesSlice = createSlice({
           state.params = action.payload.params || {};
         },
       )
-      .addCase(fetchCategories.rejected, (state, action) => {
+      .addCase(fetchServices.rejected, (state, action) => {
         state.isFetching = false;
         state.isFetched = false;
-        state.error =
-          (action.payload as string) || 'Failed to fetch categories';
+        state.error = (action.payload as string) || 'Failed to fetch services';
       });
   },
 });
 
-export const {resetCategories} = categoriesSlice.actions;
-export const selectCategories = (state: {category: CategoriesState}) =>
-  state.category.data;
+export const {resetServices} = servicesSlice.actions;
+export const selectServices = (state: {services: ServicesState}) =>
+  state.services.data;
+export const selectIsFetching = (state: {services: ServicesState}) =>
+  state.services.isFetching;
 
-export default categoriesSlice.reducer;
+export default servicesSlice.reducer;

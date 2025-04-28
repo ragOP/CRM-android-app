@@ -12,7 +12,7 @@ import ProductCard from '../ProductCard';
 interface ProductGridProps {
   rows?: number;
   title: string;
-  highlight?: { [key: string]: boolean };
+  highlight?: {[key: string]: boolean};
   data: any;
   isCategory?: boolean;
 }
@@ -24,17 +24,22 @@ const ProductGrid: React.FC<ProductGridProps> = ({
   data,
   isCategory = false,
 }) => {
-  const renderCategoryCard = ({ item }: { item: any }) => (
+  const renderCategoryCard = ({item}: {item: any}) => (
     <View style={styles.card}>
-      <Image source={item.image} style={styles.image} resizeMode="contain" />
-      <Text style={styles.title} numberOfLines={1}>{item.title}</Text>
+      <Image
+        source={{uri: item.image}}
+        style={styles.image}
+        resizeMode="contain"
+      />
+      <Text style={styles.title} numberOfLines={1}>
+        {item.title}
+      </Text>
       <Text style={styles.discount}>{item.discount}</Text>
     </View>
   );
-  
 
   return (
-    <View style={{ padding: 16 }}>
+    <View style={{padding: 16}}>
       <View style={styles.header}>
         <Text style={styles.saleText}>
           {title.split(' ').map((word, index) => {
@@ -49,7 +54,7 @@ const ProductGrid: React.FC<ProductGridProps> = ({
           })}
         </Text>
         <TouchableOpacity>
-          <Text style={styles.viewAll}>view all →</Text>
+          <Text style={styles.viewAll}>View all →</Text>
         </TouchableOpacity>
       </View>
 
@@ -60,17 +65,25 @@ const ProductGrid: React.FC<ProductGridProps> = ({
           renderItem={renderCategoryCard}
           keyExtractor={(item, index) => `${item.title}-${index}`}
           showsHorizontalScrollIndicator={false}
-          ItemSeparatorComponent={() => <View style={{ width: 12 }} />}
-          contentContainerStyle={{  gap: 7 }}
-          columnWrapperStyle={{ justifyContent: 'space-between' }}
+          ItemSeparatorComponent={() => <View style={{width: 12}} />}
+          contentContainerStyle={{gap: 7}}
+          columnWrapperStyle={{justifyContent: 'space-between'}}
         />
       ) : (
         <FlatList
           data={data}
-          renderItem={({ item }) => <ProductCard {...item} />}
-          keyExtractor={(item) => item.id}
+          renderItem={({item}) => (
+            <ProductCard
+              image={item?.banner_image}
+              price={item?.discounted_price}
+              originalPrice={item?.price}
+              title={item?.name}
+              subtitle={item?.small_description}
+            />
+          )}
+          keyExtractor={item => item.id}
           numColumns={rows}
-          columnWrapperStyle={{ justifyContent: 'space-between' }}
+          columnWrapperStyle={{justifyContent: 'space-between'}}
         />
       )}
     </View>
@@ -103,7 +116,7 @@ const styles = StyleSheet.create({
     padding: 10,
     marginBottom: 12,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
+    shadowOffset: {width: 0, height: 1},
     shadowOpacity: 0.1,
     shadowRadius: 3,
     elevation: 3,
@@ -126,5 +139,4 @@ const styles = StyleSheet.create({
     marginTop: 2,
     textAlign: 'center',
   },
-  
 });
