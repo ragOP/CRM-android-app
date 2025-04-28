@@ -158,15 +158,22 @@ const categories = [
     image: require('../../assets/medicine.png'),
     title: 'Medicines',
     discount: 'SAVE 20 % OFF',
-  }
+  },
 ];
 
-const index = () => {
+const HomePageScreen = () => {
+
+
   return (
     <ScrollView style={styles.container}>
       <GradientHeader title="" description="" isHomePage />
       <ImageCarousel />
-      <ProductGrid title='Sale is Live' highlight={{'live': true}} rows={2} data={products} />
+      <ProductGrid
+        title="Sale is Live"
+        highlight={{live: true}}
+        rows={2}
+        data={products}
+      />
       <CustomCTA
         leftImage={require('../../assets/left-cta-img.png')}
         text="Save unto 10% extra enjoy FREE delivery with PLUS membership"
@@ -174,40 +181,66 @@ const index = () => {
         buttonText="Buy Now"
         onPress={() => console.log('CTA clicked!')}
       />
-      <ProductGrid title='Our Laundry Services' highlight={{'laundry': true}} data={services} />
-      <ProductGrid title='Our House Cleaning Services' highlight={{'cleaning': true}} data={services} />
+      <ProductGrid
+        title="Our Laundry Services"
+        highlight={{laundry: true}}
+        data={services}
+      />
+      <ProductGrid
+        title="Our House Cleaning Services"
+        highlight={{cleaning: true}}
+        data={services}
+      />
       <HealthConditionSection />
-      <ProductGrid title='Top Picks For You' highlight={{'picks': true}} data={products} />
+      <ProductGrid
+        title="Top Picks For You"
+        highlight={{picks: true}}
+        data={products}
+      />
       <Image
         source={require('../../assets/healthBanner.png')}
         style={styles.healthBanner}
       />
-      <ProductGrid title='Big Deals On Sports Drinks' highlight={{'sports': true, 'drinks': true}} data={services} />
-      <ProductGrid title='Shop By Categories' highlight={{'categories': true}} data={categories} isCategory rows={2} />
-      <ProductGrid title='Best Services for You' highlight={{'you': true}} data={services} />
+      <ProductGrid
+        title="Big Deals On Sports Drinks"
+        highlight={{sports: true, drinks: true}}
+        data={services}
+      />
+      <ProductGrid
+        title="Shop By Categories"
+        highlight={{categories: true}}
+        data={categories}
+        isCategory
+        rows={2}
+      />
+      <ProductGrid
+        title="Best Services for You"
+        highlight={{you: true}}
+        data={services}
+      />
       <Blog />
-       {/* Testimonial */}
-       <View style={styles.testimonialContainer}>
-          <Text style={{color: '#00008B', fontSize: 20, fontWeight: 'bold'}}>
-            Our clients praise us for great service.
-          </Text>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-            {testimonialsData.map(testimonial => (
-              <TestimonialCard
-                key={testimonial.id}
-                name={testimonial.name}
-                testimonial={testimonial.testimonial}
-                image={testimonial.image}
-                isHomePage
-              />
-            ))}
-          </ScrollView>
-        </View>
+      {/* Testimonial */}
+      <View style={styles.testimonialContainer}>
+        <Text style={{color: '#00008B', fontSize: 20, fontWeight: 'bold'}}>
+          Our clients praise us for great service.
+        </Text>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+          {testimonialsData.map(testimonial => (
+            <TestimonialCard
+              key={testimonial.id}
+              name={testimonial.name}
+              testimonial={testimonial.testimonial}
+              image={testimonial.image}
+              isHomePage
+            />
+          ))}
+        </ScrollView>
+      </View>
     </ScrollView>
   );
 };
 
-export default index;
+export default HomePageScreen;
 
 const styles = StyleSheet.create({
   container: {

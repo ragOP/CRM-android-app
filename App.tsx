@@ -46,13 +46,14 @@ const App = () => {
           <Stack.Screen name={'register'} component={RegisterScreen} />
         </Stack.Navigator>
       </NavigationContainer> */}
+            {/* <HomeScreen /> */}
             {/* <RegisterScreen /> */}
-            <SignupScreen />
+            {/* <SignupScreen /> */}
             {/* <RegisterScreen /> */}
             {/* <SignupScreen /> */}
             {/* <HomeServiceScreen /> */}
             {/* <LaundaryScreen />  */}
-            {/* <HomePageScreen /> */}
+            <HomePageScreen />
             {/* <PharmacyScreen /> */}
             {/* <DryCleanScreen /> */}
             {/* <UniversalSearchScreen /> */}
