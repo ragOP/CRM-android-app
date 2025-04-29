@@ -5,7 +5,7 @@ interface ProductCardProps {
   image: any;
   price: number;
   originalPrice: number;
-  discount: string;
+  discount?: string | number;
   title: string;
   subtitle: string;
 }
@@ -24,7 +24,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
       <View style={styles.priceRow}>
         <Text style={styles.price}>₹{price}</Text>
         <Text style={styles.original}>/{originalPrice}</Text>
-        <Text style={styles.discount}> {discount} Off</Text>
+        {discount && <Text style={styles.discount}> {discount} Off</Text>}
       </View>
       <Text style={styles.title} numberOfLines={1}>
         {title}
@@ -46,7 +46,7 @@ const styles = StyleSheet.create({
     padding: 10,
     marginBottom: 12,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
+    shadowOffset: {width: 0, height: 1},
     shadowOpacity: 0.1,
     shadowRadius: 3,
     elevation: 3,

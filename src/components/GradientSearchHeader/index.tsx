@@ -17,14 +17,14 @@ const GradientSearchHeader = () => {
       {/* Header Section */}
       <View style={styles.header}>
         <Text style={styles.heading}>What are you looking for?</Text>
-        <TouchableOpacity style={styles.upload}>
+        {/* <TouchableOpacity style={styles.upload}>
           <Image
             source={require('../../assets/prescriptionIcon.png')} // replace with your actual icon
             style={styles.icon}
           />
           <Text style={styles.prescriptionText}>Order with prescription. </Text>
           <Text style={styles.uploadNow}>UPLOAD NOW ›</Text>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
       </View>
 
       {/* Search Box */}
