@@ -7,25 +7,41 @@ import {
   TouchableOpacity,
   TextInput,
 } from 'react-native';
+import {useNavigation} from '@react-navigation/native';
 
-interface CustomSearchProps {}
+type CustomSearchProps = {
+  searchText: string;
+  onChange: (value: string) => void;
+  onSearch: () => void;
+};
 
-const CustomSearch: React.FC<CustomSearchProps> = () => {
+const CustomSearch = ({searchText, onChange, onSearch}: CustomSearchProps) => {
+  const navigation = useNavigation();
+
+  const onBack = () => {
+    navigation.goBack();
+  };
+
   return (
     <View>
       <View style={styles.container}>
-        <Image source={require('../../assets/leftarrow.png')} />
+        <TouchableOpacity onPress={onBack}>
+          <Image source={require('../../assets/leftarrow.png')} />
+        </TouchableOpacity>
+
         <View style={styles.searchContainer}>
           <Image
             source={require('../../assets/search-icon.png')} // replace with your actual icon
             style={{width: 16, height: 16, marginRight: 4}}
           />
           <TextInput
-            placeholder="search for “headache medicine”"
+            placeholder="Search for “headache medicine”"
             placeholderTextColor="#888"
             style={styles.input}
+            value={searchText}
+            onChangeText={onChange}
           />
-          <TouchableOpacity style={styles.searchButton}>
+          <TouchableOpacity onPress={onSearch} style={styles.searchButton}>
             <Text style={styles.searchText}>Search</Text>
           </TouchableOpacity>
         </View>
@@ -53,7 +69,8 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 10,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
   },
   searchContainer: {
     flexDirection: 'row',
@@ -61,12 +78,15 @@ const styles = StyleSheet.create({
     borderRadius: 50,
     alignItems: 'center',
     marginHorizontal: 10,
-    paddingHorizontal: 12,
-    paddingVertical: 3,
+    paddingLeft: 12,
+    paddingRight: 4,
+    // paddingHorizontal: 12,
+    paddingVertical: 4,
     borderColor: '#4D4D4D',
     borderWidth: 1,
   },
   input: {
+    flex: 1,
     paddingVertical: 6,
     paddingHorizontal: 10,
     fontSize: 14,

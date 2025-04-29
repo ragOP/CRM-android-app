@@ -24,7 +24,7 @@ const initialState: ServicesState = {
   error: null,
 };
 
-export const fetchServices = createAsyncThunk<
+export const fetchReduxServices = createAsyncThunk<
   {data: Service[]; params: Record<string, any>},
   Record<string, any>,
   {rejectValue: string}
@@ -48,13 +48,13 @@ const servicesSlice = createSlice({
   },
   extraReducers: builder => {
     builder
-      .addCase(fetchServices.pending, state => {
+      .addCase(fetchReduxServices.pending, state => {
         state.isFetching = true;
         state.isFetched = false;
         state.error = null;
       })
       .addCase(
-        fetchServices.fulfilled,
+        fetchReduxServices.fulfilled,
         (
           state,
           action: PayloadAction<{
@@ -68,7 +68,7 @@ const servicesSlice = createSlice({
           state.params = action.payload.params || {};
         },
       )
-      .addCase(fetchServices.rejected, (state, action) => {
+      .addCase(fetchReduxServices.rejected, (state, action) => {
         state.isFetching = false;
         state.isFetched = false;
         state.error = (action.payload as string) || 'Failed to fetch services';

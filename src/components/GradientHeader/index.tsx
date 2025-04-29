@@ -1,10 +1,22 @@
-import React, { useEffect } from 'react';
-import { StyleSheet, Text, View, Dimensions } from 'react-native';
+import React, {useEffect} from 'react';
+import {
+  StyleSheet,
+  Text,
+  View,
+  Dimensions,
+  Touchable,
+  TouchableOpacity,
+} from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import CategoryCard from '../CategoryCard';
-import { useAppDispatch, useAppSelector } from '../../redux/store';
-import { isArrayWithValues } from '../../utils/array/isArrayWithValues';
-import { fetchServices, selectIsFetching, selectServices } from '../../redux/slice/servicesSlice';
+import {useAppDispatch, useAppSelector} from '../../redux/store';
+import {isArrayWithValues} from '../../utils/array/isArrayWithValues';
+import {
+  fetchReduxServices,
+  selectIsFetching,
+  selectServices,
+} from '../../redux/slice/servicesSlice';
+import {useNavigation} from '@react-navigation/native';
 
 interface GradientHeaderProps {
   title: string;
@@ -24,18 +36,24 @@ const GradientHeader = ({
   isHomePage,
 }: GradientHeaderProps) => {
   const dispatch = useAppDispatch();
+
+  const navigation = useNavigation();
+
   const isFetching = useAppSelector(selectIsFetching);
   const services = useAppSelector(selectServices);
 
-  useEffect(() => {
-    if (isHomePage) {
-      dispatch(fetchServices({}));
+  const handleCategoryPress = (service: any) => {
+    if (service.name?.toLowerCase().includes('pharm')) {
+      navigation.navigate('UniversalSearch', {service});
     }
-  }, [dispatch, isHomePage]);
+    // Add more category handling here as needed
+  };
 
   // Calculate dynamic item width based on number of services
   const getItemWidth = (count: number) => {
-    if (count === 0) return '100%';
+    if (count === 0) {
+      return '100%';
+    }
     // total gaps = (count - 1) * gap
     const totalGap = (count - 1) * gap;
     const availableWidth = screenWidth - horizontalPadding - totalGap;
@@ -48,13 +66,13 @@ const GradientHeader = ({
     const itemWidth = getItemWidth(count);
     return (
       <View style={styles.categoryContainer}>
-        {Array.from({ length: count }).map((_, i) => (
+        {Array.from({length: count}).map((_, i) => (
           <View
             key={i}
             style={[
               styles.categoryItem,
               styles.skeleton,
-              { width: itemWidth, marginRight: i !== count - 1 ? gap : 0 },
+              {width: itemWidth, marginRight: i !== count - 1 ? gap : 0},
             ]}
           />
         ))}
@@ -74,24 +92,35 @@ const GradientHeader = ({
             key={index}
             style={[
               styles.categoryItem,
-              { width: itemWidth, marginRight: index !== items.length - 1 ? gap : 0 },
-            ]}
-          >
-            <CategoryCard
-              label={category.name || ''}
-              image={category.images?.[0]}
-            />
+              {
+                width: itemWidth,
+                marginRight: index !== items.length - 1 ? gap : 0,
+              },
+            ]}>
+            <TouchableOpacity
+              onPress={() => handleCategoryPress(category)}
+              style={{width: '100%', height: '100%'}}>
+              <CategoryCard
+                label={category.name || ''}
+                image={category.images?.[0]}
+              />
+            </TouchableOpacity>
           </View>
         ))}
       </View>
     );
   };
 
+  useEffect(() => {
+    if (isHomePage) {
+      dispatch(fetchReduxServices({}));
+    }
+  }, [dispatch, isHomePage]);
+
   return (
     <LinearGradient
       colors={['#82C8E5', '#F7F7F7']}
-      style={[styles.header, { height }]}
-    >
+      style={[styles.header, {height}]}>
       <View style={styles.container}>
         <Text style={styles.headerTitle}>{title}</Text>
         <Text style={styles.subTitle}>{description}</Text>
@@ -105,13 +134,12 @@ const styles = StyleSheet.create({
   header: {
     justifyContent: 'center',
     alignItems: 'center',
-    paddingVertical: 25,
   },
   container: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'flex-start',
-    paddingHorizontal: 16,
+    paddingHorizontal: 8,
   },
   headerTitle: {
     fontSize: 22,
@@ -129,7 +157,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'nowrap',
     justifyContent: 'flex-start',
-    marginTop: 12,
     width: '100%',
   },
   categoryItem: {
