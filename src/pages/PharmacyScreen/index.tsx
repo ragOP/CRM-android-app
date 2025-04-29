@@ -147,7 +147,7 @@ const products = [
   },
 ];
 
-const index = () => {
+const PharmacyScreen = () => {
   return (
     <ScrollView
       showsVerticalScrollIndicator={false}
@@ -226,7 +226,7 @@ const index = () => {
   );
 };
 
-export default index;
+export default PharmacyScreen;
 
 const styles = StyleSheet.create({
   healthBanner: {

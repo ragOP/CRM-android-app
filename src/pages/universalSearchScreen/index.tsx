@@ -1,4 +1,4 @@
-import {Text, ScrollView, FlatList} from 'react-native';
+import {Text, ScrollView, FlatList, View} from 'react-native';
 import CustomSearch from '../../components/CustomSearch';
 import Filter from '../../components/Filter';
 import ProductCard from '../../components/ProductCard';
@@ -57,7 +57,6 @@ const UniversalSearchScreen: React.FC = () => {
 
   const params = {
     ...(filters || {}),
-    search: debouncedQuery || '',
     category_id:
       !isArrayWithValues(filters.category_id) &&
       isArrayWithValues(categoriesList)
@@ -78,7 +77,7 @@ const UniversalSearchScreen: React.FC = () => {
     });
   };
 
-  const {data: allProducts, isProductsLoading} = useQuery({
+  const {data: allProducts, isLoading: isProductsLoading} = useQuery({
     queryKey: ['search_result_products', params],
     queryFn: async () => {
       const apiResponse = await fetchProducts({
@@ -127,7 +126,24 @@ const UniversalSearchScreen: React.FC = () => {
         setFilters={setFilters}
         categoriesList={categoriesList || []}
       />
-      {isArrayWithValues(allProducts) ? (
+      {isProductsLoading ? (
+        // Skeleton loader for products
+        <View style={{flexDirection: 'row', flexWrap: 'wrap', padding: 16}}>
+          {[...Array(6)].map((_, idx) => (
+            <View
+              key={idx}
+              style={{
+                width: '48%',
+                height: 180,
+                backgroundColor: '#e0e0e0',
+                borderRadius: 12,
+                marginBottom: 16,
+                marginRight: idx % 2 === 0 ? '4%' : 0,
+              }}
+            />
+          ))}
+        </View>
+      ) : isArrayWithValues(allProducts) ? (
         <FlatList
           data={allProducts}
           renderItem={({item}) => (
@@ -147,7 +163,15 @@ const UniversalSearchScreen: React.FC = () => {
           }}
         />
       ) : (
-        <Text>Not found</Text>
+        <View
+          style={{
+            flex: 1,
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: 32,
+          }}>
+          <Text style={{fontSize: 16, color: '#888'}}>No products found</Text>
+        </View>
       )}
     </ScrollView>
   );

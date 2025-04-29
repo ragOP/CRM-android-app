@@ -11,6 +11,7 @@ import {
 import Icon from 'react-native-vector-icons/Ionicons';
 import {FilterType} from '../../pages/universalSearchScreen';
 import {isArrayWithValues} from '../../utils/array/isArrayWithValues';
+import CustomCheckbox from '../CustomCheckBox';
 
 export type FilterOption = {
   label: string;
@@ -116,9 +117,13 @@ const Filter = ({filters, setFilters, categoriesList}: FilterProps) => {
                 style={selected ? styles.selectedBrandText : styles.brandText}>
                 {item.label}
               </Text>
-              <View
-                style={[styles.checkbox, selected && styles.checkboxSelected]}
+              <CustomCheckbox
+                checked={selected}
+                onChange={() => toggleSelection(selectedFilter.key, item.value)}
               />
+              {/* <View
+                style={[styles.checkbox, selected && styles.checkboxSelected]}
+              /> */}
             </TouchableOpacity>
           );
         }}

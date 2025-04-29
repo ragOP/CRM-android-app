@@ -47,7 +47,7 @@ const CustomSearch = ({searchText, onChange, onSearch}: CustomSearchProps) => {
         </View>
       </View>
 
-      <View style={styles.header}>
+      {/* <View style={styles.header}>
         <TouchableOpacity style={styles.upload}>
           <Image
             source={require('../../assets/prescriptionIcon.png')} // replace with your actual icon
@@ -56,7 +56,7 @@ const CustomSearch = ({searchText, onChange, onSearch}: CustomSearchProps) => {
           <Text style={styles.prescriptionText}>Order with prescription. </Text>
           <Text style={styles.uploadNow}>UPLOAD NOW ›</Text>
         </TouchableOpacity>
-      </View>
+      </View> */}
     </View>
   );
 };
