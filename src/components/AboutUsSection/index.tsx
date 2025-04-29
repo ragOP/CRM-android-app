@@ -22,7 +22,7 @@ const index: React.FC<AboutUsProps> = ({ title, description, buttonText, imageSo
       <View style={styles.rightContainer}>
         <Image
           style={styles.image}
-          source={imageSource}
+          source={{uri: imageSource}}
         />
       </View>
     </View>
@@ -36,18 +36,18 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'row',
     backgroundColor: '#82C8E533',
-    paddingHorizontal: 20,
+    paddingHorizontal: 16,
     paddingVertical: 10,
     marginVertical: 10,
   },
   title: {
-    fontSize: 10,
+    fontSize: 16,
     fontWeight: '600',
     color: '#000',
     marginBottom: 3,
   },
   description: {
-    fontSize: 6,
+    fontSize: 9,
     fontWeight: '400',
     color: '#000',
     marginBottom: 5,
@@ -73,7 +73,7 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     color: '#fff',
-    fontSize: 8,
+    fontSize: 10,
     fontWeight: '500',
   },
   image: {

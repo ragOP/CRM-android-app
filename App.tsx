@@ -53,9 +53,9 @@ const App = () => {
             {/* <SignupScreen /> */}
             {/* <RegisterScreen /> */}
             {/* <SignupScreen /> */}
-            {/* <HomeServiceScreen /> */}
+            <HomeServiceScreen />
             {/* <LaundaryScreen />  */}
-            <HomePageScreen />
+            {/* <HomePageScreen /> */}
             {/* <PharmacyScreen /> */}
             {/* <DryCleanScreen /> */}
             {/* <UniversalSearchScreen /> */}

@@ -1,12 +1,14 @@
 import React from 'react';
 import { View, StyleSheet, Text } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
+import { Category } from '../../redux/slice/categorySlice';
 
 interface CustomDropdownProps {
   label?: string;
+  value?: string;
   selectedValue?: string;
   onValueChange?: (itemValue: string, itemIndex: number) => void;
-  options?: { label: string; value: string }[];
+  options?: Category[];
   InputWidth?: number;     
   InputHeight?: number;    
   radius?: number;         
@@ -15,6 +17,7 @@ interface CustomDropdownProps {
 
 const CustomDropdown: React.FC<CustomDropdownProps> = ({
   label,
+  value,
   selectedValue,
   onValueChange,
   options = [],
@@ -23,9 +26,10 @@ const CustomDropdown: React.FC<CustomDropdownProps> = ({
   radius = 8,
   fontSize = 16,
 }) => {
+  console.log('Received categories:', options);
   return (
     <View style={[styles.container, { width: `${InputWidth}%`, height: InputHeight }]}>
-      {label && <Text style={styles.label}>{label}</Text>}
+      {/* {label && <Text style={styles.label}>{label}</Text>} */}
       <View style={[styles.pickerWrapper, { borderRadius: radius, height: InputHeight }]}>
         <Picker
           selectedValue={selectedValue}
@@ -33,9 +37,9 @@ const CustomDropdown: React.FC<CustomDropdownProps> = ({
           style={[styles.picker, { fontSize: fontSize }]}
           dropdownIconColor="#333"
         >
-          <Picker.Item label="Select Your Service" value="" />
+          <Picker.Item label={label} value={value} key={value} />
           {options.map(option => (
-            <Picker.Item label={option.label} value={option.value} key={option.value} />
+            <Picker.Item label={option.name} value={option._id} key={option._id} />
           ))}
         </Picker>
       </View>
@@ -51,7 +55,7 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 18,
-    color: '#333',
+    color: '#000',
     marginBottom: 5,
   },
   pickerWrapper: {
@@ -59,10 +63,11 @@ const styles = StyleSheet.create({
     borderColor: '#ccc',
     backgroundColor: '#fff',
     justifyContent: 'center',
+    paddingHorizontal: 10,
   },
   picker: {
     width: '100%',
-    height: '100%',
-    color: '#000',
+    color: '#333',
+    fontWeight: '100',
   },
 });

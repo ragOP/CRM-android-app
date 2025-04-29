@@ -30,7 +30,7 @@ export const fetchCategories = createAsyncThunk<
   {rejectValue: string}
 >('categories/fetchCategories', async (params = {}, {rejectWithValue}) => {
   try {
-    const response = await apiService({endpoint: endpoints.category});
+    const response = await apiService({endpoint: endpoints.category, params});
     return {data: response.response.data.categories, params};
   } catch (error: any) {
     return rejectWithValue(error?.response?.data || 'Something went wrong');

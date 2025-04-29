@@ -1,91 +1,86 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import {View, Text, StyleSheet, SafeAreaView, StatusBar} from 'react-native';
 import CustomInputField from '../InputFields';
 import CustomDropdown from '../DropDown';
 import CustomButton from '../Button';
-import CustomCheckbox from '../CustomCheckBox';
+import {Category} from '../../redux/slice/categorySlice';
+import {fetchProducts} from '../../apis/fetchProducts';
+import {useQuery} from '@tanstack/react-query';
 
 interface BookingFormProps {
   title: string;
-  isLaundry?: boolean;
+  categories?: Category[];
 }
 
-const dummyData = [
-  {label: 'Option 1', value: '1'},
-  {label: 'Option 2', value: '2'},
-  {label: 'Option 3', value: '3'},
-];
+const index: React.FC<BookingFormProps> = ({title, categories}) => {
+  const [selectedService, setSelectedService] = useState('');
+  const [selectedPackage, setSelectedPackage] = useState('');
 
-const index: React.FC<BookingFormProps> = ({title, isLaundry}) => {
-  const [selectedService, setSelectedService] = useState('standard');
+  const {data: products} = useQuery({
+    queryKey: ['top_products', selectedService],
+    queryFn: async () => {
+      const apiResponse = await fetchProducts({
+        params: {category_id: selectedService},
+      });
+      if (apiResponse?.response?.success) {
+        return apiResponse?.response?.data?.data;
+      }
+      return [];
+    },
+  });
+
   return (
-      <View style={styles.container}>
-        <Text style={styles.title}>{title}</Text>
-        <View style={styles.inputContainer}>
-          <View style={{flex: 1}}>
-            <CustomInputField
-              fontSize={16}
-              InputWidth={100}
-              radius={50}
-              placeholder="Name"
-            />
-            <CustomInputField
-              fontSize={16}
-              InputWidth={100}
-              radius={50}
-              placeholder="Phone Number"
-            />
-          </View>
-          <View style={{flex: 1}}>
-            <CustomInputField
-              fontSize={16}
-              InputWidth={100}
-              radius={50}
-              placeholder="City"
-            />
-            {isLaundry ? (
-              <View>
-                <CustomInputField
-                  fontSize={16}
-                  InputWidth={100}
-                  radius={50}
-                  placeholder="Pincode"
-                  numeric
-                />
-              </View>
-            ) : (
-              <CustomDropdown
-                InputHeight={50}
-                fontSize={16}
-                InputWidth={100}
-                radius={50}
-                selectedValue={selectedService}
-                onValueChange={itemValue => setSelectedService(itemValue)}
-                options={dummyData}
-              />
-            )}
-          </View>
-        </View>
-        {isLaundry ? (
-          <>
-            <View style={styles.checkboxContainer}>
-              <CustomCheckbox label="Home Cleaning" />
-              <CustomCheckbox label="Shoes Cleaning" />
-              <CustomCheckbox label="Laundry" />
-              <CustomCheckbox label="Ironing" />
-              <CustomCheckbox label="Dry Cleaning" />
-            </View>
-            <CustomButton buttonHeight={50} borderRadius={50} buttonWidth={50} title="Submit" />
-          </>
-        ) : (
-          <CustomButton
-            borderRadius={50}
-            buttonWidth={100}
-            title="Book Your Cleaning"
-            iconName={'../../assets/cleaningIcon.svg'}
+    <View style={styles.container}>
+      <Text style={styles.title}>{title}</Text>
+      <View style={styles.inputContainer}>
+        <View style={{flex: 1, flexDirection: 'row', gap: 7}}>
+          <CustomInputField
+            fontSize={16}
+            InputWidth={48}
+            radius={50}
+            placeholder="Name"
           />
-        )}
+          <CustomInputField
+            fontSize={16}
+            InputWidth={48}
+            radius={50}
+            placeholder="Phone Number"
+          />
+        </View>
+        <View style={{flex: 1, flexDirection: 'row', gap: 7}}>
+          <CustomDropdown
+            InputHeight={50}
+            fontSize={16}
+            InputWidth={48}
+            radius={50}
+            label="Select Your Service"
+            value=""
+            selectedValue={selectedService}
+            onValueChange={itemValue => {
+              setSelectedService(itemValue);
+            }}
+            options={categories}
+          />
+          <CustomDropdown
+            InputHeight={50}
+            fontSize={16}
+            InputWidth={48}
+            radius={50}
+            label="Select Your Package"
+            selectedValue={selectedPackage}
+            onValueChange={itemValue => setSelectedPackage(itemValue)}
+            options={products}
+          />
+        </View>
       </View>
+
+      <CustomButton
+        borderRadius={50}
+        buttonWidth={100}
+        title="Book Your Cleaning"
+        iconName={'../../assets/cleaningIcon.svg'}
+      />
+    </View>
   );
 };
 
@@ -102,8 +97,8 @@ const styles = StyleSheet.create({
   },
   inputContainer: {
     flex: 1,
-    flexDirection: 'row',
-    gap: 7,
+    flexDirection: 'column',
+    gap: 5,
   },
   title: {
     fontSize: 16,

@@ -3,13 +3,17 @@ import {
   Text,
   ScrollView,
   StyleSheet,
-  SafeAreaView,
-  StatusBar,
 } from 'react-native';
 import GradientHeader from '../../components/GradientHeader/index';
 import BookingForm from '../../components/BookingForm/index';
 import AboutUs from '../../components/AboutUsSection/index';
 import TestimonialCard from '../../components/TestimonialCard';
+import { useQuery } from '@tanstack/react-query';
+import { apiService } from '../../utils/api/apiService';
+import { endpoints } from '../../utils/endpoints';
+import { useAppDispatch, useAppSelector } from '../../redux/store';
+import { fetchCategories, selectCategories } from '../../redux/slice/categorySlice';
+import { useEffect } from 'react';
 
 const testimonialsData = [
   {
@@ -43,19 +47,38 @@ const testimonialsData = [
 ];
 
 const index = () => {
+  const dispatch = useAppDispatch();
+  const categories = useAppSelector(selectCategories);
+
+  useEffect(() => {
+    dispatch(fetchCategories({service_id: '67bb85be42d073bcb30015d9'}));
+  }, []);
+
+  const {data: internalPageConfig} = useQuery({
+    queryKey: ['internal_config'],
+    queryFn: async () => {
+      const apiResponse = await apiService({
+        endpoint: endpoints.internal_page,
+        method: 'GET',
+      });
+      if (apiResponse?.response?.success) {
+        return apiResponse?.response?.data;
+      }
+      return {};
+    },
+  });
   return (
       <ScrollView>
         <GradientHeader
           title="Get Your Laundry Done!"
           description="Visit, call, or drop us a message—we’re just around the corner!"
         />
-        <BookingForm title="Request Pickup" isLaundry={true} />
+        <BookingForm title="Request Pickup" categories={categories} />
         <AboutUs
           title="We care for your Clothes"
-          description={`We are your one-stop solution for all your laundry needs. Discover why Caresync is the best laundry service provider in India and why customers trust us for their laundry requirements. 
-Whether you are a student or a busy professional living away from home, our laundry services promise to free up your time and deliver a clean, spotless set of clothes. We treat your laundry with great care.`}
+          description={internalPageConfig?.aboutDescription}
           buttonText="Book Now"
-          imageSource={require('../../assets/careForCloths.png')}
+          imageSource={internalPageConfig?.aboutUsImage}
         />
         {/* A weird design component that need to be redesigned from figma */}
 

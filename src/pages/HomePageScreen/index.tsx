@@ -10,8 +10,8 @@ import {useCallback, useEffect, useState} from 'react';
 import {fetchProducts} from '../../apis/fetchProducts';
 import {useQuery} from '@tanstack/react-query';
 import {selectCategories} from '../../redux/slice/categorySlice';
-import {useAppSelector} from '../../redux/store';
 import {selectServices} from '../../redux/slice/servicesSlice';
+import {useAppSelector} from '../../redux/store';
 
 const products = [
   {
@@ -281,7 +281,7 @@ const HomePageScreen = () => {
 
   return (
     <ScrollView style={styles.container}>
-      <GradientHeader title="" description="" isHomePage />
+      <GradientHeader height={120} title="" description="" isHomePage />
       <ImageCarousel />
       <ProductGrid
         title="Our Best Products"

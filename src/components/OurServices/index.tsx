@@ -1,87 +1,94 @@
 import {View, Text, StyleSheet, FlatList} from 'react-native';
 import CustomCard from '../CustomCard/index';
+import { Category } from '../../redux/slice/categorySlice';
 
-const index = () => {
-  const services = [
-    {
-      title: 'BATHROOM CLEANING',
-      description:
-        'Expert sofa cleaning to remove stains, odors, and dust, restoring freshness and comfort to your furniture.',
-      image: require('../../assets/bathroomCleaning.png'),
-    },
-    {
-      title: 'MARBLE POLISHING',
-      description:
-        'Expert sofa cleaning to remove stains, odors, and dust, restoring freshness and comfort to your furniture.',
-      image: require('../../assets/bathroomCleaning.png'),
-    },
-    {
-      title: 'SOFA CLEANING',
-      description:
-        'Expert sofa cleaning to remove stains, odors, and dust, restoring freshness and comfort to your furniture.',
-      image: require('../../assets/bathroomCleaning.png'),
-    },
-    {
-      title: 'SOFA CLEANING',
-      description:
-        'Expert sofa cleaning to remove stains, odors, and dust, restoring freshness and comfort to your furniture.',
-      image: require('../../assets/bathroomCleaning.png'),
-    },
-    {
-      title: 'SOFA CLEANING',
-      description:
-        'Expert sofa cleaning to remove stains, odors, and dust, restoring freshness and comfort to your furniture.',
-      image: require('../../assets/bathroomCleaning.png'),
-    },
-    {
-      title: 'SOFA CLEANING',
-      description:
-        'Expert sofa cleaning to remove stains, odors, and dust, restoring freshness and comfort to your furniture.',
-      image: require('../../assets/bathroomCleaning.png'),
-    },
-    {
-      title: 'SOFA CLEANING',
-      description:
-        'Expert sofa cleaning to remove stains, odors, and dust, restoring freshness and comfort to your furniture.',
-      image: require('../../assets/bathroomCleaning.png'),
-    },
-    {
-      title: 'SOFA CLEANING',
-      description:
-        'Expert sofa cleaning to remove stains, odors, and dust, restoring freshness and comfort to your furniture.',
-      image: require('../../assets/bathroomCleaning.png'),
-    },
-    {
-      title: 'SOFA CLEANING',
-      description:
-        'Expert sofa cleaning to remove stains, odors, and dust, restoring freshness and comfort to your furniture.',
-      image: require('../../assets/bathroomCleaning.png'),
-    },
-    {
-      title: 'SOFA CLEANING',
-      description:
-        'Expert sofa cleaning to remove stains, odors, and dust, restoring freshness and comfort to your furniture.',
-      image: require('../../assets/bathroomCleaning.png'),
-    },
-    {
-      title: 'SOFA CLEANING',
-      description:
-        'Expert sofa cleaning to remove stains, odors, and dust, restoring freshness and comfort to your furniture.',
-      image: require('../../assets/bathroomCleaning.png'),
-    },
-    {
-      title: 'SOFA CLEANING',
-      description:
-        'Expert sofa cleaning to remove stains, odors, and dust, restoring freshness and comfort to your furniture.',
-      image: require('../../assets/bathroomCleaning.png'),
-    },
-  ];
+interface OurServicesProps {
+  categories?: Category[];
+  onPress?: (id: string) => void;
+}
 
-  const renderItem = ({ item }: { item: typeof services[0] }) => (
+const index: React.FC<OurServicesProps> = ({categories, onPress}) => {
+  // const services = [
+  //   {
+  //     title: 'BATHROOM CLEANING',
+  //     description:
+  //       'Expert sofa cleaning to remove stains, odors, and dust, restoring freshness and comfort to your furniture.',
+  //     image: require('../../assets/bathroomCleaning.png'),
+  //   },
+  //   {
+  //     title: 'MARBLE POLISHING',
+  //     description:
+  //       'Expert sofa cleaning to remove stains, odors, and dust, restoring freshness and comfort to your furniture.',
+  //     image: require('../../assets/bathroomCleaning.png'),
+  //   },
+  //   {
+  //     title: 'SOFA CLEANING',
+  //     description:
+  //       'Expert sofa cleaning to remove stains, odors, and dust, restoring freshness and comfort to your furniture.',
+  //     image: require('../../assets/bathroomCleaning.png'),
+  //   },
+  //   {
+  //     title: 'SOFA CLEANING',
+  //     description:
+  //       'Expert sofa cleaning to remove stains, odors, and dust, restoring freshness and comfort to your furniture.',
+  //     image: require('../../assets/bathroomCleaning.png'),
+  //   },
+  //   {
+  //     title: 'SOFA CLEANING',
+  //     description:
+  //       'Expert sofa cleaning to remove stains, odors, and dust, restoring freshness and comfort to your furniture.',
+  //     image: require('../../assets/bathroomCleaning.png'),
+  //   },
+  //   {
+  //     title: 'SOFA CLEANING',
+  //     description:
+  //       'Expert sofa cleaning to remove stains, odors, and dust, restoring freshness and comfort to your furniture.',
+  //     image: require('../../assets/bathroomCleaning.png'),
+  //   },
+  //   {
+  //     title: 'SOFA CLEANING',
+  //     description:
+  //       'Expert sofa cleaning to remove stains, odors, and dust, restoring freshness and comfort to your furniture.',
+  //     image: require('../../assets/bathroomCleaning.png'),
+  //   },
+  //   {
+  //     title: 'SOFA CLEANING',
+  //     description:
+  //       'Expert sofa cleaning to remove stains, odors, and dust, restoring freshness and comfort to your furniture.',
+  //     image: require('../../assets/bathroomCleaning.png'),
+  //   },
+  //   {
+  //     title: 'SOFA CLEANING',
+  //     description:
+  //       'Expert sofa cleaning to remove stains, odors, and dust, restoring freshness and comfort to your furniture.',
+  //     image: require('../../assets/bathroomCleaning.png'),
+  //   },
+  //   {
+  //     title: 'SOFA CLEANING',
+  //     description:
+  //       'Expert sofa cleaning to remove stains, odors, and dust, restoring freshness and comfort to your furniture.',
+  //     image: require('../../assets/bathroomCleaning.png'),
+  //   },
+  //   {
+  //     title: 'SOFA CLEANING',
+  //     description:
+  //       'Expert sofa cleaning to remove stains, odors, and dust, restoring freshness and comfort to your furniture.',
+  //     image: require('../../assets/bathroomCleaning.png'),
+  //   },
+  //   {
+  //     title: 'SOFA CLEANING',
+  //     description:
+  //       'Expert sofa cleaning to remove stains, odors, and dust, restoring freshness and comfort to your furniture.',
+  //     image: require('../../assets/bathroomCleaning.png'),
+  //   },
+  // ];
+
+  const renderItem = ({ item }: { item: Category }) => (
     <CustomCard
-      title={item.title}
+      title={item.name}
       description={item.description}
-      image={item.image}
+      image={item.images[0]}
+      onPress={() => onPress && onPress(item._id)}
     />
   );
   return (
@@ -93,12 +100,12 @@ const index = () => {
         Explore our wide range of cleaning services designed for your lifestyle
       </Text>
       <FlatList
-        data={services}
+        data={categories}
         numColumns={2}
         renderItem={renderItem}
-        keyExtractor={(item, index) => index.toString()}
+        keyExtractor={(item) => item._id}
         showsVerticalScrollIndicator={false}
-        columnWrapperStyle={{ justifyContent: 'space-around' }}
+        columnWrapperStyle={{ justifyContent: 'space-around', gap: 10 }}
         contentContainerStyle={styles.gridContainer}
       />
     </View>
@@ -123,6 +130,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   gridContainer: {
-    gap: 6,
+    gap: 10,
+
   },
 });

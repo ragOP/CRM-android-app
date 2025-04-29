@@ -20,7 +20,7 @@ const gap = 10;
 const GradientHeader = ({
   title,
   description,
-  height = 70,
+  height,
   isHomePage,
 }: GradientHeaderProps) => {
   const dispatch = useAppDispatch();

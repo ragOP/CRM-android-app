@@ -12,17 +12,19 @@ interface CustomCardProps {
   title?: string;
   description?: string;
   image?: any;
+  onPress?: () => void;
 }
 
 const CustomCard: React.FC<CustomCardProps> = ({
   title,
   description,
   image,
+  onPress,
 }) => {
   return (
-    <View style={styles.cardContainer}>
+    <View style={styles.cardContainer} onTouchEnd={onPress}>
       <ImageBackground
-        source={image}
+        source={{uri: image}}
         style={styles.imageBackground}
         imageStyle={styles.image}
       >
@@ -44,6 +46,15 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     overflow: 'hidden',
     alignSelf: 'center',
+    marginBottom: 10, 
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.22,
+    shadowRadius: 2.22,
+    elevation: 3,
   },
   imageBackground: {
     flex: 1,
@@ -56,7 +67,7 @@ const styles = StyleSheet.create({
     padding: 15,
   },
   title: {
-    fontSize: 12,
+    fontSize: 16,
     fontWeight: 'bold',
     color: '#82C8E5', 
     textTransform: 'uppercase',
@@ -64,7 +75,7 @@ const styles = StyleSheet.create({
   },
   description: {
     color: '#F3FAFC',
-    fontSize: 7,
+    fontSize: 12,
     lineHeight: 10,
   },
 });

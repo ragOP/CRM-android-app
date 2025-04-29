@@ -22,7 +22,7 @@ const CustomInputField: React.FC<CustomInputProp> = ({
   onChangeText,
   secureTextEntry = false,
   InputWidth = 100,
-  InputHeight = 80,
+  InputHeight,
   maxLength,
   numeric,
   radius = 8,
