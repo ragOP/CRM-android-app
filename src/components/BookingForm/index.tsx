@@ -1,5 +1,5 @@
 import React, {useState, useEffect} from 'react';
-import {View, Text, StyleSheet, SafeAreaView, StatusBar} from 'react-native';
+import {View, Text, StyleSheet, ActivityIndicator, SafeAreaView, StatusBar} from 'react-native';
 import CustomInputField from '../InputFields';
 import CustomDropdown from '../DropDown';
 import CustomButton from '../Button';
@@ -10,9 +10,11 @@ import {useQuery} from '@tanstack/react-query';
 interface BookingFormProps {
   title: string;
   categories?: Category[];
+  onClick?: (product_id: string) => void;
+  isPending?: boolean;
 }
 
-const index: React.FC<BookingFormProps> = ({title, categories}) => {
+const index: React.FC<BookingFormProps> = ({title, categories, onClick, isPending}) => {
   const [selectedService, setSelectedService] = useState('');
   const [selectedPackage, setSelectedPackage] = useState('');
 
@@ -28,6 +30,8 @@ const index: React.FC<BookingFormProps> = ({title, categories}) => {
       return [];
     },
   });
+
+  
 
   return (
     <View style={styles.container}>
@@ -45,6 +49,8 @@ const index: React.FC<BookingFormProps> = ({title, categories}) => {
             InputWidth={48}
             radius={50}
             placeholder="Phone Number"
+            numeric
+            maxLength={10}
           />
         </View>
         <View style={{flex: 1, flexDirection: 'row', gap: 7}}>
@@ -77,9 +83,11 @@ const index: React.FC<BookingFormProps> = ({title, categories}) => {
       <CustomButton
         borderRadius={50}
         buttonWidth={100}
-        title="Book Your Cleaning"
+        title={isPending ? 'Loading....' : 'Book Your Cleaning'}
         iconName={'../../assets/cleaningIcon.svg'}
+        onPress={() => onClick && onClick(selectedPackage)}
       />
+      
     </View>
   );
 };

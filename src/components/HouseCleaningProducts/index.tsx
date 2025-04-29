@@ -19,7 +19,6 @@ const HouseCleaningProducts : React.FC<HouseCleaningProductsProps> = ({
   price,
   discounted_price,
  }) => {
-  // console.log("product", product);
   return (
     <View style={styles.card}>
       <Image source={{ uri: banner_image }} style={styles.image} />
