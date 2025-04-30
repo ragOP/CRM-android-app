@@ -4,7 +4,6 @@ import {
   Text,
   View,
   Dimensions,
-  Touchable,
   TouchableOpacity,
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
@@ -45,6 +44,14 @@ const GradientHeader = ({
   const handleCategoryPress = (service: any) => {
     if (service.name?.toLowerCase().includes('pharm')) {
       navigation.navigate('UniversalSearch', {service});
+    }
+
+    if (service.name?.toLowerCase().includes('laundry')) {
+      navigation.navigate('LaundaryScreen', {service});
+    }
+
+    if (service.name?.toLowerCase().includes('house')) {
+      navigation.navigate('HouseServiceScreen', {service});
     }
     // Add more category handling here as needed
   };

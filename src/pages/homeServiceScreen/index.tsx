@@ -1,5 +1,12 @@
 import {useEffect, useState, useRef} from 'react';
-import {View, Text, StyleSheet, FlatList, ActivityIndicator, ToastAndroid} from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  FlatList,
+  ActivityIndicator,
+  ToastAndroid,
+} from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import React from 'react';
 import GradientHeader from '../../components/GradientHeader';
@@ -19,7 +26,7 @@ import {endpoints} from '../../utils/endpoints';
 import {apiService} from '../../utils/api/apiService';
 import {fetchProducts} from '../../apis/fetchProducts';
 import HouseCleaningProductCard from '../../components/HouseCleaningProductCard';
-import { getItem } from '../../utils/local_storage';
+import {getItem} from '../../utils/local_storage';
 
 const ourServices = [
   'Home Deep Cleaning',
@@ -78,10 +85,12 @@ interface HouseCleaningProducts {
   discounted_price: number;
 }
 
-const index = () => {
-  const [houseCleaningProducts, setHouseCleaningProducts] = useState<HouseCleaningProducts[]>([]);
+const HouseServiceScreen = () => {
+  const [houseCleaningProducts, setHouseCleaningProducts] = useState<
+    HouseCleaningProducts[]
+  >([]);
   const [isLoading, setIsLoading] = useState(false);
-  const houseCleaningRef = useRef(null);  
+  const houseCleaningRef = useRef(null);
   const dispatch = useAppDispatch();
   const categories = useAppSelector(selectCategories);
 
@@ -113,10 +122,13 @@ const index = () => {
       const apiResponse = await fetchProducts({
         params: houseCleaningProductParams,
       });
-      
+
       if (apiResponse?.response?.success) {
         setHouseCleaningProducts(apiResponse?.response?.data?.data);
-        console.log('Products fetched successfully:', apiResponse?.response?.data?.data);
+        console.log(
+          'Products fetched successfully:',
+          apiResponse?.response?.data?.data,
+        );
       } else {
         console.log('Failed to fetch products:', apiResponse);
         setHouseCleaningProducts([]);
@@ -129,78 +141,78 @@ const index = () => {
     }
   };
 
-    const queryClient = useQueryClient();
-    const { mutate: addToCartMutate, isPending } = useMutation({
-      mutationFn: async (product_id: string) => {
-        const userData = await getItem('userData');
-  
-        const payload = {
-          product_id,
-          quantity: 1,
-          user_id: userData.userId,
-        };
-  
-        const apiResponse = await apiService({
-          endpoint: endpoints.cart,
-          method: 'POST',
-          data: payload,
-          token: userData.token,
-        });
-  
-        return apiResponse;
-      },
-      onSuccess: () => {
-        ToastAndroid.show('Product added to cart', ToastAndroid.SHORT);
-        queryClient.invalidateQueries({ queryKey: ["cart_products"] });
-      }
-    });
-  
-    const handleAddToCart = (product_id: string) => {
-      addToCartMutate(product_id);
-    };  
+  const queryClient = useQueryClient();
+  const {mutate: addToCartMutate, isPending} = useMutation({
+    mutationFn: async (product_id: string) => {
+      const userData = await getItem('userData');
 
-    const HomeServingProduct = () => {
-      if (isLoading) {
-        return (
-          <View style={styles.loadingContainer}>
-            <ActivityIndicator size="large" color="#0000ff" />
-            <Text style={styles.loadingText}>Loading products...</Text>
-          </View>
-        );
-      }
-    
-      if (houseCleaningProducts.length === 0) {
-        return (
-          <View style={styles.noProductsContainer}>
-            <Text style={styles.noProductsText}>No products available</Text>
-          </View>
-        );
-      }
-    
+      const payload = {
+        product_id,
+        quantity: 1,
+        user_id: userData.userId,
+      };
+
+      const apiResponse = await apiService({
+        endpoint: endpoints.cart,
+        method: 'POST',
+        data: payload,
+        token: userData.token,
+      });
+
+      return apiResponse;
+    },
+    onSuccess: () => {
+      ToastAndroid.show('Product added to cart', ToastAndroid.SHORT);
+      queryClient.invalidateQueries({queryKey: ['cart_products']});
+    },
+  });
+
+  const handleAddToCart = (product_id: string) => {
+    addToCartMutate(product_id);
+  };
+
+  const HomeServingProduct = () => {
+    if (isLoading) {
       return (
-        <View style={styles.productsContainer} ref={houseCleaningRef}>
-          <Text style={styles.productsTitle}>Available Products</Text>
-          <FlatList
-            data={houseCleaningProducts}
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            renderItem={({item}) => (
-              <HouseCleaningProductCard
-                _id={item._id}
-                name={item.name}
-                small_description={item.small_description}
-                discounted_price={item.discounted_price}
-                price={item.price}
-                banner_image={item.banner_image}
-                onPress={handleAddToCart}
-                isPending={isPending}
-              />
-            )}
-            keyExtractor={(item) => item._id}
-          />
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#0000ff" />
+          <Text style={styles.loadingText}>Loading products...</Text>
         </View>
       );
-    };
+    }
+
+    if (houseCleaningProducts.length === 0) {
+      return (
+        <View style={styles.noProductsContainer}>
+          <Text style={styles.noProductsText}>No products available</Text>
+        </View>
+      );
+    }
+
+    return (
+      <View style={styles.productsContainer} ref={houseCleaningRef}>
+        <Text style={styles.productsTitle}>Available Products</Text>
+        <FlatList
+          data={houseCleaningProducts}
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          renderItem={({item}) => (
+            <HouseCleaningProductCard
+              _id={item._id}
+              name={item.name}
+              small_description={item.small_description}
+              discounted_price={item.discounted_price}
+              price={item.price}
+              banner_image={item.banner_image}
+              onPress={handleAddToCart}
+              isPending={isPending}
+            />
+          )}
+          keyExtractor={item => item._id}
+        />
+      </View>
+    );
+  };
 
   return (
     <FlatList
@@ -218,7 +230,10 @@ const index = () => {
             isPending={isPending}
           />
 
-          <OurServices categories={categories} onPress={fetchHouseCleaningProducts} />
+          <OurServices
+            categories={categories}
+            onPress={fetchHouseCleaningProducts}
+          />
 
           <AboutUs
             title="About Us"
@@ -284,7 +299,7 @@ const index = () => {
   );
 };
 
-export default index;
+export default HouseServiceScreen;
 
 const styles = StyleSheet.create({
   title: {

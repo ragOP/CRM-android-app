@@ -1,10 +1,4 @@
-import {
-  View,
-  Text,
-  ScrollView,
-  StyleSheet,
-  ToastAndroid
-} from 'react-native';
+import {View, Text, ScrollView, StyleSheet, ToastAndroid} from 'react-native';
 import GradientHeader from '../../components/GradientHeader/index';
 import BookingForm from '../../components/BookingForm/index';
 import AboutUs from '../../components/AboutUsSection/index';
@@ -18,10 +12,10 @@ import {
   fetchCategories,
   selectCategories,
 } from '../../redux/slice/categorySlice';
-import {useEffect, useState, useRef, use} from 'react';
+import {useEffect, useState, useRef} from 'react';
 import {fetchProducts} from '../../apis/fetchProducts';
 import LaundryServiceCard from '../../components/LaundryServiceCard';
-import { getItem } from '../../utils/local_storage';
+import {getItem} from '../../utils/local_storage';
 
 const testimonialsData = [
   {
@@ -64,7 +58,7 @@ interface LaundryProduct {
   discounted_price: number;
 }
 
-const index = () => {
+const LaundaryScreen = () => {
   const dispatch = useAppDispatch();
   const categories = useAppSelector(selectCategories);
   const [laundryProducts, setLaundryProducts] = useState<LaundryProduct[]>([]);
@@ -89,7 +83,7 @@ const index = () => {
   });
 
   const queryClient = useQueryClient();
-  const { mutate: addToCartMutate, isPending } = useMutation({
+  const {mutate: addToCartMutate, isPending} = useMutation({
     mutationFn: async (product_id: string) => {
       const userData = await getItem('userData');
 
@@ -110,13 +104,13 @@ const index = () => {
     },
     onSuccess: () => {
       ToastAndroid.show('Product added to cart', ToastAndroid.SHORT);
-      queryClient.invalidateQueries({ queryKey: ["cart_products"] });
-    }
+      queryClient.invalidateQueries({queryKey: ['cart_products']});
+    },
   });
 
   const handleAddToCart = (product_id: string) => {
     addToCartMutate(product_id);
-  };  
+  };
 
   const fetchLaundryProducts = async (id: string) => {
     const houseCleaningProductParams = {
@@ -145,10 +139,15 @@ const index = () => {
         description="Visit, call, or drop us a message—we’re just around the corner!"
       />
 
-      <BookingForm title="Request Pickup" categories={categories} onClick={handleAddToCart} isPending={isPending} />
+      <BookingForm
+        title="Request Pickup"
+        categories={categories}
+        onClick={handleAddToCart}
+        isPending={isPending}
+      />
 
       <OurServices categories={categories} onPress={fetchLaundryProducts} />
-      
+
       <AboutUs
         title="We care for your Clothes"
         description={internalPageConfig?.aboutDescription}
@@ -159,8 +158,7 @@ const index = () => {
 
       <View style={styles.productsContainer} ref={laundryRef}>
         <Text style={styles.productsTitle}>Available Products</Text>
-        <ScrollView
-          style={styles.container}>
+        <ScrollView style={styles.container}>
           {laundryProducts.map((service, serviceIndex) => (
             <LaundryServiceCard
               key={service._id}
@@ -169,7 +167,11 @@ const index = () => {
               price={service.price}
               originalPrice={service.discounted_price}
               description={service.small_description}
-              features={serviceIndex === 0 ? service.full_description.split('✔') : service.full_description.split('✔')}
+              features={
+                serviceIndex === 0
+                  ? service.full_description.split('✔')
+                  : service.full_description.split('✔')
+              }
               serviceIndex={serviceIndex}
               handleAddToCart={handleAddToCart}
               isPending={isPending}
@@ -198,7 +200,7 @@ const index = () => {
   );
 };
 
-export default index;
+export default LaundaryScreen;
 
 const styles = StyleSheet.create({
   testimonialContainer: {

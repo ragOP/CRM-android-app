@@ -5,109 +5,11 @@ import ProductGrid from '../../components/ProductGrid';
 import CustomCTA from '../../components/CTA';
 import HealthConditionSection from '../../components/HealthCondition';
 import TestimonialCard from '../../components/TestimonialCard';
-import Blog from '../../components/Blog';
-import {useCallback, useEffect, useState} from 'react';
 import {fetchProducts} from '../../apis/fetchProducts';
 import {useQuery} from '@tanstack/react-query';
 import {selectCategories} from '../../redux/slice/categorySlice';
 import {selectServices} from '../../redux/slice/servicesSlice';
 import {useAppSelector} from '../../redux/store';
-
-const products = [
-  {
-    id: '1',
-    image: require('../../assets/protein-jar.png'),
-    price: 259,
-    originalPrice: 599,
-    discount: '66%',
-    title: 'Tropeaka Lean Protein Salted',
-    subtitle: 'Icky Top Navigation With A Sear...',
-  },
-  {
-    id: '2',
-    image: require('../../assets/protein-jar.png'),
-    price: 299,
-    originalPrice: 699,
-    discount: '57%',
-    title: 'Tropeaka Vegan Protein Chocolate',
-    subtitle: 'Delicious and Nutritious',
-  },
-  {
-    id: '3',
-    image: require('../../assets/protein-jar.png'),
-    price: 349,
-    originalPrice: 799,
-    discount: '56%',
-    title: 'Tropeaka Superfood Protein Vanilla',
-    subtitle: 'Nutritious and Tasty',
-  },
-  {
-    id: '4',
-    image: require('../../assets/protein-jar.png'),
-    price: 349,
-    originalPrice: 799,
-    discount: '56%',
-    title: 'Tropeaka Superfood Protein Vanilla',
-    subtitle: 'Nutritious and Tasty',
-  },
-  {
-    id: '5',
-    image: require('../../assets/protein-jar.png'),
-    price: 399,
-    originalPrice: 899,
-    discount: '56%',
-    title: 'Tropeaka Superfood Protein Chocolate',
-    subtitle: 'Delicious and Nutritious',
-  },
-  {
-    id: '6',
-    image: require('../../assets/protein-jar.png'),
-    price: 450,
-    originalPrice: 999,
-    discount: '55%',
-    title: 'Tropeaka Premium Protein Blend',
-    subtitle: 'Ultimate Nutrition for Athletes',
-  },
-];
-
-// const services = [
-//   {
-//     id: '1',
-//     image: require('../../assets/service-img.png'),
-//     price: 259,
-//     originalPrice: 599,
-//     discount: '66%',
-//     title: 'Tropeaka Lean Protein Salted',
-//     subtitle: 'Icky Top Navigation With A Sear...',
-//   },
-//   {
-//     id: '2',
-//     image: require('../../assets/service-img.png'),
-//     price: 259,
-//     originalPrice: 599,
-//     discount: '66%',
-//     title: 'Tropeaka Lean Protein Salted',
-//     subtitle: 'Icky Top Navigation With A Sear...',
-//   },
-//   {
-//     id: '3',
-//     image: require('../../assets/service-img.png'),
-//     price: 259,
-//     originalPrice: 599,
-//     discount: '66%',
-//     title: 'Tropeaka Lean Protein Salted',
-//     subtitle: 'Icky Top Navigation With A Sear...',
-//   },
-//   {
-//     id: '4',
-//     image: require('../../assets/service-img.png'),
-//     price: 259,
-//     originalPrice: 599,
-//     discount: '66%',
-//     title: 'Tropeaka Lean Protein Salted',
-//     subtitle: 'Icky Top Navigation With A Sear...',
-//   },
-// ];
 
 const testimonialsData = [
   {
@@ -170,9 +72,6 @@ const testimonialsData = [
 const HomePageScreen = () => {
   const categories = useAppSelector(selectCategories);
   const services = useAppSelector(selectServices);
-
-  console.log('services', services);
-  console.log('categories', categories);
 
   const topProductsParams = {
     is_best_seller: true,
