@@ -7,14 +7,13 @@ import {Provider} from 'react-redux';
 import {QueryClient, QueryClientProvider} from '@tanstack/react-query';
 import Icon from 'react-native-vector-icons/Ionicons';
 
-import {store} from './src/redux/store';
+import {store, useAppSelector} from './src/redux/store';
 
 // Screens
 import HomePageScreen from './src/pages/HomePageScreen';
 import HomeScreen from './src/pages/homeScreen';
 import RegisterScreen from './src/pages/authScreen/registerScreen';
 import PharmacyScreen from './src/pages/PharmacyScreen';
-import SignupScreen from './src/pages/authScreen/signupScreen';
 import HomeServiceScreen from './src/pages/homeServiceScreen';
 import LaundaryScreen from './src/pages/laundaryScreen';
 import DryCleanScreen from './src/pages/dryCleanScreen';
@@ -24,6 +23,8 @@ import CartScreen from './src/pages/cartScreen';
 import UniversalSearchScreen from './src/pages/universalSearchScreen';
 import Blog from './src/components/Blog';
 import HouseServiceScreen from './src/pages/homeServiceScreen';
+import UserProfileScreen from './src/components/UserProfileScreen/UserProfileScreen';
+import LoginScreen from './src/pages/authScreen/loginScreen';
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -40,6 +41,23 @@ function HomeStack() {
       <Stack.Screen name="LaundaryScreen" component={LaundaryScreen} />
       <Stack.Screen name="HouseServiceScreen" component={HouseServiceScreen} />
       {/* Add more screens as needed */}
+    </Stack.Navigator>
+  );
+}
+
+function AccountStack() {
+  const isLoggedIn = useAppSelector(state => state.auth.token);
+
+  return (
+    <Stack.Navigator screenOptions={{headerShown: false}}>
+      {isLoggedIn ? (
+        <Stack.Screen name="UserProfileScreen" component={UserProfileScreen} />
+      ) : (
+        <>
+          <Stack.Screen name="LoginScreen" component={LoginScreen} />
+          <Stack.Screen name="RegisterScreen" component={RegisterScreen} />
+        </>
+      )}
     </Stack.Navigator>
   );
 }
@@ -79,7 +97,7 @@ const App = () => {
                 component={PharmacyScreen}
                 options={{title: 'Pharmacy'}}
               />
-               <Tab.Screen
+              <Tab.Screen
                 name="Blog"
                 component={Blog}
                 options={{title: 'Blog'}}
@@ -91,7 +109,7 @@ const App = () => {
               />
               <Tab.Screen
                 name="Account"
-                component={RegisterScreen}
+                component={AccountStack}
                 options={{title: 'Account'}}
               />
             </Tab.Navigator>

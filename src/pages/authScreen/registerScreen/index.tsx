@@ -10,13 +10,67 @@ import {
   Platform,
   TouchableWithoutFeedback,
   Keyboard,
+  Alert,
 } from 'react-native';
-const logo = require('../../../assets/logo.png');
 import CustomInputField from '../../../components/InputFields';
 import CustomButton from '../../../components/Button';
+import {useNavigation} from '@react-navigation/native';
+import {signupUser} from '../../../apis/signupUser';
+
+const logo = require('../../../assets/logo.png');
 
 const RegisterScreen = () => {
+  const navigation = useNavigation();
   const [isLoading, setIsLoading] = useState(false);
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    password: '',
+    confirmPassword: '',
+  });
+
+  const handleChange = (key: string, value: string) => {
+    setFormData({...formData, [key]: value});
+  };
+
+  const handleRegister = async () => {
+    if (
+      !formData.name ||
+      !formData.email ||
+      !formData.password ||
+      !formData.confirmPassword
+    ) {
+      Alert.alert('Error', 'Please fill in all fields');
+      return;
+    }
+    if (formData.password !== formData.confirmPassword) {
+      Alert.alert('Error', 'Passwords do not match');
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const payload = {
+        name: formData.name,
+        email: formData.email,
+        password: formData.password,
+        confirmPassword: formData.confirmPassword,
+      };
+      const response = await signupUser({
+        payload,
+      });
+      if (response?.response?.success) {
+        Alert.alert('Success', 'Account created successfully!');
+        navigation.navigate('LoginScreen');
+      } else {
+        Alert.alert('Error', response?.response?.message || 'Signup failed');
+      }
+    } catch (error: any) {
+      Alert.alert('Error', error?.message || 'Something went wrong');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <KeyboardAvoidingView
@@ -30,32 +84,44 @@ const RegisterScreen = () => {
               <Text style={styles.topText}>Register</Text>
               <View style={styles.row}>
                 <Text style={styles.normalText}>Already have an account?</Text>
-                <TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => navigation.navigate('LoginScreen')}>
                   <Text style={styles.linkText}>Login</Text>
                 </TouchableOpacity>
               </View>
             </View>
             <View style={styles.middleContainer}>
-              <View style={styles.row}>
-                <CustomInputField label="First Name" InputWidth={50} />
-                <CustomInputField label="Last Name" InputWidth={50} />
-              </View>
-              <CustomInputField label="Email" InputWidth={100} />
-              <CustomInputField label="Date of Birth" InputWidth={100} />
               <CustomInputField
-                label="Mobile Number"
+                label="Name"
                 InputWidth={100}
-                numeric={true}
+                value={formData.name}
+                onChangeText={val => handleChange('name', val)}
+              />
+              <CustomInputField
+                label="Email"
+                InputWidth={100}
+                value={formData.email}
+                onChangeText={val => handleChange('email', val)}
               />
               <CustomInputField
                 label="Password"
                 InputWidth={100}
-                secureTextEntry={true}
+                value={formData.password}
+                secureTextEntry
+                onChangeText={val => handleChange('password', val)}
+              />
+              <CustomInputField
+                label="Confirm Password"
+                InputWidth={100}
+                value={formData.confirmPassword}
+                secureTextEntry
+                onChangeText={val => handleChange('confirmPassword', val)}
               />
               <CustomButton
-                title="Register"
+                title={isLoading ? 'Registering...' : 'Register'}
                 buttonWidth={100}
                 isLoading={isLoading}
+                onPress={handleRegister}
               />
             </View>
           </View>
@@ -83,7 +149,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#fff',
     paddingHorizontal: 30,
-    paddingTop: 20
+    paddingTop: 20,
   },
   topText: {
     fontSize: 33,

@@ -10,7 +10,6 @@ import {
   Platform,
   Alert,
 } from 'react-native';
-import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useNavigation} from '@react-navigation/native';
 
@@ -18,12 +17,16 @@ const logo = require('../../../assets/logo.png');
 import CustomInputField from '../../../components/InputFields';
 import CustomButton from '../../../components/Button';
 import {loginUser} from '../../../apis/login';
+import {useAppDispatch} from '../../../redux/store';
+import {login} from '../../../redux/slice/authSlice';
 
-const SignupScreen = () => {
+const LoginScreen = () => {
+  const navigation = useNavigation();
+  const dispatch = useAppDispatch();
+
   const [isLoading, setIsLoading] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const navigation = useNavigation();
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -52,6 +55,17 @@ const SignupScreen = () => {
           name: userData?.name,
         };
 
+        dispatch(
+          login({
+            token: userData?.token,
+            user: {
+              id: userData?.id,
+              name: userData?.name,
+              email: userData?.email,
+            },
+          }),
+        );
+
         // Save user data to AsyncStorage
         await AsyncStorage.setItem(
           'userData',
@@ -60,11 +74,7 @@ const SignupScreen = () => {
 
         Alert.alert('Success', 'Login successful');
 
-        // Navigate to Home or Dashboard
-        navigation.reset({
-          index: 0,
-          routes: [{name: 'Home'}], // Replace 'Home' with your actual route name
-        });
+        navigation.navigate('UserProfileScreen');
       } else {
         Alert.alert('Error', response?.message || 'Login failed');
       }
@@ -91,7 +101,8 @@ const SignupScreen = () => {
             <Text style={styles.topText}>Sign in to your Account</Text>
             <View style={styles.row}>
               <Text style={styles.normalText}>Don't have an account? </Text>
-              <TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => navigation.navigate('RegisterScreen')}>
                 <Text style={styles.linkText}>Sign Up</Text>
               </TouchableOpacity>
             </View>
@@ -137,7 +148,7 @@ const SignupScreen = () => {
   );
 };
 
-export default SignupScreen;
+export default LoginScreen;
 
 // your styles below...
 

@@ -171,7 +171,7 @@ const PharmacyScreen = () => {
         rows={2}
       />
 
-      <View
+      {/* <View
         style={{
           flexDirection: 'row',
           justifyContent: 'space-between',
@@ -221,7 +221,7 @@ const PharmacyScreen = () => {
         highlight={{sports: true, drinks: true}}
         data={sportDrinkData}
       />
-      <Blog />
+      <Blog /> */}
     </ScrollView>
   );
 };
