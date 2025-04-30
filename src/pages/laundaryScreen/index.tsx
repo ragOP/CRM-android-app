@@ -1,10 +1,10 @@
-import {View, Text, ScrollView, StyleSheet, ToastAndroid} from 'react-native';
+import {View, Text, ScrollView, StyleSheet, Alert} from 'react-native';
 import GradientHeader from '../../components/GradientHeader/index';
 import BookingForm from '../../components/BookingForm/index';
 import AboutUs from '../../components/AboutUsSection/index';
 import TestimonialCard from '../../components/TestimonialCard';
 import OurServices from '../../components/OurServices';
-import {useMutation, useQuery, useQueryClient} from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {apiService} from '../../utils/api/apiService';
 import {endpoints} from '../../utils/endpoints';
 import {useAppDispatch, useAppSelector} from '../../redux/store';
@@ -15,7 +15,8 @@ import {
 import {useEffect, useState, useRef} from 'react';
 import {fetchProducts} from '../../apis/fetchProducts';
 import LaundryServiceCard from '../../components/LaundryServiceCard';
-import {getItem} from '../../utils/local_storage';
+import { getItem } from '../../utils/local_storage';
+// import { addToCartMutate, isPending } from '../../apis/addToCart';
 
 const testimonialsData = [
   {
@@ -83,33 +84,42 @@ const LaundaryScreen = () => {
   });
 
   const queryClient = useQueryClient();
-  const {mutate: addToCartMutate, isPending} = useMutation({
-    mutationFn: async (product_id: string) => {
-      const userData = await getItem('userData');
+const {mutate: addToCartMutate, isPending} = useMutation({
+  mutationFn: async (product_id: string) => {
+    const userData = await getItem('userData');
 
-      const payload = {
-        product_id,
-        quantity: 1,
-        user_id: userData.userId,
-      };
+    const payload = {
+      product_id,
+      quantity: 1,
+      user_id: userData.userId,
+    };
 
-      const apiResponse = await apiService({
-        endpoint: endpoints.cart,
-        method: 'POST',
-        data: payload,
-        token: userData.token,
-      });
+    const apiResponse = await apiService({
+      endpoint: endpoints.cart,
+      method: 'POST',
+      data: payload,
+      token: userData.token,
+    });
 
-      return apiResponse;
-    },
-    onSuccess: () => {
-      ToastAndroid.show('Product added to cart', ToastAndroid.SHORT);
-      queryClient.invalidateQueries({queryKey: ['cart_products']});
-    },
-  });
+    console.log('api response', apiResponse);
+    return apiResponse;
+  },
+  onSuccess: () => {
+    Alert.alert('Success', 'Product added to cart successfully!');
+    queryClient.invalidateQueries({queryKey: ['cart_products']});
+  },
+
+  onError: (error: any) => {
+    if (error?.response?.status === 401) {
+      Alert.alert('Error', 'Unauthorized access. Please log in again.');
+    } else {
+      Alert.alert('Error', 'Failed to add product to cart. Please try again.');
+    }
+  },
+});
 
   const handleAddToCart = (product_id: string) => {
-    addToCartMutate(product_id);
+   addToCartMutate(product_id);
   };
 
   const fetchLaundryProducts = async (id: string) => {
