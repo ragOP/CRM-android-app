@@ -1,5 +1,5 @@
 import React, {useState, useEffect} from 'react';
-import {View, Text, StyleSheet, ActivityIndicator, SafeAreaView, StatusBar} from 'react-native';
+import {View, Text, StyleSheet, ActivityIndicator, Alert} from 'react-native';
 import CustomInputField from '../InputFields';
 import CustomDropdown from '../DropDown';
 import CustomButton from '../Button';
@@ -15,14 +15,18 @@ interface BookingFormProps {
 }
 
 const index: React.FC<BookingFormProps> = ({title, categories, onClick, isPending}) => {
-  const [selectedService, setSelectedService] = useState('');
-  const [selectedPackage, setSelectedPackage] = useState('');
-
+const [bookingData, setBookingData] = useState({
+    name: '',
+    phoneNumber: '',
+    selectedService: '',
+    selectedPackage: '',
+  });
   const {data: products} = useQuery({
-    queryKey: ['top_products', selectedService],
+    queryKey: ['top_products', bookingData.selectedService],
+    enabled: !!bookingData.selectedService,
     queryFn: async () => {
       const apiResponse = await fetchProducts({
-        params: {category_id: selectedService},
+        params: {category_id: bookingData.selectedService},
       });
       if (apiResponse?.response?.success) {
         return apiResponse?.response?.data?.data;
@@ -31,50 +35,53 @@ const index: React.FC<BookingFormProps> = ({title, categories, onClick, isPendin
     },
   });
 
-  
-
   return (
     <View style={styles.container}>
       <Text style={styles.title}>{title}</Text>
       <View style={styles.inputContainer}>
-        <View style={{flex: 1, flexDirection: 'row', gap: 7}}>
+        <View style={{flex: 1, flexDirection: 'row', justifyContent: 'space-between', }}>
           <CustomInputField
-            fontSize={16}
-            InputWidth={48}
+            fontSize={14}
+            InputWidth={49}
             radius={50}
             placeholder="Name"
+            value={bookingData.name}
+            maxLength={72}
+            onChangeText={text => setBookingData(prev => ({...prev, name: text}))}
           />
           <CustomInputField
-            fontSize={16}
-            InputWidth={48}
+            fontSize={14}
+            InputWidth={49}
             radius={50}
             placeholder="Phone Number"
+            value={bookingData.phoneNumber}
             numeric
             maxLength={10}
+            onChangeText={text => setBookingData(prev => ({...prev, phoneNumber: text}))}
           />
         </View>
-        <View style={{flex: 1, flexDirection: 'row', gap: 7}}>
+        <View style={{flex: 1, flexDirection: 'row', justifyContent: 'space-between', }}>
           <CustomDropdown
             InputHeight={50}
-            fontSize={16}
-            InputWidth={48}
+            fontSize={12}
+            InputWidth={49}
             radius={50}
-            label="Select Your Service"
+            label="Select Service"
             value=""
-            selectedValue={selectedService}
+            selectedValue={bookingData.selectedService}
             onValueChange={itemValue => {
-              setSelectedService(itemValue);
+              setBookingData(prev => ({...prev, selectedService: itemValue}));
             }}
             options={categories}
           />
           <CustomDropdown
             InputHeight={50}
-            fontSize={16}
-            InputWidth={48}
+            fontSize={12}
+            InputWidth={49}
             radius={50}
-            label="Select Your Package"
-            selectedValue={selectedPackage}
-            onValueChange={itemValue => setSelectedPackage(itemValue)}
+            label="Select Package"
+            selectedValue={bookingData.selectedPackage}
+            onValueChange={itemValue => setBookingData(prev => ({...prev, selectedPackage: itemValue}))}
             options={products}
           />
         </View>
@@ -83,9 +90,18 @@ const index: React.FC<BookingFormProps> = ({title, categories, onClick, isPendin
       <CustomButton
         borderRadius={50}
         buttonWidth={100}
-        title={isPending ? 'Loading....' : 'Book Your Cleaning'}
+        title={isPending ? 'Loading....' : 'Book Now'}
         iconName={'../../assets/cleaningIcon.svg'}
-        onPress={() => onClick && onClick(selectedPackage)}
+        onPress={() => {
+          const { name, phoneNumber, selectedService, selectedPackage } = bookingData;
+          if(!name || !phoneNumber || !selectedService || !selectedPackage) {
+            Alert.alert('Error', 'Please fill all the fields');
+            return;
+          }
+          if (isPending) return;
+          onClick && onClick(selectedPackage);
+          setBookingData(prev => ({...prev, name: '', phoneNumber: '', selectedService: '', selectedPackage: ''}));
+        }}
       />
       
     </View>
@@ -95,7 +111,7 @@ const index: React.FC<BookingFormProps> = ({title, categories, onClick, isPendin
 const styles = StyleSheet.create({
   container: {
     padding: 15,
-    marginHorizontal: 20,
+    marginHorizontal: 12,
     marginVertical: 10,
     backgroundColor: '#fff',
     borderRadius: 7,
@@ -106,11 +122,10 @@ const styles = StyleSheet.create({
   inputContainer: {
     flex: 1,
     flexDirection: 'column',
-    gap: 5,
   },
   title: {
     fontSize: 16,
-    fontWeight: '500',
+    fontWeight: '700',
     fontFamily: 'Poppins',
     color: '#000000',
     marginBottom: 10,

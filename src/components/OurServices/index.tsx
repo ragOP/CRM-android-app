@@ -117,7 +117,6 @@ export default index;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    marginTop: 20,
     padding: 20,
   },
   heading: {

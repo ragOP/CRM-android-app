@@ -146,7 +146,8 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'flex-start',
-    paddingHorizontal: 8,
+    paddingHorizontal: 16,
+    paddingTop: 10
   },
   headerTitle: {
     fontSize: 22,

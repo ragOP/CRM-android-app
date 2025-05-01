@@ -84,7 +84,7 @@ const styles = StyleSheet.create({
     borderRadius: 15,
     padding: 20,
     marginVertical: 10,
-    marginHorizontal: 'auto',
+    marginRight: 20,
     width: 320,
     shadowColor: '#000',
     shadowOffset: {width: 0, height: 2},
@@ -103,7 +103,7 @@ const styles = StyleSheet.create({
     marginBottom: 6,
   },
   priceSymbol: {
-    fontSize: 18,
+    fontSize: 24,
     fontWeight: 'bold',
   },
   price: {
@@ -134,7 +134,6 @@ const styles = StyleSheet.create({
   featureRow: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    // marginBottom: 6,
   },
   checkmarkContainer: {
     width: 20,
