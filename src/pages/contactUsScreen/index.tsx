@@ -1,9 +1,27 @@
-import {View, Text, StyleSheet, ScrollView, Image} from 'react-native';
+import {View, Text, StyleSheet, ScrollView, Image, ActivityIndicator} from 'react-native';
 import GradientHeader from '../../components/GradientHeader';
 import ContactUsForm from '../../components/ContactUsForm';
 import LocationCard from '../../components/LocationCard';
 import Icon from 'react-native-vector-icons/Ionicons';
-const index = () => {
+import {useQuery} from '@tanstack/react-query';
+import {getFooterConfig} from '../../apis/getHeaderConfig';
+const ContactUsScreen = () => {
+  const {data: footerConfig, isLoading} = useQuery({
+    queryKey: ['footer_config'],
+    queryFn: () => getFooterConfig({}),
+  });
+
+  if (isLoading) {
+    return (
+      <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+        <ActivityIndicator size="large" color="#00008B" />
+        {/* <Text style={{marginTop: 10}}>Loading...</Text> */}
+      </View>
+    );
+  }
+
+  const location = [28.5691, 77.2786];
+
   return (
     <ScrollView style={{backgroundColor: '#fff'}}>
       <GradientHeader
@@ -48,15 +66,15 @@ const index = () => {
         <View style={styles.infoContainer}>
           <View style={styles.infoTextContainer}>
             <Icon name="call-outline" size={20} color="#00008B" />
-            <Text style={styles.infoText}>+91 9578376478{'\n'}+91 9578376478</Text>
+            <Text style={styles.infoText}>+91 {footerConfig?.phoneNumber}</Text>
           </View>
           <View style={styles.infoTextContainer}>
             <Icon name="location-outline" size={20} color="#00008B" />
-            <Text style={styles.infoText}>123, Main Street,{'\n'}Chiplun, Maharashtra - 415623</Text>
+            <Text style={styles.infoText}>{footerConfig?.address}</Text>
           </View>
           <View style={styles.infoTextContainer}>
             <Icon name="time-outline" size={20} color="#00008B" />
-            <Text style={styles.infoText}>Mon-Fri: 9AM - 6PM{'\n'}Saturday: 9AM - 4PM</Text>
+            <Text style={styles.infoText}>{footerConfig?.timming}</Text>
           </View>
         </View>
 
@@ -71,7 +89,7 @@ const index = () => {
   );
 };
 
-export default index;
+export default ContactUsScreen;
 
 const styles = StyleSheet.create({
   container: {

@@ -84,6 +84,7 @@ const App = () => {
                   else if (route.name === 'Cart') iconName = 'cart';
                   else if (route.name === 'Account') iconName = 'person';
                   else if (route.name === 'Blog') iconName = 'book';
+                  else if (route.name === 'Contact') iconName = 'chatbubble';
                   return <Icon name={iconName} size={size} color={color} />;
                 },
               })}>
@@ -112,7 +113,13 @@ const App = () => {
                 component={AccountStack}
                 options={{title: 'Account'}}
               />
+              <Tab.Screen
+                name="Contact"
+                component={ContactUsScreen}
+                options={{title: 'Contact'}}
+              />
             </Tab.Navigator>
+            {/* <ContactUsScreen  /> */}
           </SafeAreaView>
         </NavigationContainer>
       </QueryClientProvider>
