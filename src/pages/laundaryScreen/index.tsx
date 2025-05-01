@@ -4,7 +4,7 @@ import BookingForm from '../../components/BookingForm/index';
 import AboutUs from '../../components/AboutUsSection/index';
 import TestimonialCard from '../../components/TestimonialCard';
 import OurServices from '../../components/OurServices';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import {useMutation, useQuery, useQueryClient} from '@tanstack/react-query';
 import {apiService} from '../../utils/api/apiService';
 import {endpoints} from '../../utils/endpoints';
 import {useAppDispatch, useAppSelector} from '../../redux/store';
@@ -15,8 +15,8 @@ import {
 import {useEffect, useState, useRef} from 'react';
 import {fetchProducts} from '../../apis/fetchProducts';
 import LaundryServiceCard from '../../components/LaundryServiceCard';
-import { getItem } from '../../utils/local_storage';
-// import { addToCartMutate, isPending } from '../../apis/addToCart';
+import {getItem} from '../../utils/local_storage';
+import {useNavigation} from '@react-navigation/native';
 
 const testimonialsData = [
   {
@@ -61,9 +61,16 @@ interface LaundryProduct {
 
 const LaundaryScreen = () => {
   const dispatch = useAppDispatch();
+  const navigation = useNavigation();
+
   const categories = useAppSelector(selectCategories);
+  const isLoggedIn = useAppSelector(state => state.auth.token);
+
+  const scrollViewRef = useRef<ScrollView>(null);
   const [laundryProducts, setLaundryProducts] = useState<LaundryProduct[]>([]);
-  const laundryRef = useRef(null);
+  const [laundryOffsetY, setLaundryOffsetY] = useState(0);
+
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     dispatch(fetchCategories({service_id: '67bb85be42d073bcb30015d9'}));
@@ -83,43 +90,63 @@ const LaundaryScreen = () => {
     },
   });
 
-  const queryClient = useQueryClient();
-const {mutate: addToCartMutate, isPending} = useMutation({
-  mutationFn: async (product_id: string) => {
-    const userData = await getItem('userData');
+  const {mutate: addToCartMutate, isPending} = useMutation({
+    mutationFn: async (product_id: string) => {
+      const userData = await getItem('userData');
 
-    const payload = {
-      product_id,
-      quantity: 1,
-      user_id: userData.userId,
-    };
+      const payload = {
+        product_id,
+        quantity: 1,
+        user_id: userData.userId,
+      };
 
-    const apiResponse = await apiService({
-      endpoint: endpoints.cart,
-      method: 'POST',
-      data: payload,
-      token: userData.token,
-    });
+      const apiResponse = await apiService({
+        endpoint: endpoints.cart,
+        method: 'POST',
+        data: payload,
+        token: userData.token,
+      });
 
-    console.log('api response', apiResponse);
-    return apiResponse;
-  },
-  onSuccess: () => {
-    Alert.alert('Success', 'Product added to cart successfully!');
-    queryClient.invalidateQueries({queryKey: ['cart_products']});
-  },
+      console.log('api response', apiResponse);
+      return apiResponse;
+    },
+    onSuccess: () => {
+      Alert.alert('Success', 'Product added to cart successfully!');
+      queryClient.invalidateQueries({queryKey: ['cart_products']});
+    },
 
-  onError: (error: any) => {
-    if (error?.response?.status === 401) {
-      Alert.alert('Error', 'Unauthorized access. Please log in again.');
-    } else {
+    onError: () => {
       Alert.alert('Error', 'Failed to add product to cart. Please try again.');
-    }
-  },
-});
+    },
+  });
+
+  const scrollToLaundrySection = () => {
+    scrollViewRef.current?.scrollTo({ y: laundryOffsetY, animated: true });
+  };  
+
+  const onLoginRedirect = () => {
+    navigation.navigate('Account', {
+      screen: 'LoginScreen',
+    });
+  };
 
   const handleAddToCart = (product_id: string) => {
-   addToCartMutate(product_id);
+    if (isLoggedIn) {
+      addToCartMutate(product_id);
+    } else {
+      Alert.alert(
+        'User not logged in',
+        'You need to be logged in to add to cart',
+        [
+          {
+            text: 'Cancel',
+            onPress: () => console.log('Cancel Pressed'),
+            style: 'cancel',
+          },
+          {text: 'OK', onPress: () => onLoginRedirect()},
+        ],
+      );
+    }
   };
 
   const fetchLaundryProducts = async (id: string) => {
@@ -132,10 +159,7 @@ const {mutate: addToCartMutate, isPending} = useMutation({
 
     if (apiResponse?.response?.success) {
       setLaundryProducts(apiResponse?.response?.data?.data || []);
-      console.log(
-        'Products fetched successfully:',
-        apiResponse?.response?.data?.data,
-      );
+      scrollToLaundrySection();
     } else {
       console.log('Failed to fetch products:', apiResponse);
       setLaundryProducts([]);
@@ -143,7 +167,7 @@ const {mutate: addToCartMutate, isPending} = useMutation({
   };
 
   return (
-    <ScrollView>
+    <ScrollView ref={scrollViewRef}>
       <GradientHeader
         title="Get Your Laundry Done!"
         description="Visit, call, or drop us a message—we’re just around the corner!"
@@ -166,33 +190,45 @@ const {mutate: addToCartMutate, isPending} = useMutation({
       />
       {/* A weird design component that need to be redesigned from figma */}
 
-      <View style={styles.productsContainer} ref={laundryRef}>
+      <View
+        style={styles.productsContainer}
+        onLayout={event => {
+          setLaundryOffsetY(event.nativeEvent.layout.y);
+        }}>
         <Text style={styles.productsTitle}>Available Products</Text>
-        <ScrollView style={styles.container}>
-          {laundryProducts.map((service, serviceIndex) => (
-            <LaundryServiceCard
-              key={service._id}
-              service_id={service._id}
-              serviceType={service.name}
-              price={service.price}
-              originalPrice={service.discounted_price}
-              description={service.small_description}
-              features={
-                serviceIndex === 0
-                  ? service.full_description.split('✔')
-                  : service.full_description.split('✔')
-              }
-              serviceIndex={serviceIndex}
-              handleAddToCart={handleAddToCart}
-              isPending={isPending}
-            />
-          ))}
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.container}>
+          {laundryProducts.length > 0 ? (
+            laundryProducts.map((service, serviceIndex) => (
+              <LaundryServiceCard
+                key={service._id}
+                service_id={service._id}
+                serviceType={service.name}
+                price={service.price}
+                originalPrice={service.discounted_price}
+                description={service.small_description}
+                features={
+                  serviceIndex === 0
+                    ? service.full_description.split('✔')
+                    : service.full_description.split('✔')
+                }
+                serviceIndex={serviceIndex}
+                handleAddToCart={handleAddToCart}
+                isPending={isPending}
+              />
+            ))
+          ) : (
+            <View style={styles.noProductsContainer}>
+              <Text style={styles.noProductsText}>
+                No products available at the moment.
+              </Text>
+            </View>
+          )}
         </ScrollView>
       </View>
 
       {/* Testimonial */}
       <View style={styles.testimonialContainer}>
-        <Text style={{color: '#04050B', fontSize: 14, fontWeight: 'bold'}}>
+        <Text style={{color: '#04050B', fontSize: 18, textAlign: 'center', fontWeight: 'bold', marginBottom: 10}}>
           Our clients praise us for great service.
         </Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false}>
@@ -227,7 +263,6 @@ const styles = StyleSheet.create({
     color: '#0000ff',
   },
   noProductsContainer: {
-    padding: 20,
     alignItems: 'center',
   },
   noProductsText: {
@@ -244,54 +279,6 @@ const styles = StyleSheet.create({
     marginLeft: 10,
   },
   container: {
-    marginTop: 20,
     paddingHorizontal: 10,
-  },
-  card: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 16,
-    marginRight: 12,
-    width: 280,
-    elevation: 3,
-    shadowColor: '#000',
-    shadowOffset: {width: 0, height: 2},
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-  },
-  title: {
-    fontWeight: 'bold',
-    fontSize: 18,
-    marginBottom: 4,
-  },
-  price: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#000',
-  },
-  subtitle: {
-    fontSize: 13,
-    color: '#444',
-    marginBottom: 10,
-  },
-  featureList: {
-    marginVertical: 10,
-  },
-  feature: {
-    fontSize: 13,
-    marginBottom: 5,
-    color: '#333',
-  },
-  button: {
-    borderWidth: 1,
-    borderColor: '#3b82f6',
-    borderRadius: 24,
-    paddingVertical: 8,
-    alignItems: 'center',
-    marginTop: 10,
-  },
-  buttonText: {
-    color: '#3b82f6',
-    fontWeight: '600',
   },
 });

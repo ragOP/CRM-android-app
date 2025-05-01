@@ -39,32 +39,34 @@ const [bookingData, setBookingData] = useState({
     <View style={styles.container}>
       <Text style={styles.title}>{title}</Text>
       <View style={styles.inputContainer}>
-        <View style={{flex: 1, flexDirection: 'row', gap: 7}}>
+        <View style={{flex: 1, flexDirection: 'row', justifyContent: 'space-between', }}>
           <CustomInputField
-            fontSize={16}
-            InputWidth={48}
+            fontSize={14}
+            InputWidth={49}
             radius={50}
             placeholder="Name"
+            value={bookingData.name}
             maxLength={72}
             onChangeText={text => setBookingData(prev => ({...prev, name: text}))}
           />
           <CustomInputField
-            fontSize={16}
-            InputWidth={48}
+            fontSize={14}
+            InputWidth={49}
             radius={50}
             placeholder="Phone Number"
+            value={bookingData.phoneNumber}
             numeric
             maxLength={10}
             onChangeText={text => setBookingData(prev => ({...prev, phoneNumber: text}))}
           />
         </View>
-        <View style={{flex: 1, flexDirection: 'row', gap: 7}}>
+        <View style={{flex: 1, flexDirection: 'row', justifyContent: 'space-between', }}>
           <CustomDropdown
             InputHeight={50}
-            fontSize={16}
-            InputWidth={48}
+            fontSize={12}
+            InputWidth={49}
             radius={50}
-            label="Select Your Service"
+            label="Select Service"
             value=""
             selectedValue={bookingData.selectedService}
             onValueChange={itemValue => {
@@ -74,10 +76,10 @@ const [bookingData, setBookingData] = useState({
           />
           <CustomDropdown
             InputHeight={50}
-            fontSize={16}
-            InputWidth={48}
+            fontSize={12}
+            InputWidth={49}
             radius={50}
-            label="Select Your Package"
+            label="Select Package"
             selectedValue={bookingData.selectedPackage}
             onValueChange={itemValue => setBookingData(prev => ({...prev, selectedPackage: itemValue}))}
             options={products}
@@ -88,7 +90,7 @@ const [bookingData, setBookingData] = useState({
       <CustomButton
         borderRadius={50}
         buttonWidth={100}
-        title={isPending ? 'Loading....' : 'Book Your Cleaning'}
+        title={isPending ? 'Loading....' : 'Book Now'}
         iconName={'../../assets/cleaningIcon.svg'}
         onPress={() => {
           const { name, phoneNumber, selectedService, selectedPackage } = bookingData;
@@ -109,7 +111,7 @@ const [bookingData, setBookingData] = useState({
 const styles = StyleSheet.create({
   container: {
     padding: 15,
-    marginHorizontal: 20,
+    marginHorizontal: 12,
     marginVertical: 10,
     backgroundColor: '#fff',
     borderRadius: 7,
@@ -120,7 +122,6 @@ const styles = StyleSheet.create({
   inputContainer: {
     flex: 1,
     flexDirection: 'column',
-    gap: 5,
   },
   title: {
     fontSize: 16,
