@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import React, {useState} from 'react';
+import {View, Text, StyleSheet, TouchableOpacity} from 'react-native';
+import { isArrayWithValues } from '../../utils/array/isArrayWithValues';
 
 interface ProductVariantProps {
   variants: {
@@ -7,49 +8,54 @@ interface ProductVariantProps {
     price: number;
     pricePerGram: string;
     inStock: boolean;
-    stockStatus?: 'In Stock' | 'Out of Stock' | 'Only 2 Left'; 
+    stockStatus?: 'In Stock' | 'Out of Stock' | 'Only 2 Left';
   }[];
 }
 
-const ProductVariants: React.FC<ProductVariantProps> = ({ variants }) => {
+const ProductVariants = ({variants}: ProductVariantProps) => {
   const [selectedVariant, setSelectedVariant] = useState(1); // Set 454gm as initially selected
-  
+
   // Helper function to determine text color based on stock status
   const getStockTextColor = (variant: ProductVariantProps['variants'][0]) => {
     if (!variant.inStock) return '#C62828'; // Red for Out of Stock
     if (variant.stockStatus === 'Only 2 Left') return '#D9A600'; // Orange for limited stock
     return '#297C00'; // Green for In Stock
   };
-  
+
   return (
     <View style={styles.container}>
       <View style={styles.variantsContainer}>
-        {variants.map((variant, index) => (
-          <TouchableOpacity
-            key={index}
-            style={[
-              styles.variantCard,
-              selectedVariant === index && styles.selectedVariant,
-            ]}
-            onPress={() => setSelectedVariant(index)}
-          >
-            <View style={[
-              styles.cardContent,
-              !variant.inStock && styles.outOfStockContent
-            ]}>
-              <Text style={styles.weightText}>{variant.weight}</Text>
-              <View style={styles.separator} />
-              <Text style={styles.priceText}>₹{variant.price}</Text>
-              <Text style={styles.pricePerGramText}>({variant.pricePerGram})</Text>
-              <Text style={[
-                styles.stockText, 
-                { color: getStockTextColor(variant) }
-              ]}>
-                {variant.stockStatus || (variant.inStock ? 'In Stock' : 'Out of Stock')}
-              </Text>
-            </View>
-          </TouchableOpacity>
-        ))}
+        {isArrayWithValues(variants) &&
+          variants.map((variant, index) => (
+            <TouchableOpacity
+              key={index}
+              style={[
+                styles.variantCard,
+                selectedVariant === index && styles.selectedVariant,
+              ]}
+              onPress={() => setSelectedVariant(index)}>
+              <View
+                style={[
+                  styles.cardContent,
+                  !variant.inStock && styles.outOfStockContent,
+                ]}>
+                <Text style={styles.weightText}>{variant.weight}</Text>
+                <View style={styles.separator} />
+                <Text style={styles.priceText}>₹{variant.price}</Text>
+                <Text style={styles.pricePerGramText}>
+                  ({variant.pricePerGram})
+                </Text>
+                <Text
+                  style={[
+                    styles.stockText,
+                    {color: getStockTextColor(variant)},
+                  ]}>
+                  {variant.stockStatus ||
+                    (variant.inStock ? 'In Stock' : 'Out of Stock')}
+                </Text>
+              </View>
+            </TouchableOpacity>
+          ))}
       </View>
     </View>
   );

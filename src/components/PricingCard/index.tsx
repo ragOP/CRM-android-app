@@ -49,7 +49,9 @@ const PricingCard: React.FC<PricingCardProps> = ({
       </View>
 
       <View style={styles.featuresContainer}>
-       <Text style={[styles.type, highlight && {color: '#D8D8D8'}]}>{type}</Text>
+        <Text style={[styles.type, highlight && {color: '#D8D8D8'}]}>
+          {type}
+        </Text>
         {features.map((feature, index) => (
           <Text
             key={index}
@@ -59,8 +61,15 @@ const PricingCard: React.FC<PricingCardProps> = ({
         ))}
       </View>
 
-      <TouchableOpacity style={[styles.button, highlight && {backgroundColor: '#383FE5', borderWidth: 0}]} onPress={onPress}>
-        <Text style={[styles.buttonText, highlight && {color: '#F3FAFC'}]}>{buttonText}</Text>
+      <TouchableOpacity
+        style={[
+          styles.button,
+          highlight && {backgroundColor: '#383FE5', borderWidth: 0},
+        ]}
+        onPress={onPress}>
+        <Text style={[styles.buttonText, highlight && {color: '#F3FAFC'}]}>
+          {buttonText}
+        </Text>
       </TouchableOpacity>
     </View>
   );

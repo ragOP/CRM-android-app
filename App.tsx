@@ -30,7 +30,6 @@ const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
 const queryClient = new QueryClient();
 
-// Move HomeStack OUTSIDE of App
 function HomeStack() {
   return (
     <Stack.Navigator screenOptions={{headerShown: false}}>
@@ -40,7 +39,7 @@ function HomeStack() {
       <Stack.Screen name="UniversalSearch" component={UniversalSearchScreen} />
       <Stack.Screen name="LaundaryScreen" component={LaundaryScreen} />
       <Stack.Screen name="HouseServiceScreen" component={HouseServiceScreen} />
-      {/* Add more screens as needed */}
+      <Stack.Screen name="ProductScreen" component={ProductScreen} />
     </Stack.Navigator>
   );
 }

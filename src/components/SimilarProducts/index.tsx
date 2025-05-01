@@ -1,48 +1,61 @@
 import React from 'react';
-import { View, Text, StyleSheet, FlatList, Image, TouchableOpacity } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  FlatList,
+  Image,
+  TouchableOpacity,
+} from 'react-native';
+import {ProductType} from '../ProductPage';
+import {calculateDiscountPercentage} from '../../utils/percentage/calculateDiscountPercentage';
 
-interface SimilarProductsProps {
-  products: {
-    id: string;
-    name: string;
-    image: string;
-    price: number;
-    mrp: number;
-    discountPercent?: number;
-    description?: string;
-  }[];
-}
+type SimilarProductsProps = {
+  products: ProductType[];
+};
 
-const SimilarProducts: React.FC<SimilarProductsProps> = ({ products }) => {
+const SimilarProducts = ({products}: SimilarProductsProps) => {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Similar Products</Text>
-      
+
       <FlatList
         horizontal
         data={products}
-        keyExtractor={(item) => item.id}
+        keyExtractor={item => item._id}
         showsHorizontalScrollIndicator={false}
-        renderItem={({ item }) => (
-          <TouchableOpacity style={styles.productCard}>
-            <Image source={{ uri: item.image }} style={styles.productImage} />
-            <View style={styles.priceRow}>
-              <Text style={styles.price}>₹{item.price}</Text>
-              <Text style={styles.original}>/{item.mrp}</Text>
-              {item.discountPercent && (
-                <Text style={styles.discount}> {item.discountPercent}% Off</Text>
-              )}
-            </View>
-            <Text style={styles.productName} numberOfLines={1}>
-              {item.name}
-            </Text>
-            {item.description && (
-              <Text style={styles.productDescription} numberOfLines={1}>
-                {item.description}
+        renderItem={({item}) => {
+          const discountPercentage = calculateDiscountPercentage(
+            item.price,
+            item.discounted_price,
+          );
+          return (
+            <TouchableOpacity style={styles.productCard}>
+              <Image
+                source={{uri: item.images?.[0]}}
+                style={styles.productImage}
+              />
+              <View style={styles.priceRow}>
+                <Text style={styles.price}>₹{item.discounted_price}</Text>
+                <Text style={styles.original}>/{item.price}</Text>
+                {discountPercentage && (
+                  <Text style={styles.discount}>
+                    {' '}
+                    {discountPercentage}% Off
+                  </Text>
+                )}
+              </View>
+              <Text style={styles.productName} numberOfLines={1}>
+                {item.name}
               </Text>
-            )}
-          </TouchableOpacity>
-        )}
+              {item.small_description && (
+                <Text style={styles.productDescription} numberOfLines={1}>
+                  {item.small_description}
+                </Text>
+              )}
+            </TouchableOpacity>
+          );
+        }}
       />
     </View>
   );
@@ -67,7 +80,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     padding: 10,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
+    shadowOffset: {width: 0, height: 1},
     shadowOpacity: 0.1,
     shadowRadius: 3,
     elevation: 2,
