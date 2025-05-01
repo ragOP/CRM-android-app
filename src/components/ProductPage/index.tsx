@@ -1,5 +1,11 @@
 import React from 'react';
-import {View, ScrollView, StyleSheet, SafeAreaView, Dimensions} from 'react-native';
+import {
+  View,
+  ScrollView,
+  StyleSheet,
+  SafeAreaView,
+  Dimensions,
+} from 'react-native';
 import ProductImages from '../../components/ProductImages';
 import ProductPricing from '../../components/ProductPricing';
 import ProductVariants from '../../components/ProductVariants';
@@ -8,69 +14,66 @@ import SimilarProducts from '../../components/SimilarProducts';
 import ProductDetails from '../../components/ProductDetails';
 import AddToCartBar from '../../components/AddToCartBar';
 import DottedHorizontalRule from '../DottedHorizontalRule';
+import {calculateDiscountPercentage} from '../../utils/percentage/calculateDiscountPercentage';
 
-interface ProductPageProps {
-  product: {
-    id: string;
-    name: string;
-    shortDescription: string;
-    images: string[];
-    mrp: number;
-    discountPrice: number;
-    discountPercent?: number;
-    specialOffer?: string;
-    variants: {
-      weight: string;
-      price: number;
-      pricePerGram: string;
-      inStock: boolean;
-    }[];
-    dosage?: {
-      timing: string[];
-      time: string[];
-    };
-    description: string;
-    features: string[];
-    directions: string[];
-    faqs?: {question: string; answer: string}[];
-  };
-  similarProducts: {
-    id: string;
-    name: string;
-    image: string;
-    price: number;
-    mrp: number;
-    discountPercent?: number;
-  }[];
-}
+export type ProductType = {
+  _id: string;
+  name: string;
+  small_description: string;
+  full_description: string;
+  price: number;
+  discounted_price: number;
+  salesperson_discounted_price: number;
+  dnd_discounted_price: number;
+  instock: boolean;
+  manufacturer: string;
+  consumed_type: string;
+  banner_image: string;
+  images: string[];
+  expiry_date: string | null;
+  meta_data: Record<string, any>;
+  uploaded_by_brand: string;
+  is_best_seller: boolean;
+  category: string[];
+  created_by_admin: string;
+  createdAt: string;
+  updatedAt: string;
+  __v: number;
+};
 
-const ProductPage: React.FC<ProductPageProps> = ({
-  product,
-  similarProducts,
-}) => {
+type ProductPageProps = {
+  product: ProductType;
+  similarProducts: ProductType[];
+};
+
+const ProductPage = ({product, similarProducts}: ProductPageProps) => {
+  const discountPercentage = calculateDiscountPercentage(
+    product.price,
+    product.discounted_price,
+  );
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.mainContainer}>
         <ScrollView contentContainerStyle={styles.scrollContent}>
           <ProductImages images={product.images} />
           <ProductPricing
-            mrp={product.mrp}
-            discountPrice={product.discountPrice}
-            discountPercent={product.discountPercent}
-            specialOffer={product.specialOffer}
+            mrp={product.price}
+            discountPrice={product.discounted_price}
+            discountPercent={discountPercentage}
+            // specialOffer={product.specialOffer}
             highlight={{'50%': true, off: true, free: true}}
             productName={product.name}
-            productDescription={product.shortDescription}
+            productDescription={product.small_description}
           />
           <View style={styles.content}>
-            <ProductVariants variants={product.variants} />
+            <ProductVariants variants={product?.variants || []} />
             <DottedHorizontalRule
               dotSize={4}
               dotColor="#4D4D4D"
               spacing={5}
               thickness={1}
             />
-            {product.dosage && (
+            {product?.dosage && (
               <ProductDosage
                 dosage={{
                   timing: ['Before Breakfast', 'After Lunch', 'After Dinner'],
@@ -87,7 +90,7 @@ const ProductPage: React.FC<ProductPageProps> = ({
             />
           </View>
         </ScrollView>
-        
+
         {/* Fixed button bar at the bottom */}
         <View style={styles.fixedButtonContainer}>
           <AddToCartBar />
@@ -97,7 +100,7 @@ const ProductPage: React.FC<ProductPageProps> = ({
   );
 };
 
-const bottomBarHeight = 50; 
+const bottomBarHeight = 50;
 
 const styles = StyleSheet.create({
   container: {
@@ -109,7 +112,7 @@ const styles = StyleSheet.create({
     position: 'relative',
   },
   scrollContent: {
-    paddingBottom: bottomBarHeight, 
+    paddingBottom: bottomBarHeight,
   },
   content: {
     padding: 15,
@@ -122,10 +125,10 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     elevation: 8, // For Android shadow
     shadowColor: '#000', // For iOS shadow
-    shadowOffset: { width: 0, height: -2 },
+    shadowOffset: {width: 0, height: -2},
     shadowOpacity: 0.1,
     shadowRadius: 4,
-  }
+  },
 });
 
 export default ProductPage;

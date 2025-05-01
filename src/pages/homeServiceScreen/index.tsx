@@ -6,6 +6,7 @@ import {
   FlatList,
   ActivityIndicator,
   ToastAndroid,
+  ScrollView,
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import React from 'react';
@@ -27,6 +28,7 @@ import {apiService} from '../../utils/api/apiService';
 import {fetchProducts} from '../../apis/fetchProducts';
 import HouseCleaningProductCard from '../../components/HouseCleaningProductCard';
 import {getItem} from '../../utils/local_storage';
+import TestimonialCard from '../../components/TestimonialCard';
 
 const ourServices = [
   'Home Deep Cleaning',
@@ -73,6 +75,37 @@ const pricingData = [
     features: Array(5).fill('1 BHK (401 to 600 Sqft) - ₹3800/- *'),
     buttonText: 'Book Now',
     highlight: false,
+  },
+];
+
+const testimonialsData = [
+  {
+    id: '1',
+    name: 'Rajesh Gupta',
+    testimonial:
+      "I have tried several laundry services, but none compare to the exceptional quality and promptness I've experienced with Washmart. Their attention to detail and efficient delivery of clean and fresh clothes are remarkable.",
+    image: require('../../assets/testimonialImage.png'),
+  },
+  {
+    id: '2',
+    name: 'Rajesh Gupta',
+    testimonial:
+      "I have tried several laundry services, but none compare to the exceptional quality and promptness I've experienced with Washmart. Their attention to detail and efficient delivery of clean and fresh clothes are remarkable.",
+    image: require('../../assets/testimonialImage.png'),
+  },
+  {
+    id: '3',
+    name: 'Rajesh Gupta',
+    testimonial:
+      "I have tried several laundry services, but none compare to the exceptional quality and promptness I've experienced with Washmart. Their attention to detail and efficient delivery of clean and fresh clothes are remarkable.",
+    image: require('../../assets/testimonialImage.png'),
+  },
+  {
+    id: '4',
+    name: 'Rajesh Gupta',
+    testimonial:
+      "I have tried several laundry services, but none compare to the exceptional quality and promptness I've experienced with Washmart. Their attention to detail and efficient delivery of clean and fresh clothes are remarkable.",
+    image: require('../../assets/testimonialImage.png'),
   },
 ];
 
@@ -279,6 +312,30 @@ const HouseServiceScreen = () => {
                 </Text>
               </View>
             </LinearGradient>
+
+            {/* Testimonial */}
+            <View style={styles.testimonialContainer}>
+              <Text
+                style={{
+                  color: '#04050B',
+                  fontSize: 18,
+                  textAlign: 'center',
+                  fontWeight: 'bold',
+                  marginBottom: 10,
+                }}>
+                Our clients praise us for great service.
+              </Text>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                {testimonialsData.map(testimonial => (
+                  <TestimonialCard
+                    key={testimonial.id}
+                    name={testimonial.name}
+                    testimonial={testimonial.testimonial}
+                    image={testimonial.image}
+                  />
+                ))}
+              </ScrollView>
+            </View>
           </View>
         </>
       }
@@ -349,7 +406,10 @@ const styles = StyleSheet.create({
   productsTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    marginBottom: 10,
     marginLeft: 10,
+  },
+  testimonialContainer: {
+    padding: 10,
+    marginVertical: 20,
   },
 });

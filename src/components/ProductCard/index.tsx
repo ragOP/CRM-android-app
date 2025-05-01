@@ -1,7 +1,9 @@
 import React from 'react';
-import {View, Text, Image, StyleSheet} from 'react-native';
+import {View, Text, Image, StyleSheet, TouchableOpacity} from 'react-native';
+import {useNavigation} from '@react-navigation/native';
 
 interface ProductCardProps {
+  data: any;
   image: any;
   price: number;
   originalPrice: number;
@@ -11,6 +13,7 @@ interface ProductCardProps {
 }
 
 const ProductCard: React.FC<ProductCardProps> = ({
+  data,
   image,
   price,
   originalPrice,
@@ -18,8 +21,14 @@ const ProductCard: React.FC<ProductCardProps> = ({
   title,
   subtitle,
 }) => {
+  const navigation = useNavigation();
+
+  const handlePress = () => {
+    navigation.navigate('ProductScreen', {product: data});
+  };
+
   return (
-    <View style={styles.card}>
+    <TouchableOpacity onPress={handlePress} style={styles.card}>
       <Image source={{uri: image}} style={styles.image} />
       <View style={styles.priceRow}>
         <Text style={styles.price}>₹{price}</Text>
@@ -32,7 +41,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
       <Text style={styles.subtitle} numberOfLines={1}>
         {subtitle}
       </Text>
-    </View>
+    </TouchableOpacity>
   );
 };
 

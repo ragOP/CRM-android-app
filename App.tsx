@@ -30,7 +30,6 @@ const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
 const queryClient = new QueryClient();
 
-// Move HomeStack OUTSIDE of App
 function HomeStack() {
   return (
     <Stack.Navigator screenOptions={{headerShown: false}}>
@@ -40,7 +39,7 @@ function HomeStack() {
       <Stack.Screen name="UniversalSearch" component={UniversalSearchScreen} />
       <Stack.Screen name="LaundaryScreen" component={LaundaryScreen} />
       <Stack.Screen name="HouseServiceScreen" component={HouseServiceScreen} />
-      {/* Add more screens as needed */}
+      <Stack.Screen name="ProductScreen" component={ProductScreen} />
     </Stack.Navigator>
   );
 }
@@ -62,6 +61,25 @@ function AccountStack() {
   );
 }
 
+const tabScreenOptions = ({route}: {route: any}) => ({
+  headerShown: false,
+  tabBarIcon: ({color, size}: {color: string; size: number}) => {
+    let iconName = 'home';
+    if (route.name === 'HomeTab') {
+      iconName = 'home';
+    } else if (route.name === 'Pharmacy') {
+      iconName = 'medkit';
+    } else if (route.name === 'Cart') {
+      iconName = 'cart';
+    } else if (route.name === 'Account') {
+      iconName = 'person';
+    } else if (route.name === 'Blog') {
+      iconName = 'book';
+    }
+    return <Icon name={iconName} size={size} color={color} />;
+  },
+});
+
 const App = () => {
   return (
     <Provider store={store}>
@@ -75,19 +93,7 @@ const App = () => {
             />
             <Tab.Navigator
               initialRouteName="HomeTab"
-              screenOptions={({route}) => ({
-                headerShown: false,
-                tabBarIcon: ({color, size}) => {
-                  let iconName = 'home';
-                  if (route.name === 'HomeTab') iconName = 'home';
-                  else if (route.name === 'Pharmacy') iconName = 'medkit';
-                  else if (route.name === 'Cart') iconName = 'cart';
-                  else if (route.name === 'Account') iconName = 'person';
-                  else if (route.name === 'Blog') iconName = 'book';
-                  else if (route.name === 'Contact') iconName = 'chatbubble';
-                  return <Icon name={iconName} size={size} color={color} />;
-                },
-              })}>
+              screenOptions={tabScreenOptions}>
               <Tab.Screen
                 name="HomeTab"
                 component={HomeStack}
@@ -113,13 +119,7 @@ const App = () => {
                 component={AccountStack}
                 options={{title: 'Account'}}
               />
-              <Tab.Screen
-                name="Contact"
-                component={ContactUsScreen}
-                options={{title: 'Contact'}}
-              />
             </Tab.Navigator>
-            {/* <ContactUsScreen  /> */}
           </SafeAreaView>
         </NavigationContainer>
       </QueryClientProvider>

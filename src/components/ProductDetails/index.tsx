@@ -1,82 +1,105 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import React, {useState} from 'react';
+import {View, Text, StyleSheet, TouchableOpacity} from 'react-native';
+import {isArrayWithValues} from '../../utils/array/isArrayWithValues';
 
 interface ProductDetailsProps {
   description: string;
   features: string[];
   directions: string[];
-  faqs?: { question: string; answer: string }[];
+  faqs?: {question: string; answer: string}[];
 }
 
-const ProductDetails: React.FC<ProductDetailsProps> = ({ 
-  description, 
-  features, 
+const ProductDetails = ({
+  description,
+  features,
   directions,
-  faqs
-}) => {
+  faqs,
+}: ProductDetailsProps) => {
   const [activeTab, setActiveTab] = useState('description');
-  
+
   return (
     <View style={styles.container}>
       <View style={styles.tabsContainer}>
-        <TouchableOpacity 
-          style={styles.tab} 
-          onPress={() => setActiveTab('description')}
-        >
-          <Text style={[styles.tabText, activeTab === 'description' && {color: '#00008B'}]}>Product Information</Text>
+        <TouchableOpacity
+          style={styles.tab}
+          onPress={() => setActiveTab('description')}>
+          <Text
+            style={[
+              styles.tabText,
+              activeTab === 'description' && {color: '#00008B'},
+            ]}>
+            Product Information
+          </Text>
         </TouchableOpacity>
-        <TouchableOpacity 
-          style={styles.tab} 
-          onPress={() => setActiveTab('directions')}
-        >
-          <Text style={[styles.tabText, activeTab === 'directions' && {color: '#00008B'}]}>Directions for use</Text>
+        <TouchableOpacity
+          style={styles.tab}
+          onPress={() => setActiveTab('directions')}>
+          <Text
+            style={[
+              styles.tabText,
+              activeTab === 'directions' && {color: '#00008B'},
+            ]}>
+            Directions for use
+          </Text>
         </TouchableOpacity>
-        <TouchableOpacity 
-          style={styles.tab} 
-          onPress={() => setActiveTab('faqs')}
-        >
-          <Text style={[styles.tabText, activeTab === 'faqs' && {color: '#00008B'}]}>FAQs</Text>
+        <TouchableOpacity
+          style={styles.tab}
+          onPress={() => setActiveTab('faqs')}>
+          <Text
+            style={[
+              styles.tabText,
+              activeTab === 'faqs' && {color: '#00008B'},
+            ]}>
+            FAQs
+          </Text>
         </TouchableOpacity>
-        <TouchableOpacity 
-          style={styles.tab} 
-          onPress={() => setActiveTab('bought')}
-        >
-          <Text style={[styles.tabText, activeTab === 'bought' && {color: '#00008B'}]}>Customers Also Bought</Text>
+        <TouchableOpacity
+          style={styles.tab}
+          onPress={() => setActiveTab('bought')}>
+          <Text
+            style={[
+              styles.tabText,
+              activeTab === 'bought' && {color: '#00008B'},
+            ]}>
+            Customers Also Bought
+          </Text>
         </TouchableOpacity>
       </View>
-      
+
       <View style={styles.contentContainer}>
         {activeTab === 'description' && (
           <View>
             <Text style={styles.sectionTitle}>Description</Text>
             <Text style={styles.descriptionText}>{description}</Text>
-            
+
             <Text style={styles.sectionTitle}>Features</Text>
             <View style={styles.featuresList}>
-              {features.map((feature, index) => (
-                <View key={index} style={styles.featureItem}>
-                  <Text style={styles.bulletPoint}>•</Text>
-                  <Text style={styles.featureText}>{feature}</Text>
-                </View>
-              ))}
+              {isArrayWithValues(features) &&
+                features.map((feature, index) => (
+                  <View key={index} style={styles.featureItem}>
+                    <Text style={styles.bulletPoint}>•</Text>
+                    <Text style={styles.featureText}>{feature}</Text>
+                  </View>
+                ))}
             </View>
           </View>
         )}
-        
+
         {activeTab === 'directions' && (
           <View>
             <Text style={styles.sectionTitle}>Directions for Use</Text>
             <View style={styles.directionsList}>
-              {directions.map((direction, index) => (
-                <View key={index} style={styles.directionItem}>
-                  <Text style={styles.bulletPoint}>•</Text>
-                  <Text style={styles.directionText}>{direction}</Text>
-                </View>
-              ))}
+              {isArrayWithValues(directions) &&
+                directions.map((direction, index) => (
+                  <View key={index} style={styles.directionItem}>
+                    <Text style={styles.bulletPoint}>•</Text>
+                    <Text style={styles.directionText}>{direction}</Text>
+                  </View>
+                ))}
             </View>
           </View>
         )}
-        
+
         {activeTab === 'faqs' && faqs && (
           <View>
             <Text style={styles.sectionTitle}>Frequently Asked Questions</Text>
@@ -88,9 +111,11 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({
             ))}
           </View>
         )}
-        
+
         {activeTab === 'bought' && (
-          <Text style={styles.comingSoonText}>Customers also bought these items...</Text>
+          <Text style={styles.comingSoonText}>
+            Customers also bought these items...
+          </Text>
         )}
       </View>
     </View>

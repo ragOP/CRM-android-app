@@ -37,9 +37,9 @@ const CustomDropdown: React.FC<CustomDropdownProps> = ({
           style={[styles.picker, { fontSize: fontSize }]}
           dropdownIconColor="#333"
         >
-          <Picker.Item label={label} value={value} key={value} />
+          <Picker.Item style={[styles.picker, { fontSize: fontSize }]} label={label} value={value} key={value} />
           {options.map(option => (
-            <Picker.Item label={option.name} value={option._id} key={option._id} />
+            <Picker.Item style={[styles.picker, { fontSize: fontSize }]} label={option.name} value={option._id} key={option._id} />
           ))}
         </Picker>
       </View>

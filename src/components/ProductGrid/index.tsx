@@ -8,6 +8,7 @@ import {
   Image,
 } from 'react-native';
 import ProductCard from '../ProductCard';
+import {useNavigation} from '@react-navigation/native';
 
 interface ProductGridProps {
   rows?: number;
@@ -24,6 +25,8 @@ const ProductGrid: React.FC<ProductGridProps> = ({
   data,
   isCategory = false,
 }) => {
+  const navigation = useNavigation();
+
   const renderCategoryCard = ({item}: {item: any}) => (
     <View style={styles.card}>
       <Image
@@ -53,7 +56,8 @@ const ProductGrid: React.FC<ProductGridProps> = ({
             );
           })}
         </Text>
-        <TouchableOpacity>
+        <TouchableOpacity
+          onPress={() => navigation.navigate('UniversalSearch')}>
           <Text style={styles.viewAll}>View all →</Text>
         </TouchableOpacity>
       </View>
@@ -74,6 +78,7 @@ const ProductGrid: React.FC<ProductGridProps> = ({
           data={data}
           renderItem={({item}) => (
             <ProductCard
+              data={item}
               image={item?.banner_image}
               price={item?.discounted_price}
               originalPrice={item?.price}

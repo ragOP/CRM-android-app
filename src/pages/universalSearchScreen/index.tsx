@@ -22,10 +22,9 @@ export type FilterType = {
 const UniversalSearchScreen: React.FC = () => {
   const dispatch = useAppDispatch();
   const route = useRoute();
+  
   const {service} = route.params || {};
-  console.log('category', service);
   const reduxServices = useAppSelector(selectServices);
-  console.log('>> REDUX SERVICES', reduxServices);
 
   const [filters, setFilters] = useState<FilterType>({
     page: 1,
@@ -148,6 +147,7 @@ const UniversalSearchScreen: React.FC = () => {
           data={allProducts}
           renderItem={({item}) => (
             <ProductCard
+              data={item}
               image={item?.banner_image}
               price={item?.discounted_price}
               originalPrice={item?.price}

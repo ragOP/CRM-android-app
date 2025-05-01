@@ -1,22 +1,29 @@
-import React, { useState, useRef } from 'react';
-import { View, Image, StyleSheet, FlatList, TouchableOpacity, Dimensions } from 'react-native';
+import React, {useState, useRef} from 'react';
+import {
+  View,
+  Image,
+  StyleSheet,
+  FlatList,
+  TouchableOpacity,
+  Dimensions,
+} from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 
-interface ProductImagesProps {
+type ProductImagesProps = {
   images: string[];
-}
+};
 
-const ProductImages: React.FC<ProductImagesProps> = ({ images }) => {
+const ProductImages = ({images}: ProductImagesProps) => {
   const [selectedImage, setSelectedImage] = useState(0);
   const windowWidth = Dimensions.get('window').width - 80;
   const flatListRef = useRef<FlatList>(null);
-  
+
   const scrollToIndex = (index: number) => {
     if (flatListRef.current) {
-      flatListRef.current.scrollToIndex({ 
-        index, 
+      flatListRef.current.scrollToIndex({
+        index,
         animated: true,
-        viewPosition: 0.5
+        viewPosition: 0.5,
       });
     }
   };
@@ -36,23 +43,20 @@ const ProductImages: React.FC<ProductImagesProps> = ({ images }) => {
     setSelectedImage(newIndex);
     scrollToIndex(newIndex);
   };
-  
+
   return (
     <View style={styles.container}>
       <Image
-        source={{ uri: images[selectedImage] }}
-        style={[styles.mainImage, { width: windowWidth }]}
+        source={{uri: images[selectedImage]}}
+        style={[styles.mainImage, {width: windowWidth}]}
         resizeMode="contain"
       />
-      
+
       <View style={styles.thumbnailContainer}>
-        <TouchableOpacity 
-          style={styles.arrowButton} 
-          onPress={handlePrevious}
-        >
+        <TouchableOpacity style={styles.arrowButton} onPress={handlePrevious}>
           <Icon name="chevron-back" size={20} color="#00008B" />
         </TouchableOpacity>
-        
+
         <FlatList
           ref={flatListRef}
           horizontal
@@ -60,14 +64,17 @@ const ProductImages: React.FC<ProductImagesProps> = ({ images }) => {
           keyExtractor={(_, index) => index.toString()}
           showsHorizontalScrollIndicator={false}
           style={styles.thumbnailList}
-          renderItem={({ item, index }) => (
-            <TouchableOpacity 
+          renderItem={({item, index}) => (
+            <TouchableOpacity
               onPress={() => setSelectedImage(index)}
-              style={selectedImage === index ? styles.activeThumbnail : styles.thumbnail}
-            >
-              <Image 
-                source={{ uri: item }} 
-                style={styles.thumbnailImage} 
+              style={
+                selectedImage === index
+                  ? styles.activeThumbnail
+                  : styles.thumbnail
+              }>
+              <Image
+                source={{uri: item}}
+                style={styles.thumbnailImage}
                 resizeMode="contain"
               />
             </TouchableOpacity>
@@ -78,11 +85,8 @@ const ProductImages: React.FC<ProductImagesProps> = ({ images }) => {
             index,
           })}
         />
-        
-        <TouchableOpacity 
-          style={styles.arrowButton} 
-          onPress={handleNext}
-        >
+
+        <TouchableOpacity style={styles.arrowButton} onPress={handleNext}>
           <Icon name="chevron-forward" size={20} color="#00008B" />
         </TouchableOpacity>
       </View>
@@ -118,13 +122,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
+    shadowOffset: {width: 0, height: 1},
     shadowOpacity: 0.1,
     shadowRadius: 2,
     elevation: 2,
   },
   thumbnailList: {
-    maxWidth: Dimensions.get('window').width - 100, 
+    maxWidth: Dimensions.get('window').width - 100,
     marginHorizontal: 5,
   },
   thumbnail: {

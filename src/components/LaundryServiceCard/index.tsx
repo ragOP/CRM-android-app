@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import {View, Text, TouchableOpacity, StyleSheet} from 'react-native';
 
 interface LaundryServiceCardProps {
   service_id: string;
@@ -36,35 +36,43 @@ const LaundryServiceCard: React.FC<LaundryServiceCardProps> = ({
         <Text style={styles.originalPrice}>{originalPrice}</Text>
       </View>
       <Text style={styles.description}>{description}</Text>
-      
+
       <Text style={styles.serviceTitle}>{serviceType}</Text>
-      
+
       <View style={styles.featuresContainer}>
-        {features.map((feature, index) => (
-          index !== 0 && <View key={index} style={styles.featureRow}>
-            <View style={styles.checkmarkContainer}>
-              <Text style={styles.checkmark}>✔</Text>
-            </View>
-            {serviceIndex === 0 ? (
-              feature.split("\n").map((subFeature, subIndex) => (
-                <>
-                <Text key={subIndex} style={styles.featureText}>{subFeature}</Text>
-                <View style={{height: 50}}></View>
-                </>
-              ))
-            ) : (
-              <Text style={styles.featureText}>{feature}</Text>
-            )
-            }
-          </View>
-        ))}
+        {features.map(
+          (feature, index) =>
+            index !== 0 && (
+              <View key={index} style={styles.featureRow}>
+                <View style={styles.checkmarkContainer}>
+                  <Text style={styles.checkmark}>✔</Text>
+                </View>
+                {serviceIndex === 0 ? (
+                  feature.split('\n').map((subFeature, subIndex) => (
+                    <>
+                      <Text key={subIndex} style={styles.featureText}>
+                        {subFeature}
+                      </Text>
+                      <View style={{height: 50}}></View>
+                    </>
+                  ))
+                ) : (
+                  <Text style={styles.featureText}>{feature}</Text>
+                )}
+              </View>
+            ),
+        )}
       </View>
-      
-      <TouchableOpacity style={styles.addButton} onPress={() => {
-        console.log('Service ID:', service_id);
-        handleAddToCart(service_id);
-      }}>
-        <Text style={styles.addButtonText}>{isPending ? 'Loading....' : 'Add to Cart'}</Text>
+
+      <TouchableOpacity
+        style={styles.addButton}
+        onPress={() => {
+          console.log('Service ID:', service_id);
+          handleAddToCart(service_id);
+        }}>
+        <Text style={styles.addButtonText}>
+          {isPending ? 'Loading....' : 'Add to Cart'}
+        </Text>
       </TouchableOpacity>
     </View>
   );
@@ -76,10 +84,10 @@ const styles = StyleSheet.create({
     borderRadius: 15,
     padding: 20,
     marginVertical: 10,
-    marginHorizontal: 'auto',
+    marginRight: 20,
     width: 320,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 2,
@@ -95,7 +103,7 @@ const styles = StyleSheet.create({
     marginBottom: 6,
   },
   priceSymbol: {
-    fontSize: 18,
+    fontSize: 24,
     fontWeight: 'bold',
   },
   price: {
@@ -126,7 +134,6 @@ const styles = StyleSheet.create({
   featureRow: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    // marginBottom: 6,
   },
   checkmarkContainer: {
     width: 20,
