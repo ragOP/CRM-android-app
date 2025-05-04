@@ -1,15 +1,15 @@
 import {View, Text, TouchableOpacity, StyleSheet} from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
-interface CartPayableSectionProps {
+type CartPayableSectionProps = {
   totalAmount: number;
   onPlaceOrder: () => void;
-}
+};
 
-const CartPayableSection: React.FC<CartPayableSectionProps> = ({
+const CartPayableSection = ({
   totalAmount,
   onPlaceOrder,
-}) => (
+}: CartPayableSectionProps) => (
   <View style={styles.payableContainer}>
     <View>
       <Text style={styles.payableLabel}>Payable Amount</Text>

@@ -1,11 +1,21 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, SafeAreaView } from 'react-native';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  SafeAreaView,
+} from 'react-native';
 
-const AddToCartBar: React.FC = () => {
+type AddToCartBarParams = {
+  onAddToCart: () => void;
+};
+
+const AddToCartBar = ({onAddToCart}: AddToCartBarParams) => {
   return (
     <SafeAreaView>
       <View style={styles.container}>
-        <TouchableOpacity style={styles.addToCartButton}>
+        <TouchableOpacity style={styles.addToCartButton} onPress={onAddToCart}>
           <Text style={styles.addToCartText}>Add To Cart</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.buyNowButton}>

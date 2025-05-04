@@ -10,9 +10,9 @@ import {
 import {useNavigation} from '@react-navigation/native';
 
 type CustomSearchProps = {
-  searchText: string;
-  onChange: (value: string) => void;
-  onSearch: () => void;
+  searchText?: string;
+  onChange?: (value: string) => void;
+  onSearch?: () => void;
 };
 
 const CustomSearch = ({searchText, onChange, onSearch}: CustomSearchProps) => {

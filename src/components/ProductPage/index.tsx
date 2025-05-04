@@ -43,10 +43,11 @@ export type ProductType = {
 
 type ProductPageProps = {
   product: ProductType;
-  similarProducts: ProductType[];
+  similarProducts?: ProductType[];
+  onAddToCart: () => void;
 };
 
-const ProductPage = ({product, similarProducts}: ProductPageProps) => {
+const ProductPage = ({product, similarProducts = [], onAddToCart}: ProductPageProps) => {
   const discountPercentage = calculateDiscountPercentage(
     product.price,
     product.discounted_price,
@@ -83,7 +84,7 @@ const ProductPage = ({product, similarProducts}: ProductPageProps) => {
             )}
             <SimilarProducts products={similarProducts} />
             <ProductDetails
-              description={product.description}
+              description={product.full_description}
               features={product.features}
               directions={product.directions}
               faqs={product.faqs}
@@ -93,7 +94,7 @@ const ProductPage = ({product, similarProducts}: ProductPageProps) => {
 
         {/* Fixed button bar at the bottom */}
         <View style={styles.fixedButtonContainer}>
-          <AddToCartBar />
+          <AddToCartBar onAddToCart={onAddToCart}/>
         </View>
       </View>
     </SafeAreaView>

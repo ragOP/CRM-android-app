@@ -1,55 +1,51 @@
 import {View, Text, TouchableOpacity, StyleSheet, Image} from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import {calculateDiscountPercentage} from '../../utils/percentage/calculateDiscountPercentage';
 
 interface CartItemProps {
-  item: {
-    id: string;
-    title: string;
-    description: string;
-    price: number;
-    mrp: number;
-    discountPercentage: number;
-    quantity: number;
-    image: string;
-  };
-  onRemove: (id: string) => void;
+  item: any;
+  productQuantity: number;
+  onRemove: () => void;
   onQuantityChange: (id: string, quantity: number) => void;
 }
 
 const CartItem: React.FC<CartItemProps> = ({
   item,
+  productQuantity,
   onRemove,
   onQuantityChange,
 }) => (
   <View style={styles.cartItemContainer}>
-    <Image source={{uri: item.image}} style={styles.itemImage} />
+    <Image source={{uri: item.images?.[0]}} style={styles.itemImage} />
     <View style={styles.itemDetails}>
-      <Text style={styles.itemTitle}>{item.title}</Text>
-      <Text style={styles.itemDescription}>{item.description}</Text>
+      <Text style={styles.itemTitle}>{item?.name}</Text>
+      <Text style={styles.itemDescription}>{item.small_description}</Text>
       <View style={styles.priceContainer}>
-        <Text style={styles.itemPrice}>₹{item.price}</Text>
-        <Text style={styles.itemMrp}>₹{item.mrp}</Text>
-        <Text style={styles.itemDiscount}>{item.discountPercentage}% off</Text>
+        <Text style={styles.itemPrice}>₹{item.discounted_price}</Text>
+        <Text style={styles.itemMrp}>₹{item.price}</Text>
+        <Text style={styles.itemDiscount}>
+          {calculateDiscountPercentage(item.price, item.discounted_price)}% off
+        </Text>
       </View>
 
       <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
         <View style={styles.quantityContainer}>
           <TouchableOpacity
             onPress={() =>
-              onQuantityChange(item.id, Math.max(1, item.quantity - 1))
+              onQuantityChange(item, Math.max(1, productQuantity - 1))
             }
             style={styles.quantityButton}>
             <Text style={styles.quantityButtonText}>-</Text>
           </TouchableOpacity>
-          <Text style={styles.quantityText}>{item.quantity}</Text>
+          <Text style={styles.quantityText}>{productQuantity}</Text>
           <TouchableOpacity
-            onPress={() => onQuantityChange(item.id, item.quantity + 1)}
+            onPress={() => onQuantityChange(item, productQuantity + 1)}
             style={styles.quantityButton}>
             <Text style={styles.quantityButtonText}>+</Text>
           </TouchableOpacity>
         </View>
         <TouchableOpacity
-          onPress={() => onRemove(item.id)}
+          onPress={() => onRemove()}
           style={styles.removeButton}>
           <Icon name="trash-can-outline" size={20} color="#FB6969" />
         </TouchableOpacity>
@@ -82,7 +78,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '500',
     marginBottom: 4,
-    color: '#1A1A1A'
+    color: '#1A1A1A',
   },
   itemDescription: {
     fontSize: 14,
@@ -98,7 +94,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
     marginRight: 8,
-    color: '#1A1A1A'
+    color: '#1A1A1A',
   },
   itemMrp: {
     fontSize: 14,

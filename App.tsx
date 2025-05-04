@@ -7,7 +7,7 @@ import {Provider} from 'react-redux';
 import {QueryClient, QueryClientProvider} from '@tanstack/react-query';
 import Icon from 'react-native-vector-icons/Ionicons';
 
-import {store, useAppSelector} from './src/redux/store';
+import {persistor, store, useAppSelector} from './src/redux/store';
 
 // Screens
 import HomePageScreen from './src/pages/HomePageScreen';
@@ -25,12 +25,17 @@ import Blog from './src/components/Blog';
 import HouseServiceScreen from './src/pages/homeServiceScreen';
 import UserProfileScreen from './src/components/UserProfileScreen/UserProfileScreen';
 import LoginScreen from './src/pages/authScreen/loginScreen';
+import {PersistGate} from 'redux-persist/integration/react';
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
 const queryClient = new QueryClient();
 
 function HomeStack() {
+  const reduxAuth = useAppSelector(state => state.auth);
+  const isLoggedIn = Boolean(reduxAuth.token);
+  console.log('reduxAuth', reduxAuth);
+
   return (
     <Stack.Navigator screenOptions={{headerShown: false}}>
       <Stack.Screen name="HomePage" component={HomePageScreen} />
@@ -45,8 +50,9 @@ function HomeStack() {
 }
 
 function AccountStack() {
-  const isLoggedIn = useAppSelector(state => state.auth.token);
-
+  const reduxAuth = useAppSelector(state => state.auth);
+  const isLoggedIn = Boolean(reduxAuth.token);
+  // console.log('reduxAuth', reduxAuth);
   return (
     <Stack.Navigator screenOptions={{headerShown: false}}>
       {isLoggedIn ? (
@@ -83,46 +89,49 @@ const tabScreenOptions = ({route}: {route: any}) => ({
 const App = () => {
   return (
     <Provider store={store}>
-      <QueryClientProvider client={queryClient}>
-        <NavigationContainer>
-          <SafeAreaView style={styles.safeArea}>
-            <StatusBar
-              barStyle="dark-content"
-              backgroundColor="transparent"
-              translucent
-            />
-            <Tab.Navigator
-              initialRouteName="HomeTab"
-              screenOptions={tabScreenOptions}>
-              <Tab.Screen
-                name="HomeTab"
-                component={HomeStack}
-                options={{title: 'Home'}}
+      <PersistGate loading={null} persistor={persistor}>
+        <QueryClientProvider client={queryClient}>
+          <NavigationContainer>
+            <SafeAreaView style={styles.safeArea}>
+              <StatusBar
+                barStyle="dark-content"
+                backgroundColor="transparent"
+                translucent
               />
-              <Tab.Screen
-                name="Pharmacy"
-                component={PharmacyScreen}
-                options={{title: 'Pharmacy'}}
-              />
-              <Tab.Screen
-                name="Blog"
-                component={Blog}
-                options={{title: 'Blog'}}
-              />
-              <Tab.Screen
-                name="Cart"
-                component={CartScreen}
-                options={{title: 'Cart'}}
-              />
-              <Tab.Screen
-                name="Account"
-                component={AccountStack}
-                options={{title: 'Account'}}
-              />
-            </Tab.Navigator>
-          </SafeAreaView>
-        </NavigationContainer>
-      </QueryClientProvider>
+              <Tab.Navigator
+                initialRouteName="HomeTab"
+                screenOptions={tabScreenOptions}>
+                <Tab.Screen
+                  name="HomeTab"
+                  component={HomeStack}
+                  options={{title: 'Home'}}
+                />
+                {/* <Tab.Screen
+                  name="Pharmacy"
+                  component={PharmacyScreen}
+                  options={{title: 'Pharmacy'}}
+                /> */}
+                <Tab.Screen
+                  name="Blog"
+                  component={Blog}
+                  options={{title: 'Blog'}}
+                />
+                <Tab.Screen
+                  name="Cart"
+                  component={CartScreen}
+                  options={{title: 'Cart'}}
+                />
+
+                <Tab.Screen
+                  name="Account"
+                  component={AccountStack}
+                  options={{title: 'Account'}}
+                />
+              </Tab.Navigator>
+            </SafeAreaView>
+          </NavigationContainer>
+        </QueryClientProvider>
+      </PersistGate>
     </Provider>
   );
 };

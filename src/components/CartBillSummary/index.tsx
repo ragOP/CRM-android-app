@@ -5,6 +5,7 @@ interface CartBillSummaryProps {
   itemTotal: number;
   platformFee: number;
   discount: number;
+  couponDiscount: number | string;
   shippingFee: number | string;
   totalAmount: number;
 }
@@ -14,26 +15,37 @@ const CartBillSummary: React.FC<CartBillSummaryProps> = ({
   platformFee,
   discount,
   shippingFee,
+  couponDiscount,
   totalAmount,
 }) => (
   <View style={styles.billContainer}>
     <Text style={styles.billTitle}>Bill Summary</Text>
     <View style={styles.billRow}>
       <Text style={styles.billLabel}>Item total (MRP)</Text>
-      <Text style={styles.billValue}>₹{itemTotal}</Text>
+      <Text style={styles.billValue}>₹{itemTotal || 0}</Text>
     </View>
     <View style={styles.billRow}>
       <Text style={styles.billLabel}>Platform fee</Text>
       <Text style={styles.billValue}>₹{platformFee}</Text>
     </View>
     <View style={styles.billRow}>
-      <Text style={[styles.billLabel, styles.discountValue]}>Total discount</Text>
-      <Text style={[styles.billValue, styles.discountValue]}>-₹{discount}</Text>
+      <Text style={[styles.billLabel, styles.discountValue]}>
+        Total discount
+      </Text>
+      <Text style={[styles.billValue, styles.discountValue]}>-₹{discount || 0}</Text>
     </View>
     <View style={styles.billRow}>
       <Text style={[styles.billLabel, styles.discountValue]}>Shipping fee</Text>
       <Text style={[styles.billLabel, styles.discountValue]}>
-        {typeof shippingFee === 'string' ? shippingFee : `₹${shippingFee}`}
+        {typeof shippingFee === 'string' ? shippingFee : `₹${shippingFee || 0}`}
+      </Text>
+    </View>
+    <View style={styles.billRow}>
+      <Text style={[styles.billLabel, styles.discountValue]}>
+        Coupon discount
+      </Text>
+      <Text style={[styles.billLabel, styles.discountValue]}>
+        {`₹${couponDiscount || 0}`}
       </Text>
     </View>
     <View style={styles.separator} />
@@ -57,7 +69,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
     marginBottom: 12,
-    color: '#1A1A1A'
+    color: '#1A1A1A',
   },
   billRow: {
     flexDirection: 'row',
@@ -70,7 +82,7 @@ const styles = StyleSheet.create({
   },
   billValue: {
     fontSize: 14,
-    color: '#1A1A1A'
+    color: '#1A1A1A',
   },
   discountValue: {
     color: '#297C00',
@@ -87,11 +99,11 @@ const styles = StyleSheet.create({
   totalLabel: {
     fontSize: 16,
     fontWeight: '500',
-    color: '#1A1A1A'
+    color: '#1A1A1A',
   },
   totalValue: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#1A1A1A'
+    color: '#1A1A1A',
   },
 });

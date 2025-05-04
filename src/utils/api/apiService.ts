@@ -1,6 +1,6 @@
-import axios, { AxiosRequestConfig, Method } from 'axios';
-import { getItem } from '../local_storage';
-import { BACKEND_URL } from '../url';
+import axios, {AxiosRequestConfig, Method} from 'axios';
+import {getItem} from '../local_storage';
+import {BACKEND_URL} from '../url';
 
 interface ApiServiceParams {
   endpoint: string;
@@ -32,7 +32,8 @@ export const apiService = async ({
   signal,
 }: ApiServiceParams): Promise<ApiServiceResponse> => {
   try {
-    const token = await getItem('token');
+    const userData = await getItem('userData');
+    const token = userData?.token;
 
     const requestObj: AxiosRequestConfig = {
       url: `${customUrl ? customUrl : BACKEND_URL}/${endpoint}`,
@@ -48,14 +49,14 @@ export const apiService = async ({
       requestObj.headers = {
         ...headers,
         'ngrok-skip-browser-warning': 'xyz',
-        ...(!removeToken ? { Authorization: `Bearer ${_token || token}` } : {}),
+        ...(!removeToken ? {Authorization: `Bearer ${_token || token}`} : {}),
       };
     }
 
-    const { data: res } = await axios(requestObj);
-    return { response: res };
+    const {data: res} = await axios(requestObj);
+    return {response: res};
   } catch (error: any) {
     console.error(error, 'backend endpoint error');
-    return { success: false, error: true, ...(error || {}) };
+    return {success: false, error: true, ...(error || {})};
   }
 };

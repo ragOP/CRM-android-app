@@ -1,5 +1,5 @@
 import React, {useState} from 'react';
-import {SafeAreaView, ScrollView, StyleSheet} from 'react-native';
+import {Alert, SafeAreaView, ScrollView, StyleSheet} from 'react-native';
 import CartHeader from '../../components/CartHeader';
 import CartItem from '../../components/CartItem';
 import CartBillSummary from '../../components/CartBillSummary';
@@ -7,178 +7,281 @@ import CartPayableSection from '../../components/CartPayableSection';
 import CartOfferSection from '../../components/CartOfferSection';
 import EmptyCart from '../../components/EmptyCart';
 import ProductGrid from '../../components/ProductGrid';
+import AddressDialog from './components/AddressDialog';
+import {getAddresses} from '../../apis/getAddresses';
+import {useMutation, useQuery, useQueryClient} from '@tanstack/react-query';
+import {useAppSelector} from '../../redux/store';
+import {fetchCart} from '../../apis/fetchCart';
+import {fetchProducts} from '../../apis/fetchProducts';
+import {isArrayWithValues} from '../../utils/array/isArrayWithValues';
+import {addCart} from '../../apis/addCart';
+import {useNavigation} from '@react-navigation/native';
+import CustomLoader from '../../components/Loaders/CustomLoader';
+import {placeOrder} from '../../apis/placeOrder';
 
 const CartScreen = () => {
-  const [cartItems, setCartItems] = useState([
-    {
-      id: '1',
-      title: 'FameMeds Paracetamol 500mg Tablets',
-      description: 'Fast Pain Relief & Fever Reduction',
-      price: 306,
-      mrp: 529,
-      discountPercentage: 42,
-      quantity: 2,
-      image: 'https://via.placeholder.com/100',
-    },
-    {
-      id: '2',
-      title: 'FameMeds Paracetamol 500mg Tablets',
-      description: 'Fast Pain Relief & Fever Reduction',
-      price: 306,
-      mrp: 529,
-      discountPercentage: 42,
-      quantity: 1,
-      image: 'https://via.placeholder.com/100',
-    },
-    {
-      id: '3',
-      title: 'FameMeds Paracetamol 500mg Tablets',
-      description: 'Fast Pain Relief & Fever Reduction',
-      price: 306,
-      mrp: 529,
-      discountPercentage: 42,
-      quantity: 1,
-      image: 'https://via.placeholder.com/100',
-    },
-  ]);
+  const queryClient = useQueryClient();
+  const navigation = useNavigation();
 
-  const [activeTab, setActiveTab] = useState('cart');
+  const reduxUser = useAppSelector(state => state.auth.user);
+  const reduxUserId = reduxUser?.id;
 
-  const products = [
-    {
-      id: '1',
-      image: require('../../assets/protein-jar.png'),
-      price: 259,
-      originalPrice: 599,
-      discount: '66%',
-      title: 'Tropeaka Lean Protein Salted',
-      subtitle: 'Icky Top Navigation With A Sear...',
-    },
-    {
-      id: '2',
-      image: require('../../assets/protein-jar.png'),
-      price: 299,
-      originalPrice: 699,
-      discount: '57%',
-      title: 'Tropeaka Vegan Protein Chocolate',
-      subtitle: 'Delicious and Nutritious',
-    },
-    {
-      id: '3',
-      image: require('../../assets/protein-jar.png'),
-      price: 349,
-      originalPrice: 799,
-      discount: '56%',
-      title: 'Tropeaka Superfood Protein Vanilla',
-      subtitle: 'Nutritious and Tasty',
-    },
-    {
-      id: '4',
-      image: require('../../assets/protein-jar.png'),
-      price: 349,
-      originalPrice: 799,
-      discount: '56%',
-      title: 'Tropeaka Superfood Protein Vanilla',
-      subtitle: 'Nutritious and Tasty',
-    },
-  ];
+  const [dialogVisible, setDialogVisible] = useState(false);
+  const [address, setCurrentAddress] = useState(null);
+  const [discountCoupon, setDiscountCoupon] = useState(null);
 
-  // Cart functions
-  const handleRemoveItem = (itemId: string) => {
-    setCartItems(cartItems.filter(item => item.id !== itemId));
+  const {data: addresses, isLoading: isAddressLoading} = useQuery({
+    queryKey: ['user_addresses'],
+    queryFn: async () => {
+      const apiResponse = await getAddresses({id: reduxUserId});
+
+      const data = apiResponse?.response?.data;
+      console.log('apiResponse >>>>', apiResponse, data);
+      setCurrentAddress(data?.[0] || null);
+      return data || [];
+    },
+  });
+  console.log(addresses, 'addresses');
+
+  const params = {
+    user_id: reduxUserId,
   };
 
-  const handleQuantityChange = (itemId: string, newQuantity: number) => {
-    setCartItems(
-      cartItems.map(item =>
-        item.id === itemId ? {...item, quantity: newQuantity} : item,
-      ),
+  const {data: cartData, isLoading: isCartDataLoading} = useQuery({
+    queryKey: ['cart_products'],
+    queryFn: () => fetchCart({params}),
+  });
+
+  const cartProductsItems = cartData?.items || [];
+
+  const {mutate: updateCart, isPending: isUpdatingCart} = useMutation({
+    mutationFn: updatedCart =>
+      addCart({
+        payload: updatedCart,
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({queryKey: ['cart_products']});
+    },
+  });
+
+  const {mutate: placeOrderMutation, isPending: isPlacingOrder} = useMutation({
+    mutationFn: payload => placeOrder({payload}),
+    onSuccess: data => {
+      if (data?.response?.success) {
+        Alert.alert(
+          'Order Placed',
+          'Your order has been placed successfully!',
+          [
+            {
+              text: 'Go to Home Page',
+              onPress: () => {
+                navigation.navigate('HomeTab');
+              },
+            },
+            {
+              text: 'Cancel',
+              onPress: () => {},
+            },
+          ],
+        );
+        queryClient.invalidateQueries({queryKey: ['cart_products']});
+      }
+    },
+    onError: error => {
+      console.error('Error placing order:', error);
+      Alert.alert(
+        'Error',
+        'Failed to place the order. Please try again later.',
+      );
+    },
+  });
+
+  const handleQuantityChange = (product: string, change: number) => {
+    const productId = product?._id;
+
+    const updatedItem = cartProductsItems?.find(
+      item => item.product._id === productId,
     );
+
+    if (updatedItem) {
+      updateCart({
+        user_id: reduxUserId,
+        product_id: productId,
+        quantity: change,
+      });
+    }
   };
 
   const handlePlaceOrder = () => {
-    console.log('Order placed!');
-    // Implementation for placing order
+    const payload = {
+      cartId: cartData?._id,
+      addressId: address?._id,
+      couponId: discountCoupon?.[0]?._id || null,
+    };
+    console.log('CALLED 111', payload);
+
+    if (!payload?.cartId || !payload.addressId) {
+      Alert.alert(
+        'Error',
+        'Please select a valid address and cart before placing an order.',
+      );
+      return;
+    }
+
+    console.log('CALLED', payload);
+    placeOrderMutation(payload);
   };
 
-  const handleProductPress = (productId: string) => {
-    console.log(`Product ${productId} pressed`);
-    // Navigate to product detail
-  };
-
-  const handleApplyCoupon = () => {
+  const handleApplyCoupon = coupon => {
+    setDiscountCoupon(coupon);
     console.log('Apply coupon pressed');
-    // Show coupon modal or navigate to coupon screen
   };
 
-  const handleChangeAddress = () => {
-    console.log('Change address pressed');
-    // Navigate to address selection screen
+  const onOpenAddressDialog = () => {
+    setDialogVisible(true);
+  };
+
+  const handleChangeAddress = address => {
+    setCurrentAddress(address);
+    setDialogVisible(false);
   };
 
   const handleShopNow = () => {
-    console.log('Shop now pressed');
-    // Navigate to products screen
+    navigation.navigate('HomeTab');
   };
 
-  // Calculate bill
-  const itemTotal = cartItems.reduce(
-    (sum, item) => sum + item.price * item.quantity,
+  const primaryAddress = addresses?.[0];
+  const deliverTo = `${primaryAddress?.name || ''}, ${
+    primaryAddress?.address || ''
+  }, ${primaryAddress?.city || ''}, ${primaryAddress?.state || ''}, ${
+    primaryAddress?.country || ''
+  }`;
+
+  const lastMinuteBuyProductsParams = {
+    is_best_seller: true,
+    page: 1,
+    per_page: 10,
+  };
+
+  const {
+    data: lastMinuteBuyProducts,
+    isLoading: isLastMinuteBuyProductsLoading,
+  } = useQuery({
+    queryKey: ['top_ordered_products'],
+    queryFn: async () => {
+      const apiResponse = await fetchProducts({
+        params: lastMinuteBuyProductsParams,
+      });
+      if (apiResponse?.response?.success) {
+        return apiResponse?.response?.data?.data;
+      }
+      return [];
+    },
+  });
+
+  const alternativeProductsParams = {
+    is_best_seller: true,
+    page: 1,
+    per_page: 10,
+  };
+
+  const {data: alternativeProducts, isLoading: isAlternativeProductsLoading} =
+    useQuery({
+      queryKey: ['top_ordered_products'],
+      queryFn: async () => {
+        const apiResponse = await fetchProducts({
+          params: alternativeProductsParams,
+        });
+        if (apiResponse?.response?.success) {
+          return apiResponse?.response?.data?.data;
+        }
+        return [];
+      },
+    });
+
+  const totalPrice = cartProductsItems.reduce(
+    (sum, item) => sum + item.product.price * item.quantity,
     0,
   );
-  const platformFee = 4;
-  const discount = 224;
-  const shippingFee = 'As per delivery address';
-  const totalAmount = itemTotal + platformFee - discount;
+
+  const discountedPrice = cartProductsItems.reduce(
+    (sum, item) => sum + item.product.discounted_price * item.quantity,
+    0,
+  );
 
   return (
-    <SafeAreaView style={styles.container}>
-      <ScrollView showsVerticalScrollIndicator={false}>
-        <CartHeader
-          deliverTo="Thane 1, Sector"
-          onChangePress={handleChangeAddress}
-        />
+    <>
+      <SafeAreaView style={styles.container}>
+        <ScrollView showsVerticalScrollIndicator={false}>
+          <CartHeader
+            deliverTo={deliverTo || ''}
+            onChangePress={onOpenAddressDialog}
+            isAddressLoading={isAddressLoading}
+          />
 
-        {cartItems.length > 0 ? (
-          <>
-            {/* Cart Items */}
-            {cartItems.map(item => (
+          {/* Cart Items */}
+          {isCartDataLoading ? (
+            <CustomLoader height={400} />
+          ) : isArrayWithValues(cartProductsItems) ? (
+            cartProductsItems.map(item => (
               <CartItem
                 key={item.id}
-                item={item}
-                onRemove={handleRemoveItem}
+                item={item?.product}
+                productQuantity={item?.quantity}
+                onRemove={() => handleQuantityChange(item?.product, 0)}
                 onQuantityChange={handleQuantityChange}
               />
-            ))}
+            ))
+          ) : (
+            <EmptyCart onShopNow={handleShopNow} />
+          )}
 
-            {/* Bill Summary */}
+          {/* Bill Summary */}
+          {isArrayWithValues(cartProductsItems) && (
             <CartBillSummary
-              itemTotal={itemTotal}
-              platformFee={platformFee}
-              discount={discount}
-              shippingFee={shippingFee}
-              totalAmount={totalAmount}
+              itemTotal={totalPrice || 0}
+              platformFee={0}
+              discount={totalPrice - discountedPrice}
+              shippingFee={0}
+              couponDiscount={0}
+              totalAmount={cartData?.total_price}
             />
+          )}
 
-            <CartOfferSection onApplyCoupon={handleApplyCoupon} />
+          {isArrayWithValues(cartProductsItems) && (
+            <CartOfferSection
+              onApplyCoupon={handleApplyCoupon}
+              discountCoupon={discountCoupon}
+              onRemoveCoupon={() => setDiscountCoupon(null)}
+            />
+          )}
 
-            {/* Payable Amount & Order Button */}
+          {/* Payable Amount & Order Button */}
+          {isArrayWithValues(cartProductsItems) && (
             <CartPayableSection
-              totalAmount={totalAmount}
+              totalAmount={cartData?.total_price}
               onPlaceOrder={handlePlaceOrder}
             />
+          )}
 
-            {/* Offers & Coupons */}
+          {/* Offers & Coupons */}
 
-            <ProductGrid title="Items you may have missed" data={products} />
+          <ProductGrid title="Last Minute Buys" data={lastMinuteBuyProducts} />
 
-            <ProductGrid title="Recently Viewed" data={products} />
-          </>
-        ) : (
-          <EmptyCart onShopNow={handleShopNow} />
-        )}
-      </ScrollView>
-    </SafeAreaView>
+          <ProductGrid
+            title="Alternative products"
+            data={alternativeProducts}
+          />
+        </ScrollView>
+      </SafeAreaView>
+
+      <AddressDialog
+        visible={dialogVisible}
+        addresses={addresses}
+        onClose={() => setDialogVisible(false)}
+        onSelect={handleChangeAddress}
+      />
+    </>
   );
 };
 

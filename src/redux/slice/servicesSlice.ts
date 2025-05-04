@@ -31,7 +31,6 @@ export const fetchReduxServices = createAsyncThunk<
 >('services/fetchServices', async (params = {}, {rejectWithValue}) => {
   try {
     const response = await apiService({endpoint: endpoints.service});
-    console.log('Services response:', response);
     return {data: response.response.data, params};
   } catch (error: any) {
     return rejectWithValue(error?.response?.data || 'Something went wrong');
