@@ -13,6 +13,7 @@ import {useNavigation, useRoute} from '@react-navigation/native';
 import {useAppSelector} from '../../redux/store';
 import {useMutation, useQueryClient} from '@tanstack/react-query';
 import {addCart} from '../../apis/addCart';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const ProductScreen = () => {
   const route = useRoute();
@@ -40,6 +41,27 @@ const ProductScreen = () => {
     },
   });
 
+  const onSaveProductLocallyAndLogin = async () => {
+    try {
+      const productData = {
+        product_id: product?._id,
+        quantity: 1,
+      };
+
+      // Save product data to AsyncStorage with a timestamp
+      const dataToSave = {
+        product: productData,
+        timestamp: Date.now(),
+      };
+
+      await AsyncStorage.setItem('tempProduct', JSON.stringify(dataToSave));
+
+      navigation.navigate('Account', {screen: 'LoginScreen'});
+    } catch (error) {
+      console.error('Error saving product locally:', error);
+    }
+  };
+
   const onAddToCart = () => {
     if (!reduxToken) {
       Alert.alert(
@@ -49,7 +71,7 @@ const ProductScreen = () => {
           {text: 'Cancel', style: 'cancel'},
           {
             text: 'Login',
-            onPress: () => navigation.navigate('Account'),
+            onPress: () => onSaveProductLocallyAndLogin(),
           },
         ],
       );

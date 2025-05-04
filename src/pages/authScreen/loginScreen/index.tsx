@@ -17,16 +17,65 @@ const logo = require('../../../assets/logo.png');
 import CustomInputField from '../../../components/InputFields';
 import CustomButton from '../../../components/Button';
 import {loginUser} from '../../../apis/login';
-import {useAppDispatch} from '../../../redux/store';
+import {useAppDispatch, useAppSelector} from '../../../redux/store';
 import {login} from '../../../redux/slice/authSlice';
+import {useMutation, useQueryClient} from '@tanstack/react-query';
+import {addCart} from '../../../apis/addCart';
 
 const LoginScreen = () => {
-  const navigation = useNavigation();
   const dispatch = useAppDispatch();
+  const navigation = useNavigation();
+  const queryClient = useQueryClient();
+
+  const reduxUserId = useAppSelector(state => state.auth.user?.id);
 
   const [isLoading, setIsLoading] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+
+  const {mutate: addToCartMutation, isPending} = useMutation({
+    mutationFn: ({payload}) =>
+      addCart({
+        payload: payload,
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({queryKey: ['cart_products']});
+      Alert.alert('Success', 'Product added to cart successfully!');
+    },
+    onError: () => {
+      Alert.alert('Error', 'Failed to add product to cart. Please try again.');
+    },
+  });
+
+  const checkAndAddProductAfterLogin = async ({userId}) => {
+    try {
+      console.log('userId', userId);
+      const savedData = await AsyncStorage.getItem('tempProduct');
+      if (savedData) {
+        const {product, timestamp} = JSON.parse(savedData);
+
+        // Check if the saved product is still valid (within 5 minutes)
+        const currentTime = Date.now();
+        const fiveMinutes = 5 * 60 * 1000;
+
+        if (currentTime - timestamp <= fiveMinutes) {
+          const payload = {
+            user_id: userId,
+            product_id: product.product_id,
+            quantity: product.quantity,
+          };
+
+          addToCartMutation({payload});
+
+          await AsyncStorage.removeItem('tempProduct');
+        } else {
+          await AsyncStorage.removeItem('tempProduct');
+        }
+      }
+    } catch (error) {
+      console.error('Error checking or adding product after login:', error);
+    }
+  };
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -74,7 +123,20 @@ const LoginScreen = () => {
 
         Alert.alert('Success', 'Login successful');
 
-        navigation.navigate('UserProfileScreen');
+        const savedData = await AsyncStorage.getItem('tempProduct');
+
+        const {product, timestamp} = JSON.parse(savedData);
+
+        if (product) {
+          const currentTime = Date.now();
+          const fiveMinutes = 5 * 60 * 1000;
+          if (currentTime - timestamp <= fiveMinutes) {
+            checkAndAddProductAfterLogin({userId: userData?.id});
+            navigation.navigate('CartScreen');
+          }
+        } else {
+          navigation.navigate('UserProfileScreen');
+        }
       } else {
         Alert.alert('Error', response?.message || 'Login failed');
       }
