@@ -7,7 +7,7 @@ import CartPayableSection from '../../components/CartPayableSection';
 import CartOfferSection from '../../components/CartOfferSection';
 import EmptyCart from '../../components/EmptyCart';
 import ProductGrid from '../../components/ProductGrid';
-import AddressDialog from './components/AddressDialog';
+import AddressDialog, {Address} from './components/AddressDialog';
 import {getAddresses} from '../../apis/getAddresses';
 import {useMutation, useQuery, useQueryClient} from '@tanstack/react-query';
 import {useAppSelector} from '../../redux/store';
@@ -18,6 +18,7 @@ import {addCart} from '../../apis/addCart';
 import {useNavigation} from '@react-navigation/native';
 import CustomLoader from '../../components/Loaders/CustomLoader';
 import {placeOrder} from '../../apis/placeOrder';
+import {calculateDiscount} from '../../utils/discount/calculateDiscount';
 
 const CartScreen = () => {
   const queryClient = useQueryClient();
@@ -27,7 +28,7 @@ const CartScreen = () => {
   const reduxUserId = reduxUser?.id;
 
   const [dialogVisible, setDialogVisible] = useState(false);
-  const [address, setCurrentAddress] = useState(null);
+  const [currentAddress, setCurrentAddress] = useState<Address | null>(null);
   const [discountCoupon, setDiscountCoupon] = useState(null);
 
   const {data: addresses, isLoading: isAddressLoading} = useQuery({
@@ -115,7 +116,7 @@ const CartScreen = () => {
   const handlePlaceOrder = () => {
     const payload = {
       cartId: cartData?._id,
-      addressId: address?._id,
+      addressId: currentAddress?._id,
       couponId: discountCoupon?.[0]?._id || null,
     };
     console.log('CALLED 111', payload);
@@ -150,11 +151,11 @@ const CartScreen = () => {
     navigation.navigate('HomeTab');
   };
 
-  const primaryAddress = addresses?.[0];
+  const primaryAddress = currentAddress;
   const deliverTo = `${primaryAddress?.name || ''}, ${
     primaryAddress?.address || ''
   }, ${primaryAddress?.city || ''}, ${primaryAddress?.state || ''}, ${
-    primaryAddress?.country || ''
+    primaryAddress?.pincode
   }`;
 
   const lastMinuteBuyProductsParams = {
@@ -209,6 +210,13 @@ const CartScreen = () => {
     0,
   );
 
+  const discountedPriceAfterSubstracting = totalPrice - discountedPrice;
+  const couponDiscoountPrice = discountCoupon
+    ? calculateDiscount(cartData?.total_price, discountCoupon)
+    : 0;
+
+  const finalPrice = cartData?.total_price - couponDiscoountPrice;
+
   return (
     <>
       <SafeAreaView style={styles.container}>
@@ -241,10 +249,10 @@ const CartScreen = () => {
             <CartBillSummary
               itemTotal={totalPrice || 0}
               platformFee={0}
-              discount={totalPrice - discountedPrice}
+              discount={discountedPriceAfterSubstracting}
               shippingFee={0}
-              couponDiscount={0}
-              totalAmount={cartData?.total_price}
+              couponDiscount={couponDiscoountPrice}
+              totalAmount={finalPrice}
             />
           )}
 
@@ -259,7 +267,7 @@ const CartScreen = () => {
           {/* Payable Amount & Order Button */}
           {isArrayWithValues(cartProductsItems) && (
             <CartPayableSection
-              totalAmount={cartData?.total_price}
+              totalAmount={finalPrice}
               onPlaceOrder={handlePlaceOrder}
             />
           )}
@@ -280,6 +288,7 @@ const CartScreen = () => {
         addresses={addresses}
         onClose={() => setDialogVisible(false)}
         onSelect={handleChangeAddress}
+        currentAddress={currentAddress}
       />
     </>
   );

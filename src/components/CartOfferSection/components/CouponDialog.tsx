@@ -15,19 +15,19 @@ import dayjs from 'dayjs';
 import {useQuery} from '@tanstack/react-query';
 import {getAllCoupons} from '../../../apis/getAllCoupons';
 
-interface Coupon {
+export type Coupon = {
   code: string;
   discountType: 'fixed' | 'percentage';
   discountValue: number;
   maxDiscount?: number;
   description?: string;
   endDate: string;
-}
+};
 
 interface CouponDialogProps {
   visible: boolean;
   onClose: () => void;
-  appliedCoupons: Coupon[];
+  appliedCoupons: Coupon;
   onApplyCoupon: (coupons: Coupon[]) => void;
   onRemoveCoupon: () => void;
 }
@@ -81,24 +81,24 @@ const CouponDialog: React.FC<CouponDialogProps> = ({
           <View style={styles.content}>
             <ScrollView contentContainerStyle={styles.scrollContent}>
               {/* Applied Coupon */}
-              {appliedCoupons.length > 0 && (
+              {appliedCoupons && (
                 <View style={styles.appliedSection}>
                   <Text style={styles.appliedTitle}>Applied Coupon</Text>
                   <View style={styles.appliedCoupon}>
                     <View>
                       <Text style={styles.couponCode}>
-                        {appliedCoupons[0].code}
+                        {appliedCoupons.code}
                       </Text>
                       <Text style={styles.couponDescription}>
-                        {appliedCoupons[0].description ||
+                        {appliedCoupons.description ||
                           `Get ${
-                            appliedCoupons[0].discountType === 'percentage'
-                              ? `${appliedCoupons[0].discountValue}% off${
-                                  appliedCoupons[0].maxDiscount
-                                    ? `, up to ₹${appliedCoupons[0].maxDiscount}`
+                            appliedCoupons.discountType === 'percentage'
+                              ? `${appliedCoupons.discountValue}% off${
+                                  appliedCoupons.maxDiscount
+                                    ? `, up to ₹${appliedCoupons.maxDiscount}`
                                     : ''
                                 }`
-                              : `₹${appliedCoupons[0].discountValue} off`
+                              : `₹${appliedCoupons.discountValue} off`
                           }`}
                       </Text>
                     </View>
@@ -121,8 +121,8 @@ const CouponDialog: React.FC<CouponDialogProps> = ({
                     key={item.code}
                     style={[
                       styles.couponCard,
-                      appliedCoupons.length > 0 &&
-                        appliedCoupons[0].code !== item.code && {
+                      appliedCoupons &&
+                        appliedCoupons.code !== item.code && {
                           opacity: 0.5,
                         },
                     ]}>
@@ -148,8 +148,7 @@ const CouponDialog: React.FC<CouponDialogProps> = ({
                       style={styles.applyButton}
                       onPress={() => handleApplyCoupon(item.code)}
                       disabled={
-                        appliedCoupons.length > 0 &&
-                        appliedCoupons[0].code !== item.code
+                        appliedCoupons && appliedCoupons.code !== item.code
                       }>
                       <Text style={styles.applyButtonText}>Apply</Text>
                     </TouchableOpacity>

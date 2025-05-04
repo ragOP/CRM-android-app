@@ -15,9 +15,9 @@ const CartPayableSection = ({
       <Text style={styles.payableLabel}>Payable Amount</Text>
       <View style={styles.payableRow}>
         <Text style={styles.payableAmount}>₹{totalAmount}</Text>
-        <View style={{alignItems: 'center', justifyContent: 'center'}}>
+        {/* <View style={{alignItems: 'center', justifyContent: 'center'}}>
           <Icon name="information-outline" size={18} color="#4D4D4D" />
-        </View>
+        </View> */}
       </View>
     </View>
     <TouchableOpacity style={styles.placeOrderButton} onPress={onPlaceOrder}>

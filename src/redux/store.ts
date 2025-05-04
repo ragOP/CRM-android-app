@@ -10,19 +10,22 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const persistConfig = {
   key: 'root',
+  keyPrefix: '',
   storage: AsyncStorage,
-  whitelist: ['auth'],
+  whitelist: ['auth'], // Persist only the auth slice
 };
 
 const rootReducer = combineReducers({
   products: productSlice,
   category: categorySlice,
   services: servicesSlice,
-  auth: persistReducer(persistConfig, authSlice),
+  auth: authSlice,
 });
 
+const persistedReducer = persistReducer(persistConfig, rootReducer);
+
 export const store = configureStore({
-  reducer: rootReducer,
+  reducer: persistedReducer,
   middleware: getDefaultMiddleware =>
     getDefaultMiddleware({
       serializableCheck: false,
@@ -35,5 +38,6 @@ export const persistor = persistStore(store);
 export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;
 
+// Custom hooks for dispatch and selector
 export const useAppDispatch: () => AppDispatch = useDispatch;
 export const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;

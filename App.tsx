@@ -26,12 +26,14 @@ import HouseServiceScreen from './src/pages/homeServiceScreen';
 import UserProfileScreen from './src/components/UserProfileScreen/UserProfileScreen';
 import LoginScreen from './src/pages/authScreen/loginScreen';
 import {PersistGate} from 'redux-persist/integration/react';
+import ViewOrdersScreen from './src/components/ViewOrderScreen/ViewOrderScreen';
+import LoginValidation from './src/components/Validation/LoginValidation';
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
 const queryClient = new QueryClient();
 
-function HomeStack() {
+const HomeStack = () => {
   const reduxAuth = useAppSelector(state => state.auth);
   const isLoggedIn = Boolean(reduxAuth.token);
   console.log('reduxAuth', reduxAuth);
@@ -47,9 +49,9 @@ function HomeStack() {
       <Stack.Screen name="ProductScreen" component={ProductScreen} />
     </Stack.Navigator>
   );
-}
+};
 
-function AccountStack() {
+const AccountStack = () => {
   const reduxAuth = useAppSelector(state => state.auth);
   const isLoggedIn = Boolean(reduxAuth.token);
   // console.log('reduxAuth', reduxAuth);
@@ -63,9 +65,25 @@ function AccountStack() {
           <Stack.Screen name="RegisterScreen" component={RegisterScreen} />
         </>
       )}
+      <Stack.Screen name="ViewOrderScreen" component={ViewOrdersScreen} />
     </Stack.Navigator>
   );
-}
+};
+
+const CartStack = () => {
+  const reduxAuth = useAppSelector(state => state.auth);
+  const isLoggedIn = Boolean(reduxAuth.token);
+
+  return (
+    <Stack.Navigator screenOptions={{headerShown: false}}>
+      {isLoggedIn ? (
+        <Stack.Screen name="CartScreen" component={CartScreen} />
+      ) : (
+        <Stack.Screen name="LoginValidation" component={LoginValidation} />
+      )}
+    </Stack.Navigator>
+  );
+};
 
 const tabScreenOptions = ({route}: {route: any}) => ({
   headerShown: false,
@@ -118,7 +136,7 @@ const App = () => {
                 />
                 <Tab.Screen
                   name="Cart"
-                  component={CartScreen}
+                  component={CartStack}
                   options={{title: 'Cart'}}
                 />
 

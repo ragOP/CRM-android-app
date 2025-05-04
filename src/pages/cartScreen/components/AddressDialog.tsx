@@ -54,6 +54,7 @@ export interface AddressDialogProps {
   addresses: Address[];
   onClose: () => void;
   onSelect: (addr: Address) => void;
+  currentAddress: Address | null;
 }
 
 const AddressDialog: React.FC<AddressDialogProps> = ({
@@ -61,6 +62,7 @@ const AddressDialog: React.FC<AddressDialogProps> = ({
   addresses = [],
   onClose,
   onSelect,
+  currentAddress,
 }) => {
   const queryClient = useQueryClient();
 
@@ -197,40 +199,43 @@ const AddressDialog: React.FC<AddressDialogProps> = ({
     ]);
   };
 
-  const renderItem = ({item}: {item: Address}) => (
-    <TouchableOpacity
-      style={styles.card}
-      onPress={() => {
-        onSelect(item);
-        onClose();
-      }}
-      activeOpacity={0.8}>
-      <View style={styles.cardContent}>
-        <Text style={styles.name}>
-          {item.name} <Text style={styles.type}>({item.addressType})</Text>
-        </Text>
-        <Text style={styles.line}>
-          {item.address}, {item.locality}
-        </Text>
-        <Text style={styles.line}>
-          {item.city}, {item.state} - {item.pincode}
-        </Text>
-        <Text style={styles.line}>📞 {item.mobile}</Text>
-      </View>
-      <View style={styles.actions}>
-        <TouchableOpacity
-          onPress={() => startEdit(item)}
-          style={styles.actionButton}>
-          <Icon name="pencil" size={20} color="#007AFF" />
-        </TouchableOpacity>
-        <TouchableOpacity
-          onPress={() => confirmDelete(item._id)}
-          style={styles.actionButton}>
-          <Icon name="trash" size={20} color="#FF3B30" />
-        </TouchableOpacity>
-      </View>
-    </TouchableOpacity>
-  );
+  const renderItem = ({item}: {item: Address}) => {
+    const isSelected = currentAddress?._id === item?._id;
+    return (
+      <TouchableOpacity
+        style={[styles.card, isSelected && styles.selectedCard]}
+        onPress={() => {
+          onSelect(item);
+          onClose();
+        }}
+        activeOpacity={0.6}>
+        <View style={styles.cardContent}>
+          <Text style={styles.name}>
+            {item.name} <Text style={styles.type}>({item.addressType})</Text>
+          </Text>
+          <Text style={styles.line}>
+            {item.address}, {item.locality}
+          </Text>
+          <Text style={styles.line}>
+            {item.city}, {item.state} - {item.pincode}
+          </Text>
+          <Text style={styles.line}>📞 {item.mobile}</Text>
+        </View>
+        <View style={styles.actions}>
+          <TouchableOpacity
+            onPress={() => startEdit(item)}
+            style={styles.actionButton}>
+            <Icon name="pencil" size={20} color="#007AFF" />
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => confirmDelete(item._id)}
+            style={styles.actionButton}>
+            <Icon name="trash" size={20} color="#FF3B30" />
+          </TouchableOpacity>
+        </View>
+      </TouchableOpacity>
+    );
+  };
 
   useEffect(() => {
     if (!showForm) {
@@ -475,6 +480,11 @@ const styles = StyleSheet.create({
     borderTopColor: '#ececec',
   },
   cancelBtn: {marginRight: 12},
+  selectedCard: {
+    borderWidth: 2,
+    borderColor: '#007AFF',
+    backgroundColor: '#E6F0FF',
+  },
   cancelTxt: {
     color: '#007AFF',
     fontSize: 16,

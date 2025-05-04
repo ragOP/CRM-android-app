@@ -1,5 +1,4 @@
-import {View, Text, TouchableOpacity, StyleSheet} from 'react-native';
-import DottedHorizontalRule from '../DottedHorizontalRule';
+import {View, Text, StyleSheet} from 'react-native';
 
 interface CartBillSummaryProps {
   itemTotal: number;
@@ -10,14 +9,14 @@ interface CartBillSummaryProps {
   totalAmount: number;
 }
 
-const CartBillSummary: React.FC<CartBillSummaryProps> = ({
+const CartBillSummary = ({
   itemTotal,
   platformFee,
   discount,
   shippingFee,
   couponDiscount,
   totalAmount,
-}) => (
+}: CartBillSummaryProps) => (
   <View style={styles.billContainer}>
     <Text style={styles.billTitle}>Bill Summary</Text>
     <View style={styles.billRow}>
@@ -32,7 +31,9 @@ const CartBillSummary: React.FC<CartBillSummaryProps> = ({
       <Text style={[styles.billLabel, styles.discountValue]}>
         Total discount
       </Text>
-      <Text style={[styles.billValue, styles.discountValue]}>-₹{discount || 0}</Text>
+      <Text style={[styles.billValue, styles.discountValue]}>
+        -₹{discount || 0}
+      </Text>
     </View>
     <View style={styles.billRow}>
       <Text style={[styles.billLabel, styles.discountValue]}>Shipping fee</Text>
