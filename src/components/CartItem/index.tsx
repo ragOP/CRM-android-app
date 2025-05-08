@@ -1,6 +1,8 @@
 import {View, Text, TouchableOpacity, StyleSheet, Image} from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import {calculateDiscountPercentage} from '../../utils/percentage/calculateDiscountPercentage';
+import {getDiscountBasedOnRole} from '../../utils/products/getDiscountBasedOnRole';
+import {useAppSelector} from '../../redux/store';
 
 interface CartItemProps {
   item: any;
@@ -14,45 +16,59 @@ const CartItem: React.FC<CartItemProps> = ({
   productQuantity,
   onRemove,
   onQuantityChange,
-}) => (
-  <View style={styles.cartItemContainer}>
-    <Image source={{uri: item.images?.[0]}} style={styles.itemImage} />
-    <View style={styles.itemDetails}>
-      <Text style={styles.itemTitle}>{item?.name}</Text>
-      <Text style={styles.itemDescription}>{item.small_description}</Text>
-      <View style={styles.priceContainer}>
-        <Text style={styles.itemPrice}>₹{item.discounted_price}</Text>
-        <Text style={styles.itemMrp}>₹{item.price}</Text>
-        <Text style={styles.itemDiscount}>
-          {calculateDiscountPercentage(item.price, item.discounted_price)}% off
-        </Text>
-      </View>
+}) => {
+  const reduxAuth = useAppSelector(state => state.auth);
+  const reduxUser = reduxAuth.user;
+  const reduxUserRole = reduxUser?.role || 'user';
 
-      <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
-        <View style={styles.quantityContainer}>
+  const discountPrice = getDiscountBasedOnRole({
+    role: reduxUserRole,
+    discounted_price: item.discounted_price,
+    original_price: item.price,
+    salesperson_discounted_price: item.salesperson_discounted_price,
+    dnd_discounted_price: item.dnd_discounted_price,
+  });
+
+  return (
+    <View style={styles.cartItemContainer}>
+      <Image source={{uri: item.images?.[0]}} style={styles.itemImage} />
+      <View style={styles.itemDetails}>
+        <Text style={styles.itemTitle}>{item?.name}</Text>
+        <Text style={styles.itemDescription}>{item.small_description}</Text>
+        <View style={styles.priceContainer}>
+          <Text style={styles.itemPrice}>₹{discountPrice}</Text>
+          <Text style={styles.itemMrp}>₹{item.price}</Text>
+          <Text style={styles.itemDiscount}>
+            {calculateDiscountPercentage(item.price, discountPrice)}% off
+          </Text>
+        </View>
+
+        <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
+          <View style={styles.quantityContainer}>
+            <TouchableOpacity
+              onPress={() =>
+                onQuantityChange(item, Math.max(1, productQuantity - 1))
+              }
+              style={styles.quantityButton}>
+              <Text style={styles.quantityButtonText}>-</Text>
+            </TouchableOpacity>
+            <Text style={styles.quantityText}>{productQuantity}</Text>
+            <TouchableOpacity
+              onPress={() => onQuantityChange(item, productQuantity + 1)}
+              style={styles.quantityButton}>
+              <Text style={styles.quantityButtonText}>+</Text>
+            </TouchableOpacity>
+          </View>
           <TouchableOpacity
-            onPress={() =>
-              onQuantityChange(item, Math.max(1, productQuantity - 1))
-            }
-            style={styles.quantityButton}>
-            <Text style={styles.quantityButtonText}>-</Text>
-          </TouchableOpacity>
-          <Text style={styles.quantityText}>{productQuantity}</Text>
-          <TouchableOpacity
-            onPress={() => onQuantityChange(item, productQuantity + 1)}
-            style={styles.quantityButton}>
-            <Text style={styles.quantityButtonText}>+</Text>
+            onPress={() => onRemove()}
+            style={styles.removeButton}>
+            <Icon name="trash-can-outline" size={20} color="#FB6969" />
           </TouchableOpacity>
         </View>
-        <TouchableOpacity
-          onPress={() => onRemove()}
-          style={styles.removeButton}>
-          <Icon name="trash-can-outline" size={20} color="#FB6969" />
-        </TouchableOpacity>
       </View>
     </View>
-  </View>
-);
+  );
+};
 
 export default CartItem;
 

@@ -11,7 +11,6 @@ export const fetchCart = async ({params}: FetchCartParams) => {
       endpoint: endpoints.cart,
       params,
     });
-console.log('apiResponse', apiResponse);
     if (apiResponse?.response?.success) {
       return apiResponse?.response?.data?.cart;
     }

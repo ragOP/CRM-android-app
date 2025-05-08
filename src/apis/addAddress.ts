@@ -7,7 +7,6 @@ type AddAddressParams = {
 
 export const addAddress = async ({payload}: AddAddressParams) => {
   try {
-    console.log('Payload:', payload);
     const apiResponse = await apiService({
       endpoint: endpoints.address,
       method: 'POST',

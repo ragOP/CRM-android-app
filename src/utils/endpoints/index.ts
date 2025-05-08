@@ -18,4 +18,6 @@ export const endpoints = {
   service_page: 'api/service-page',
   header: 'api/header',
   internal_page: 'api/internal',
+  payment: 'api/payment/create-session',
+  cashfreeOrderDetails: 'api/payment/details',
 };

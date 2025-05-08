@@ -2,8 +2,8 @@ import React from 'react';
 import {View, Text, TouchableOpacity, StyleSheet} from 'react-native';
 
 interface LaundryServiceCardProps {
-  service_id: string;
-  serviceType: string;
+  productId: string;
+  productType: string;
   price: number;
   originalPrice: number;
   description: string;
@@ -14,8 +14,8 @@ interface LaundryServiceCardProps {
 }
 
 const LaundryServiceCard: React.FC<LaundryServiceCardProps> = ({
-  service_id,
-  serviceType,
+  productId,
+  productType,
   price,
   originalPrice,
   description,
@@ -24,51 +24,50 @@ const LaundryServiceCard: React.FC<LaundryServiceCardProps> = ({
   handleAddToCart,
   isPending,
 }) => {
-  console.log('features', features);
-  console.log('Service Index:', serviceIndex);
   return (
     <View style={styles.card}>
-      <Text style={styles.serviceType}>{serviceType}</Text>
-      <View style={styles.priceContainer}>
-        <Text style={styles.priceSymbol}>₹</Text>
-        <Text style={styles.price}>{price}</Text>
-        <Text style={styles.priceDivider}>/</Text>
-        <Text style={styles.originalPrice}>{originalPrice}</Text>
-      </View>
-      <Text style={styles.description}>{description}</Text>
+      <View>
+        <Text style={styles.productType}>{productType}</Text>
+        <View style={styles.priceContainer}>
+          <Text style={styles.priceSymbol}>₹</Text>
+          <Text style={styles.originalPrice}>{originalPrice}</Text>
+          <Text style={styles.priceDivider}>/</Text>
+          <Text style={styles.originalPrice}>{price}</Text>
+        </View>
+        <Text style={styles.description}>{description}</Text>
 
-      <Text style={styles.serviceTitle}>{serviceType}</Text>
+        <Text style={styles.serviceTitle}>{productType}</Text>
 
-      <View style={styles.featuresContainer}>
-        {features.map(
-          (feature, index) =>
-            index !== 0 && (
-              <View key={index} style={styles.featureRow}>
-                <View style={styles.checkmarkContainer}>
-                  <Text style={styles.checkmark}>✔</Text>
+        <View style={styles.featuresContainer}>
+          {features.map(
+            (feature, index) =>
+              index !== 0 && (
+                <View key={index} style={styles.featureRow}>
+                  <View style={styles.checkmarkContainer}>
+                    <Text style={styles.checkmark}>✔</Text>
+                  </View>
+                  {serviceIndex === 0 ? (
+                    feature.split('\n').map((subFeature, subIndex) => (
+                      <>
+                        <Text key={subIndex} style={styles.featureText}>
+                          {subFeature}
+                        </Text>
+                        <View style={{height: 50}}></View>
+                      </>
+                    ))
+                  ) : (
+                    <Text style={styles.featureText}>{feature}</Text>
+                  )}
                 </View>
-                {serviceIndex === 0 ? (
-                  feature.split('\n').map((subFeature, subIndex) => (
-                    <>
-                      <Text key={subIndex} style={styles.featureText}>
-                        {subFeature}
-                      </Text>
-                      <View style={{height: 50}}></View>
-                    </>
-                  ))
-                ) : (
-                  <Text style={styles.featureText}>{feature}</Text>
-                )}
-              </View>
-            ),
-        )}
+              ),
+          )}
+        </View>
       </View>
 
       <TouchableOpacity
         style={styles.addButton}
         onPress={() => {
-          console.log('Service ID:', service_id);
-          handleAddToCart(service_id);
+          handleAddToCart(productId);
         }}>
         <Text style={styles.addButtonText}>
           {isPending ? 'Loading....' : 'Add to Cart'}
@@ -91,8 +90,10 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 2,
+    display: 'flex',
+    justifyContent: 'space-between',
   },
-  serviceType: {
+  productType: {
     fontSize: 20,
     fontWeight: 'bold',
     marginBottom: 6,
@@ -103,8 +104,7 @@ const styles = StyleSheet.create({
     marginBottom: 6,
   },
   priceSymbol: {
-    fontSize: 24,
-    fontWeight: 'bold',
+    fontSize: 20,
   },
   price: {
     fontSize: 24,
@@ -152,7 +152,6 @@ const styles = StyleSheet.create({
     borderRadius: 25,
     padding: 12,
     alignItems: 'center',
-    marginTop: 10,
   },
   addButtonText: {
     color: 'white',

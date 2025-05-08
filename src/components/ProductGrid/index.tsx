@@ -6,26 +6,35 @@ import {
   StyleSheet,
   TouchableOpacity,
   Image,
+  ActivityIndicator,
 } from 'react-native';
 import ProductCard from '../ProductCard';
 import {useNavigation} from '@react-navigation/native';
+import {getDiscountBasedOnRole} from '../../utils/products/getDiscountBasedOnRole';
+import { useAppSelector } from '../../redux/store';
 
-interface ProductGridProps {
+type ProductGridProps = {
   rows?: number;
   title: string;
   highlight?: {[key: string]: boolean};
   data: any;
   isCategory?: boolean;
-}
+  isLoading?: boolean;
+};
 
-const ProductGrid: React.FC<ProductGridProps> = ({
+const ProductGrid = ({
   rows = 2,
   title = '',
   highlight = {},
   data,
   isCategory = false,
-}) => {
+  isLoading = false,
+}: ProductGridProps) => {
   const navigation = useNavigation();
+
+  const reduxAuth = useAppSelector((state) => state.auth);
+  const reduxUser = reduxAuth.user;
+  const reduxUserRole = reduxUser?.role || 'user';
 
   const renderCategoryCard = ({item}: {item: any}) => (
     <View style={styles.card}>
@@ -40,6 +49,14 @@ const ProductGrid: React.FC<ProductGridProps> = ({
       <Text style={styles.discount}>{item.discount}</Text>
     </View>
   );
+
+  if (isLoading) {
+    return (
+      <View style={{padding: 16}}>
+        <ActivityIndicator size="large" color="#00008B" />
+      </View>
+    );
+  }
 
   return (
     <View style={{padding: 16}}>
@@ -76,16 +93,26 @@ const ProductGrid: React.FC<ProductGridProps> = ({
       ) : (
         <FlatList
           data={data}
-          renderItem={({item}) => (
-            <ProductCard
-              data={item}
-              image={item?.banner_image}
-              price={item?.discounted_price}
-              originalPrice={item?.price}
-              title={item?.name}
-              subtitle={item?.small_description}
-            />
-          )}
+          renderItem={({item}) => {
+            const discountPrice = getDiscountBasedOnRole({
+              role: reduxUserRole,
+              discounted_price: item.discounted_price,
+              original_price: item.price,
+              salesperson_discounted_price: item.salesperson_discounted_price,
+              dnd_discounted_price: item.dnd_discounted_price,
+            });
+
+            return (
+              <ProductCard
+                data={item}
+                image={item?.banner_image}
+                price={discountPrice}
+                originalPrice={item?.price}
+                title={item?.name}
+                subtitle={item?.small_description}
+              />
+            );
+          }}
           keyExtractor={item => item.id}
           numColumns={rows}
           columnWrapperStyle={{justifyContent: 'space-between'}}

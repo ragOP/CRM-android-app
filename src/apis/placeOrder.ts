@@ -7,12 +7,13 @@ type PlaceOrderParams = {
 
 export const placeOrder = async ({payload}: PlaceOrderParams) => {
   try {
+    console.log('payload', payload);
     const apiResponse = await apiService({
       endpoint: endpoints.order,
       method: 'POST',
       data: payload,
     });
-
+    console.log('API Response:', apiResponse);
     return apiResponse;
   } catch (error) {
     console.error('error');

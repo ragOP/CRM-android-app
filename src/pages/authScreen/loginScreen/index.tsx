@@ -49,7 +49,6 @@ const LoginScreen = () => {
 
   const checkAndAddProductAfterLogin = async ({userId}) => {
     try {
-      console.log('userId', userId);
       const savedData = await AsyncStorage.getItem('tempProduct');
       if (savedData) {
         const {product, timestamp} = JSON.parse(savedData);
@@ -90,10 +89,8 @@ const LoginScreen = () => {
         email: email,
         password: password,
       };
-      console.log('Payload:', payload);
       const apiResponse = await loginUser({payload});
       const response = apiResponse?.response;
-      console.log('API Response:', apiResponse, response);
 
       if (response?.success) {
         const userData = response?.data;
@@ -111,6 +108,7 @@ const LoginScreen = () => {
               id: userData?.id,
               name: userData?.name,
               email: userData?.email,
+              role: userData?.role,
             },
           }),
         );
@@ -122,26 +120,29 @@ const LoginScreen = () => {
         );
 
         Alert.alert('Success', 'Login successful');
-
         const savedData = await AsyncStorage.getItem('tempProduct');
+        if (savedData) {
+          console.log('SAVED DATA', savedData);
 
-        const {product, timestamp} = JSON.parse(savedData);
+          const {product, timestamp} = JSON.parse(savedData);
 
-        if (product) {
-          const currentTime = Date.now();
-          const fiveMinutes = 5 * 60 * 1000;
-          if (currentTime - timestamp <= fiveMinutes) {
-            checkAndAddProductAfterLogin({userId: userData?.id});
-            navigation.navigate('CartScreen');
+          console.log('PRODUCT', product);
+          if (product) {
+            const currentTime = Date.now();
+            const fiveMinutes = 5 * 60 * 1000;
+            if (currentTime - timestamp <= fiveMinutes) {
+              await checkAndAddProductAfterLogin({userId: userData?.id});
+              navigation.navigate('CartScreen');
+            }
+          } else {
+            navigation.navigate('AccountStack', {screen: 'UserProfileScreen'});
           }
-        } else {
-          navigation.navigate('UserProfileScreen');
         }
       } else {
-        Alert.alert('Error', response?.message || 'Login failed');
+        navigation.navigate('AccountStack', {screen: 'UserProfileScreen'});
       }
     } catch (error: any) {
-      console.error(error);
+      console.log(error);
       Alert.alert(
         'Error',
         error?.response?.data?.message || 'Something went wrong',

@@ -10,6 +10,7 @@ import {fetchCategories} from '../../apis/fetchCategories';
 import {useAppDispatch, useAppSelector} from '../../redux/store';
 import {selectServices} from '../../redux/slice/servicesSlice';
 import {useRoute} from '@react-navigation/native';
+import {getDiscountBasedOnRole} from '../../utils/products/getDiscountBasedOnRole';
 
 export type FilterType = {
   category_id: string[];
@@ -22,9 +23,13 @@ export type FilterType = {
 const UniversalSearchScreen: React.FC = () => {
   const dispatch = useAppDispatch();
   const route = useRoute();
-  
+
   const {service} = route.params || {};
   const reduxServices = useAppSelector(selectServices);
+
+  const reduxAuth = useAppSelector(state => state.auth);
+  const reduxUser = reduxAuth.user;
+  const reduxUserRole = reduxUser?.role || 'user';
 
   const [filters, setFilters] = useState<FilterType>({
     page: 1,
@@ -105,8 +110,6 @@ const UniversalSearchScreen: React.FC = () => {
     }
   }, [categoryId]);
 
-  console.log('>>>', categoriesList, allProducts);
-
   // useEffect(() => {
   //   if (!isArrayWithValues(reduxServices)) {
   //     dispatch(fetchReduxServices({}));
@@ -145,16 +148,25 @@ const UniversalSearchScreen: React.FC = () => {
       ) : isArrayWithValues(allProducts) ? (
         <FlatList
           data={allProducts}
-          renderItem={({item}) => (
-            <ProductCard
-              data={item}
-              image={item?.banner_image}
-              price={item?.discounted_price}
-              originalPrice={item?.price}
-              title={item?.name}
-              subtitle={item?.small_description}
-            />
-          )}
+          renderItem={({item}) => {
+            const discountPrice = getDiscountBasedOnRole({
+              role: reduxUserRole,
+              discounted_price: item.discounted_price,
+              original_price: item.price,
+              salesperson_discounted_price: item.salesperson_discounted_price,
+              dnd_discounted_price: item.dnd_discounted_price,
+            });
+            return (
+              <ProductCard
+                data={item}
+                image={item?.banner_image}
+                price={item?.discounted_price}
+                originalPrice={item?.price}
+                title={item?.name}
+                subtitle={item?.small_description}
+              />
+            );
+          }}
           keyExtractor={item => item.id}
           numColumns={2}
           columnWrapperStyle={{justifyContent: 'space-between'}}

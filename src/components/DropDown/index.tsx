@@ -26,7 +26,6 @@ const CustomDropdown: React.FC<CustomDropdownProps> = ({
   radius = 8,
   fontSize = 16,
 }) => {
-  console.log('Received categories:', options);
   return (
     <View style={[styles.container, { width: `${InputWidth}%`, height: InputHeight }]}>
       {/* {label && <Text style={styles.label}>{label}</Text>} */}

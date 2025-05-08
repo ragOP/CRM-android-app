@@ -1,11 +1,5 @@
 import React from 'react';
-import {
-  View,
-  ScrollView,
-  StyleSheet,
-  SafeAreaView,
-  Dimensions,
-} from 'react-native';
+import {View, ScrollView, StyleSheet, SafeAreaView} from 'react-native';
 import ProductImages from '../../components/ProductImages';
 import ProductPricing from '../../components/ProductPricing';
 import ProductVariants from '../../components/ProductVariants';
@@ -15,6 +9,8 @@ import ProductDetails from '../../components/ProductDetails';
 import AddToCartBar from '../../components/AddToCartBar';
 import DottedHorizontalRule from '../DottedHorizontalRule';
 import {calculateDiscountPercentage} from '../../utils/percentage/calculateDiscountPercentage';
+import {getDiscountBasedOnRole} from '../../utils/products/getDiscountBasedOnRole';
+import {useAppSelector} from '../../redux/store';
 
 export type ProductType = {
   _id: string;
@@ -47,10 +43,26 @@ type ProductPageProps = {
   onAddToCart: () => void;
 };
 
-const ProductPage = ({product, similarProducts = [], onAddToCart}: ProductPageProps) => {
+const ProductPage = ({
+  product,
+  similarProducts = [],
+  onAddToCart,
+}: ProductPageProps) => {
+  const reduxAuth = useAppSelector(state => state.auth);
+  const reduxUser = reduxAuth.user;
+  const reduxUserRole = reduxUser?.role || 'user';
+
+  const discountPrice = getDiscountBasedOnRole({
+    role: reduxUserRole,
+    discounted_price: product.discounted_price,
+    original_price: product.price,
+    salesperson_discounted_price: product.salesperson_discounted_price,
+    dnd_discounted_price: product.dnd_discounted_price,
+  });
+
   const discountPercentage = calculateDiscountPercentage(
     product.price,
-    product.discounted_price,
+    discountPrice,
   );
   return (
     <SafeAreaView style={styles.container}>
@@ -94,7 +106,7 @@ const ProductPage = ({product, similarProducts = [], onAddToCart}: ProductPagePr
 
         {/* Fixed button bar at the bottom */}
         <View style={styles.fixedButtonContainer}>
-          <AddToCartBar onAddToCart={onAddToCart}/>
+          <AddToCartBar onAddToCart={onAddToCart} />
         </View>
       </View>
     </SafeAreaView>

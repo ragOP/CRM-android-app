@@ -11,9 +11,11 @@ import CustomSearch from '../../components/CustomSearch';
 import ProductPage from '../../components/ProductPage';
 import {useNavigation, useRoute} from '@react-navigation/native';
 import {useAppSelector} from '../../redux/store';
-import {useMutation, useQueryClient} from '@tanstack/react-query';
+import {useMutation, useQuery, useQueryClient} from '@tanstack/react-query';
 import {addCart} from '../../apis/addCart';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import {fetchProducts} from '../../apis/fetchProducts';
+import ProductGrid from '../../components/ProductGrid';
 
 const ProductScreen = () => {
   const route = useRoute();
@@ -87,12 +89,65 @@ const ProductScreen = () => {
     addToCartMutation({payload});
   };
 
+  const alternativeProductsParams = {
+    is_best_seller: true,
+    page: 1,
+    per_page: 10,
+  };
+
+  const {data: alternativeProducts, isLoading: isAlternativeProductsLoading} =
+    useQuery({
+      queryKey: ['alternative_products'],
+      queryFn: async () => {
+        const apiResponse = await fetchProducts({
+          params: alternativeProductsParams,
+        });
+        if (apiResponse?.response?.success) {
+          return apiResponse?.response?.data?.data;
+        }
+        return [];
+      },
+    });
+
+  const bestBuyProductsParams = {
+    is_best_seller: true,
+    page: 1,
+    per_page: 10,
+  };
+
+  const {data: bestBuyProducts, isLoading: isBestBuyProductsLoading} = useQuery(
+    {
+      queryKey: ['alternative_products'],
+      queryFn: async () => {
+        const apiResponse = await fetchProducts({
+          params: bestBuyProductsParams,
+        });
+        if (apiResponse?.response?.success) {
+          return apiResponse?.response?.data?.data;
+        }
+        return [];
+      },
+    },
+  );
+
   return (
     <ScrollView>
       <Pressable onPress={() => navigation.navigate('UniversalSearch')}>
         <CustomSearch />
       </Pressable>
       <ProductPage product={product} onAddToCart={onAddToCart} />
+
+      <ProductGrid
+        title="Alternative Products"
+        data={alternativeProducts}
+        isLoading={isAlternativeProductsLoading}
+      />
+
+      <ProductGrid
+        title="Best Buys"
+        data={bestBuyProducts}
+        isLoading={isBestBuyProductsLoading}
+      />
     </ScrollView>
   );
 };

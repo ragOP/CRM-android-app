@@ -7,6 +7,7 @@ import {
   ActivityIndicator,
   ToastAndroid,
   ScrollView,
+  Alert,
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import React from 'react';
@@ -29,6 +30,8 @@ import {fetchProducts} from '../../apis/fetchProducts';
 import HouseCleaningProductCard from '../../components/HouseCleaningProductCard';
 import {getItem} from '../../utils/local_storage';
 import TestimonialCard from '../../components/TestimonialCard';
+import {useNavigation} from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const ourServices = [
   'Home Deep Cleaning',
@@ -119,12 +122,17 @@ interface HouseCleaningProducts {
 }
 
 const HouseServiceScreen = () => {
+  const dispatch = useAppDispatch();
+  const navigation = useNavigation();
+
+  const reduxUserId = useAppSelector(state => state.auth.user?.id);
+  const isLoggedIn = useAppSelector(state => state.auth.token);
+
   const [houseCleaningProducts, setHouseCleaningProducts] = useState<
     HouseCleaningProducts[]
   >([]);
   const [isLoading, setIsLoading] = useState(false);
   const houseCleaningRef = useRef(null);
-  const dispatch = useAppDispatch();
   const categories = useAppSelector(selectCategories);
 
   useEffect(() => {
@@ -158,12 +166,7 @@ const HouseServiceScreen = () => {
 
       if (apiResponse?.response?.success) {
         setHouseCleaningProducts(apiResponse?.response?.data?.data);
-        console.log(
-          'Products fetched successfully:',
-          apiResponse?.response?.data?.data,
-        );
       } else {
-        console.log('Failed to fetch products:', apiResponse);
         setHouseCleaningProducts([]);
       }
     } catch (error) {
@@ -200,8 +203,41 @@ const HouseServiceScreen = () => {
     },
   });
 
+  const onLoginRedirect = async productId => {
+    const productData = {
+      product_id: productId,
+      quantity: 1,
+    };
+
+    const dataToSave = {
+      product: productData,
+      timestamp: Date.now(),
+    };
+
+    await AsyncStorage.setItem('tempProduct', JSON.stringify(dataToSave));
+
+    navigation.navigate('Account', {
+      screen: 'LoginScreen',
+    });
+  };
+
   const handleAddToCart = (product_id: string) => {
-    addToCartMutate(product_id);
+    if (isLoggedIn) {
+      addToCartMutate(product_id);
+    } else {
+      Alert.alert(
+        'User not logged in',
+        'You need to be logged in to add to cart',
+        [
+          {
+            text: 'Cancel',
+            onPress: () => console.log('Cancel Pressed'),
+            style: 'cancel',
+          },
+          {text: 'Login', onPress: () => onLoginRedirect(product_id)},
+        ],
+      );
+    }
   };
 
   const HomeServingProduct = () => {

@@ -7,7 +7,6 @@ type AddCartParams = {
 
 export const addCart = async ({payload}: AddCartParams) => {
   try {
-    console.log('payload', payload);
     const apiResponse = await apiService({
       endpoint: endpoints.cart,
       method: 'POST',

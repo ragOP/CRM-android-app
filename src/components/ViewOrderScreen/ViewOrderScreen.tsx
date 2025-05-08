@@ -18,15 +18,12 @@ const ViewOrdersScreen = () => {
     queryKey: ['orders'],
     queryFn: async () => {
       const apiResponse = await fetchOrders();
-      console.log('apiResponse', apiResponse);
       if (apiResponse?.response?.success) {
         return apiResponse?.response?.data;
       }
       return [];
     },
   });
-
-  console.log('ordersData', ordersData);
 
   const renderOrder = ({item}: {item: (typeof ordersData)[0]}) => (
     <View style={styles.orderCard}>

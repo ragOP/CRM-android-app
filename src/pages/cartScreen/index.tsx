@@ -19,6 +19,7 @@ import {useNavigation} from '@react-navigation/native';
 import CustomLoader from '../../components/Loaders/CustomLoader';
 import {placeOrder} from '../../apis/placeOrder';
 import {calculateDiscount} from '../../utils/discount/calculateDiscount';
+import {getDiscountBasedOnRole} from '../../utils/products/getDiscountBasedOnRole';
 
 const CartScreen = () => {
   const queryClient = useQueryClient();
@@ -26,6 +27,7 @@ const CartScreen = () => {
 
   const reduxUser = useAppSelector(state => state.auth.user);
   const reduxUserId = reduxUser?.id;
+  const reduxUserRole = reduxUser?.role || 'user';
 
   const [dialogVisible, setDialogVisible] = useState(false);
   const [currentAddress, setCurrentAddress] = useState<Address | null>(null);
@@ -37,12 +39,10 @@ const CartScreen = () => {
       const apiResponse = await getAddresses({id: reduxUserId});
 
       const data = apiResponse?.response?.data;
-      console.log('apiResponse >>>>', apiResponse, data);
       setCurrentAddress(data?.[0] || null);
       return data || [];
     },
   });
-  console.log(addresses, 'addresses');
 
   const params = {
     user_id: reduxUserId,
@@ -113,15 +113,15 @@ const CartScreen = () => {
     }
   };
 
-  const handlePlaceOrder = () => {
+  const handlePlaceOrder = orderId => {
     const payload = {
       cartId: cartData?._id,
       addressId: currentAddress?._id,
-      couponId: discountCoupon?.[0]?._id || null,
+      couponId: discountCoupon?._id || null,
+      orderId: orderId,
     };
-    console.log('CALLED 111', payload);
 
-    if (!payload?.cartId || !payload.addressId) {
+    if (!payload?.cartId || !payload.addressId || !payload.orderId) {
       Alert.alert(
         'Error',
         'Please select a valid address and cart before placing an order.',
@@ -129,13 +129,11 @@ const CartScreen = () => {
       return;
     }
 
-    console.log('CALLED', payload);
     placeOrderMutation(payload);
   };
 
   const handleApplyCoupon = coupon => {
     setDiscountCoupon(coupon);
-    console.log('Apply coupon pressed');
   };
 
   const onOpenAddressDialog = () => {
@@ -205,10 +203,17 @@ const CartScreen = () => {
     0,
   );
 
-  const discountedPrice = cartProductsItems.reduce(
-    (sum, item) => sum + item.product.discounted_price * item.quantity,
-    0,
-  );
+  const discountedPrice = cartProductsItems.reduce((sum, item) => {
+    const discountPrice = getDiscountBasedOnRole({
+      role: reduxUserRole,
+      discounted_price: item.product.discounted_price,
+      original_price: item.product.price,
+      salesperson_discounted_price: item.product.salesperson_discounted_price,
+      dnd_discounted_price: item.product.dnd_discounted_price,
+    });
+
+    return sum + discountPrice * item.quantity;
+  }, 0);
 
   const discountedPriceAfterSubstracting = totalPrice - discountedPrice;
   const couponDiscoountPrice = discountCoupon

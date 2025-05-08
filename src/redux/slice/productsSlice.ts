@@ -31,7 +31,6 @@ export const fetchProducts = createAsyncThunk<
 >('products/fetchProducts', async (params = {}, {rejectWithValue}) => {
   try {
     const response = await apiService({endpoint: endpoints.product, params});
-    console.log('Products response:', response);
     return {data: response.response.data.data, params};
   } catch (error: any) {
     return rejectWithValue(error?.response?.data || 'Something went wrong');

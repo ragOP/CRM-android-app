@@ -31,8 +31,6 @@ const Filter = ({filters, setFilters, categoriesList}: FilterProps) => {
     {label: 'Price', icon: 'chevron-down', key: 'price'},
   ];
 
-  console.log('categoriesList', categoriesList);
-
   const dataMap = {
     category: isArrayWithValues(categoriesList)
       ? categoriesList?.map(category => ({
@@ -52,10 +50,8 @@ const Filter = ({filters, setFilters, categoriesList}: FilterProps) => {
   const [selectedFilter, setSelectedFilter] = useState<FilterOption | null>(
     null,
   );
-  console.log('filters', filters, selectedFilter, modalVisible);
 
   const openModal = (filter: FilterOption) => {
-    console.log(filter);
     setSelectedFilter(filter);
     setModalVisible(true);
   };

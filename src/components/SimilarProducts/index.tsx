@@ -9,12 +9,18 @@ import {
 } from 'react-native';
 import {ProductType} from '../ProductPage';
 import {calculateDiscountPercentage} from '../../utils/percentage/calculateDiscountPercentage';
+import {useAppSelector} from '../../redux/store';
+import {getDiscountBasedOnRole} from '../../utils/products/getDiscountBasedOnRole';
 
 type SimilarProductsProps = {
   products: ProductType[];
 };
 
 const SimilarProducts = ({products}: SimilarProductsProps) => {
+  const reduxAuth = useAppSelector(state => state.auth);
+  const reduxUser = reduxAuth.user;
+  const reduxUserRole = reduxUser?.role || 'user';
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Similar Products</Text>
@@ -25,9 +31,17 @@ const SimilarProducts = ({products}: SimilarProductsProps) => {
         keyExtractor={item => item._id}
         showsHorizontalScrollIndicator={false}
         renderItem={({item}) => {
+          const discountPrice = getDiscountBasedOnRole({
+            role: reduxUserRole,
+            discounted_price: item.discounted_price,
+            original_price: item.price,
+            salesperson_discounted_price: item.salesperson_discounted_price,
+            dnd_discounted_price: item.dnd_discounted_price,
+          });
+
           const discountPercentage = calculateDiscountPercentage(
             item.price,
-            item.discounted_price,
+            discountPrice,
           );
           return (
             <TouchableOpacity style={styles.productCard}>

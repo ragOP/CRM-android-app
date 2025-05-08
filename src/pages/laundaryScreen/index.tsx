@@ -17,6 +17,7 @@ import {fetchProducts} from '../../apis/fetchProducts';
 import LaundryServiceCard from '../../components/LaundryServiceCard';
 import {getItem} from '../../utils/local_storage';
 import {useNavigation} from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const testimonialsData = [
   {
@@ -63,6 +64,8 @@ const LaundaryScreen = () => {
   const dispatch = useAppDispatch();
   const navigation = useNavigation();
 
+  const reduxUserId = useAppSelector(state => state.auth.user?.id);
+
   const categories = useAppSelector(selectCategories);
   const isLoggedIn = useAppSelector(state => state.auth.token);
 
@@ -92,22 +95,19 @@ const LaundaryScreen = () => {
 
   const {mutate: addToCartMutate, isPending} = useMutation({
     mutationFn: async (product_id: string) => {
-      const userData = await getItem('userData');
 
       const payload = {
         product_id,
         quantity: 1,
-        user_id: userData.userId,
+        user_id: reduxUserId,
       };
 
       const apiResponse = await apiService({
         endpoint: endpoints.cart,
         method: 'POST',
         data: payload,
-        token: userData.token,
       });
 
-      console.log('api response', apiResponse);
       return apiResponse;
     },
     onSuccess: () => {
@@ -121,18 +121,30 @@ const LaundaryScreen = () => {
   });
 
   const scrollToLaundrySection = () => {
-    scrollViewRef.current?.scrollTo({ y: laundryOffsetY, animated: true });
-  };  
+    scrollViewRef.current?.scrollTo({y: laundryOffsetY, animated: true});
+  };
 
-  const onLoginRedirect = () => {
+  const onLoginRedirect = async productId => {
+    const productData = {
+      product_id: productId,
+      quantity: 1,
+    };
+
+    const dataToSave = {
+      product: productData,
+      timestamp: Date.now(),
+    };
+
+    await AsyncStorage.setItem('tempProduct', JSON.stringify(dataToSave));
+
     navigation.navigate('Account', {
       screen: 'LoginScreen',
     });
   };
 
-  const handleAddToCart = (product_id: string) => {
+  const handleAddToCart = (productId: string) => {
     if (isLoggedIn) {
-      addToCartMutate(product_id);
+      addToCartMutate(productId);
     } else {
       Alert.alert(
         'User not logged in',
@@ -143,7 +155,7 @@ const LaundaryScreen = () => {
             onPress: () => console.log('Cancel Pressed'),
             style: 'cancel',
           },
-          {text: 'OK', onPress: () => onLoginRedirect()},
+          {text: 'Login', onPress: () => onLoginRedirect(productId)},
         ],
       );
     }
@@ -196,20 +208,23 @@ const LaundaryScreen = () => {
           setLaundryOffsetY(event.nativeEvent.layout.y);
         }}>
         <Text style={styles.productsTitle}>Available Products</Text>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.container}>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          style={styles.container}>
           {laundryProducts.length > 0 ? (
-            laundryProducts.map((service, serviceIndex) => (
+            laundryProducts.map((product, serviceIndex) => (
               <LaundryServiceCard
-                key={service._id}
-                service_id={service._id}
-                serviceType={service.name}
-                price={service.price}
-                originalPrice={service.discounted_price}
-                description={service.small_description}
+                key={product._id}
+                productId={product._id}
+                productType={product.name}
+                price={product.price}
+                originalPrice={product.discounted_price}
+                description={product.small_description}
                 features={
                   serviceIndex === 0
-                    ? service.full_description.split('✔')
-                    : service.full_description.split('✔')
+                    ? product.full_description.split('✔')
+                    : product.full_description.split('✔')
                 }
                 serviceIndex={serviceIndex}
                 handleAddToCart={handleAddToCart}
@@ -228,7 +243,14 @@ const LaundaryScreen = () => {
 
       {/* Testimonial */}
       <View style={styles.testimonialContainer}>
-        <Text style={{color: '#04050B', fontSize: 18, textAlign: 'center', fontWeight: 'bold', marginBottom: 10}}>
+        <Text
+          style={{
+            color: '#04050B',
+            fontSize: 18,
+            textAlign: 'center',
+            fontWeight: 'bold',
+            marginBottom: 10,
+          }}>
           Our clients praise us for great service.
         </Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false}>

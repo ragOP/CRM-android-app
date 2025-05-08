@@ -2,7 +2,7 @@ import React from 'react';
 import {View, Text, Image, StyleSheet, TouchableOpacity} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 
-interface ProductCardProps {
+type ProductCardProps = {
   data: any;
   image: any;
   price: number;
@@ -10,9 +10,9 @@ interface ProductCardProps {
   discount?: string | number;
   title: string;
   subtitle: string;
-}
+};
 
-const ProductCard: React.FC<ProductCardProps> = ({
+const ProductCard = ({
   data,
   image,
   price,
@@ -20,7 +20,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
   discount,
   title,
   subtitle,
-}) => {
+}: ProductCardProps) => {
   const navigation = useNavigation();
 
   const handlePress = () => {

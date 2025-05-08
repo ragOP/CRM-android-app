@@ -36,7 +36,6 @@ const queryClient = new QueryClient();
 const HomeStack = () => {
   const reduxAuth = useAppSelector(state => state.auth);
   const isLoggedIn = Boolean(reduxAuth.token);
-  console.log('reduxAuth', reduxAuth);
 
   return (
     <Stack.Navigator screenOptions={{headerShown: false}}>
@@ -54,7 +53,6 @@ const HomeStack = () => {
 const AccountStack = () => {
   const reduxAuth = useAppSelector(state => state.auth);
   const isLoggedIn = Boolean(reduxAuth.token);
-  // console.log('reduxAuth', reduxAuth);
   return (
     <Stack.Navigator screenOptions={{headerShown: false}}>
       {isLoggedIn ? (

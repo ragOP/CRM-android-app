@@ -48,8 +48,6 @@ const CouponDialog: React.FC<CouponDialogProps> = ({
     select: data => data?.response || [],
   });
 
-  console.log('availableCoupons', availableCoupons);
-
   const handleApplyCoupon = (code: string) => {
     if (!code) {
       setErrorMessage('Please enter a coupon code');

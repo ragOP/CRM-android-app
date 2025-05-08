@@ -30,6 +30,7 @@ const UserProfileScreen = () => {
         <Icon name="person-circle-outline" size={80} color="#007AFF" />
         <Text style={styles.name}>{user?.name || 'Guest User'}</Text>
         <Text style={styles.email}>{user?.email || 'No email available'}</Text>
+        <Text style={styles.email}>Role: {user?.role || 'User'}</Text>
       </View>
 
       <TouchableOpacity style={styles.button} onPress={handleViewOrders}>
