@@ -15,15 +15,33 @@ import {
 import {useNavigation} from '@react-navigation/native';
 import {apiService} from '../../utils/api/apiService';
 import {endpoints} from '../../utils/endpoints';
+import {useMutation, useQueryClient} from '@tanstack/react-query';
+import {placeOrder} from '../../apis/placeOrder';
 
 type CartPayableSectionProps = {
   totalAmount: number;
-  onPlaceOrder: (orderId: string | number) => void;
+  onPlaceOrder: ({
+    orderId,
+    addressId,
+    cartId,
+    couponId,
+    selectedUser,
+  }: PlaceOrderType) => void;
+  onValidatePlaceOrder: () => boolean;
+  addressId: string | number;
+  cartId: string | number;
+  couponId: string | number;
+  selectedUser: string | null;
 };
 
 const CartPayableSection = ({
   totalAmount,
   onPlaceOrder,
+  onValidatePlaceOrder,
+  addressId,
+  cartId,
+  couponId,
+  selectedUser,
 }: CartPayableSectionProps) => (
   <View style={styles.payableContainer}>
     <View>
@@ -35,34 +53,111 @@ const CartPayableSection = ({
         </View> */}
       </View>
     </View>
-    <Checkout onPlaceOrder={onPlaceOrder} />
+    <Checkout
+      onPlaceOrder={onPlaceOrder}
+      onValidatePlaceOrder={onValidatePlaceOrder}
+      addressId={addressId}
+      cartId={cartId}
+      couponId={couponId}
+      selectedUser={selectedUser}
+    />
   </View>
 );
 
 export default CartPayableSection;
 
-type CheckoutType = {
-  onPlaceOrder: (orderId: string | number) => void;
+type PlaceOrderType = {
+  orderId: string | number;
+  addressId: string | number;
+  cartId: string | number;
+  couponId: string | number;
+  selectedUser: string | null;
 };
 
-export const Checkout = ({onPlaceOrder}: CheckoutType) => {
+type CheckoutType = {
+  onPlaceOrder: ({
+    orderId,
+    addressId,
+    cartId,
+    couponId,
+    selectedUser,
+  }: PlaceOrderType) => void;
+  onValidatePlaceOrder: () => boolean;
+  addressId: string | number;
+  cartId: string | number;
+  couponId: string | number;
+  selectedUser: string | null;
+};
+
+export const Checkout = ({
+  onPlaceOrder,
+  onValidatePlaceOrder,
+  addressId,
+  cartId,
+  couponId,
+  selectedUser,
+}: CheckoutType) => {
   const navigation = useNavigation();
+  const queryClient = useQueryClient();
+
+  const {mutate: placeOrderMutation, isPending: isPlacingOrder} = useMutation({
+    mutationFn: async payload => placeOrder({payload}),
+    onSuccess: data => {
+      if (data?.response?.success) {
+        Alert.alert(
+          'Order Placed',
+          'Your order has been placed successfully!',
+          [
+            {
+              text: 'Go to Home Page',
+              onPress: () => {
+                navigation.navigate('HomeTab');
+              },
+            },
+            {
+              text: 'Cancel',
+              onPress: () => {},
+            },
+          ],
+        );
+        queryClient.invalidateQueries({queryKey: ['cart_products']});
+      }
+    },
+    onError: error => {
+      console.error('Error placing order:', error);
+      Alert.alert(
+        'Error',
+        'Failed to place the order. Please try again later.',
+      );
+    },
+  });
+
+  console.log(
+    'Payment Gateway Service Initialized',
+    addressId,
+    cartId,
+    couponId,
+    selectedUser,
+  );
 
   const onRedirectToPayment = async () => {
+    const isValid = onValidatePlaceOrder();
+
+    if (!isValid) {
+      return;
+    }
     try {
       const apiResponse = await apiService({
         endpoint: endpoints.payment,
         method: 'POST',
         data: {
-          // addressId: addressId,
-          // cartId: cartId,
-          // couponId: couponId,
           amount: 1000,
           customerId: '123456789',
           customerEmail: 'test@gmail.com',
           customerPhone: '98765431237',
         },
       });
+      console.log('Payment API Response:', apiResponse);
       const sessionId = apiResponse?.response?.data?.payment_session_id;
       const orderId = apiResponse?.response?.data?.order_id;
 
@@ -102,12 +197,15 @@ export const Checkout = ({onPlaceOrder}: CheckoutType) => {
   useEffect(() => {
     CFPaymentGatewayService.setCallback({
       onVerify(orderID: string): void {
-        onPlaceOrder(orderID);
-        console.log('Payment Success, OrderID:', orderID);
-        Alert.alert('Payment Success', `Order ID: ${orderID}`);
-        navigation.navigate('Account', {
-          screen: 'ViewOrderScreen',
+        placeOrderMutation({
+          orderId: orderID,
+          addressId,
+          cartId,
+          couponId,
+          selectedUser,
         });
+
+        console.log('Payment Success, OrderID:', orderID);
       },
       onError(error: CFErrorResponse, orderID: string): void {
         console.log('Payment Error:', error, orderID);

@@ -11,7 +11,7 @@ import {
 import ProductCard from '../ProductCard';
 import {useNavigation} from '@react-navigation/native';
 import {getDiscountBasedOnRole} from '../../utils/products/getDiscountBasedOnRole';
-import { useAppSelector } from '../../redux/store';
+import {useAppSelector} from '../../redux/store';
 
 type ProductGridProps = {
   rows?: number;
@@ -32,7 +32,7 @@ const ProductGrid = ({
 }: ProductGridProps) => {
   const navigation = useNavigation();
 
-  const reduxAuth = useAppSelector((state) => state.auth);
+  const reduxAuth = useAppSelector(state => state.auth);
   const reduxUser = reduxAuth.user;
   const reduxUserRole = reduxUser?.role || 'user';
 
@@ -74,7 +74,9 @@ const ProductGrid = ({
           })}
         </Text>
         <TouchableOpacity
-          onPress={() => navigation.navigate('UniversalSearch')}>
+          onPress={() =>
+            navigation.navigate('HomeTab', {screen: 'UniversalSearch'})
+          }>
           <Text style={styles.viewAll}>View all →</Text>
         </TouchableOpacity>
       </View>

@@ -7,10 +7,12 @@ type FetchCartParams = {
 
 export const fetchCart = async ({params}: FetchCartParams) => {
   try {
+    console.log('Fetching cart with params:',)
     const apiResponse = await apiService({
       endpoint: endpoints.cart,
       params,
     });
+    console.log('Error fetching cart:', apiResponse);
     if (apiResponse?.response?.success) {
       return apiResponse?.response?.data?.cart;
     }

@@ -1,5 +1,11 @@
-import React, {useState} from 'react';
-import {Alert, SafeAreaView, ScrollView, StyleSheet} from 'react-native';
+import React, {useCallback, useState} from 'react';
+import {
+  Alert,
+  RefreshControl,
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+} from 'react-native';
 import CartHeader from '../../components/CartHeader';
 import CartItem from '../../components/CartItem';
 import CartBillSummary from '../../components/CartBillSummary';
@@ -17,9 +23,9 @@ import {isArrayWithValues} from '../../utils/array/isArrayWithValues';
 import {addCart} from '../../apis/addCart';
 import {useNavigation} from '@react-navigation/native';
 import CustomLoader from '../../components/Loaders/CustomLoader';
-import {placeOrder} from '../../apis/placeOrder';
 import {calculateDiscount} from '../../utils/discount/calculateDiscount';
 import {getDiscountBasedOnRole} from '../../utils/products/getDiscountBasedOnRole';
+import OrderForSelection from '../../components/OrderForSelection/OrderForSelection';
 
 const CartScreen = () => {
   const queryClient = useQueryClient();
@@ -32,6 +38,8 @@ const CartScreen = () => {
   const [dialogVisible, setDialogVisible] = useState(false);
   const [currentAddress, setCurrentAddress] = useState<Address | null>(null);
   const [discountCoupon, setDiscountCoupon] = useState(null);
+  const [refreshing, setRefreshing] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<string | null>(null);
 
   const {data: addresses, isLoading: isAddressLoading} = useQuery({
     queryKey: ['user_addresses'],
@@ -65,37 +73,6 @@ const CartScreen = () => {
     },
   });
 
-  const {mutate: placeOrderMutation, isPending: isPlacingOrder} = useMutation({
-    mutationFn: payload => placeOrder({payload}),
-    onSuccess: data => {
-      if (data?.response?.success) {
-        Alert.alert(
-          'Order Placed',
-          'Your order has been placed successfully!',
-          [
-            {
-              text: 'Go to Home Page',
-              onPress: () => {
-                navigation.navigate('HomeTab');
-              },
-            },
-            {
-              text: 'Cancel',
-              onPress: () => {},
-            },
-          ],
-        );
-        queryClient.invalidateQueries({queryKey: ['cart_products']});
-      }
-    },
-    onError: error => {
-      console.error('Error placing order:', error);
-      Alert.alert(
-        'Error',
-        'Failed to place the order. Please try again later.',
-      );
-    },
-  });
 
   const handleQuantityChange = (product: string, change: number) => {
     const productId = product?._id;
@@ -113,12 +90,21 @@ const CartScreen = () => {
     }
   };
 
-  const handlePlaceOrder = orderId => {
+  const handlePlaceOrder = async ({
+    orderId,
+    addressId,
+    cartId,
+    couponId,
+    selectedUser: currentSelectedUser,
+  }) => {
     const payload = {
-      cartId: cartData?._id,
-      addressId: currentAddress?._id,
-      couponId: discountCoupon?._id || null,
+      cartId: cartId,
+      addressId: addressId,
+      couponId: couponId || null,
       orderId: orderId,
+      ...(reduxUserRole === 'salesperson' || reduxUserRole === 'dnd'
+        ? {orderedBy: reduxUserId, orderedForUser: currentSelectedUser}
+        : {}),
     };
 
     if (!payload?.cartId || !payload.addressId || !payload.orderId) {
@@ -129,6 +115,16 @@ const CartScreen = () => {
       return;
     }
 
+    console.log('currentSelectedUser', currentSelectedUser);
+
+    if (reduxUserRole === 'salesperson' || reduxUserRole === 'dnd') {
+      console.log('currentSelectedUser', currentSelectedUser);
+      if (!currentSelectedUser) {
+        Alert.alert('Error', 'Please select a user.');
+        return;
+      }
+    }
+    console.log('payload', payload);
     placeOrderMutation(payload);
   };
 
@@ -203,6 +199,23 @@ const CartScreen = () => {
     0,
   );
 
+  const onValidatePlaceOrder = () => {
+    if (!currentAddress) {
+      Alert.alert('Error', 'Please select a delivery address.');
+      return false;
+    }
+
+    if (
+      (reduxUserRole === 'salesperson' || reduxUserRole === 'dnd') &&
+      !selectedUser
+    ) {
+      Alert.alert('Error', 'Please select a user.');
+      return false;
+    }
+
+    return true;
+  };
+
   const discountedPrice = cartProductsItems.reduce((sum, item) => {
     const discountPrice = getDiscountBasedOnRole({
       role: reduxUserRole,
@@ -215,6 +228,15 @@ const CartScreen = () => {
     return sum + discountPrice * item.quantity;
   }, 0);
 
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    setTimeout(() => {
+      setRefreshing(false);
+    }, 2000);
+  }, []);
+
+  console.log('>>>,', selectedUser);
+
   const discountedPriceAfterSubstracting = totalPrice - discountedPrice;
   const couponDiscoountPrice = discountCoupon
     ? calculateDiscount(cartData?.total_price, discountCoupon)
@@ -225,7 +247,11 @@ const CartScreen = () => {
   return (
     <>
       <SafeAreaView style={styles.container}>
-        <ScrollView showsVerticalScrollIndicator={false}>
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          }>
           <CartHeader
             deliverTo={deliverTo || ''}
             onChangePress={onOpenAddressDialog}
@@ -269,11 +295,23 @@ const CartScreen = () => {
             />
           )}
 
+          {isArrayWithValues(cartProductsItems) && (
+            <OrderForSelection
+              selectedUser={selectedUser}
+              setSelectedUser={setSelectedUser}
+            />
+          )}
+
           {/* Payable Amount & Order Button */}
           {isArrayWithValues(cartProductsItems) && (
             <CartPayableSection
               totalAmount={finalPrice}
               onPlaceOrder={handlePlaceOrder}
+              onValidatePlaceOrder={onValidatePlaceOrder}
+              addressId={currentAddress?._id}
+              cartId={cartData?._id}
+              couponId={discountCoupon?._id}
+              selectedUser={selectedUser}
             />
           )}
 

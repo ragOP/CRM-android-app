@@ -24,7 +24,10 @@ const ProductCard = ({
   const navigation = useNavigation();
 
   const handlePress = () => {
-    navigation.navigate('ProductScreen', {product: data});
+    navigation.navigate('HomeTab', {
+      screen: 'ProductScreen',
+      params: {product: data},
+    });
   };
 
   return (
