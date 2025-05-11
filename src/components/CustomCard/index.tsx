@@ -1,18 +1,12 @@
 import React from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  ImageBackground,
-  Dimensions,
-  FlatList
-} from 'react-native';
+import {View, Text, StyleSheet, ImageBackground} from 'react-native';
 
 interface CustomCardProps {
   title?: string;
   description?: string;
   image?: any;
   onPress?: () => void;
+  width?: number;
 }
 
 const CustomCard: React.FC<CustomCardProps> = ({
@@ -20,14 +14,16 @@ const CustomCard: React.FC<CustomCardProps> = ({
   description,
   image,
   onPress,
+  width,
 }) => {
   return (
-    <View style={styles.cardContainer} onTouchEnd={onPress}>
+    <View
+      style={[styles.cardContainer, typeof width === 'number' ? {width} : null]}
+      onTouchEnd={onPress}>
       <ImageBackground
         source={{uri: image}}
         style={styles.imageBackground}
-        imageStyle={styles.image}
-      >
+        imageStyle={styles.image}>
         <View style={styles.textContainer}>
           <Text style={styles.title}>{title}</Text>
           <Text style={styles.description}>{description}</Text>
@@ -41,12 +37,11 @@ export default CustomCard;
 
 const styles = StyleSheet.create({
   cardContainer: {
-    width: 180,
     height: 160,
     borderRadius: 10,
     overflow: 'hidden',
     alignSelf: 'center',
-    marginBottom: 10, 
+    marginBottom: 10,
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
@@ -69,7 +64,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#82C8E5', 
+    color: '#82C8E5',
     textTransform: 'uppercase',
     marginBottom: 4,
   },

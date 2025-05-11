@@ -71,7 +71,7 @@ const ProductPage = ({
           <ProductImages images={product.images} />
           <ProductPricing
             mrp={product.price}
-            discountPrice={product.discounted_price}
+            discountPrice={discountPrice}
             discountPercent={discountPercentage}
             // specialOffer={product.specialOffer}
             highlight={{'50%': true, off: true, free: true}}

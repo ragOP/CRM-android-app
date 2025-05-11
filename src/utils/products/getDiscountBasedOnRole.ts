@@ -1,4 +1,4 @@
-import { Role } from "../../redux/slice/authSlice";
+import {Role} from '../../redux/slice/authSlice';
 
 interface DiscountParams {
   role: Role;
@@ -18,10 +18,10 @@ export const getDiscountBasedOnRole = ({
   if (role === 'user') {
     return discounted_price || original_price;
   } else if (role === 'salesperson') {
-    return salesperson_discounted_price || original_price;
+    return salesperson_discounted_price || discounted_price || original_price;
   } else if (role === 'dnd') {
-    return dnd_discounted_price || original_price;
+    return dnd_discounted_price || discounted_price || original_price;
   } else {
-    return original_price;
+    return discounted_price || original_price;
   }
 };

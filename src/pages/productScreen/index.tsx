@@ -1,12 +1,5 @@
 import React from 'react';
-import {
-  View,
-  Text,
-  ScrollView,
-  StyleSheet,
-  Pressable,
-  Alert,
-} from 'react-native';
+import {ScrollView, Alert} from 'react-native';
 import CustomSearch from '../../components/CustomSearch';
 import ProductPage from '../../components/ProductPage';
 import {useNavigation, useRoute} from '@react-navigation/native';
@@ -16,6 +9,8 @@ import {addCart} from '../../apis/addCart';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {fetchProducts} from '../../apis/fetchProducts';
 import ProductGrid from '../../components/ProductGrid';
+import ProductReviews from './components/ProductReviews';
+import RefreshControlWrapper from '../../components/RefreshControlWrapper/RefreshControlWrapper';
 
 const ProductScreen = () => {
   const route = useRoute();
@@ -26,6 +21,8 @@ const ProductScreen = () => {
   const reduxUser = useAppSelector(state => state.auth.user);
 
   const reduxUserId = reduxUser?.id;
+
+  const [refreshing, setRefreshing] = React.useState(false);
 
   const {product} = route.params || {};
 
@@ -115,6 +112,20 @@ const ProductScreen = () => {
     per_page: 10,
   };
 
+  const onRefresh = async () => {
+    console.log('REFRESHED');
+
+    setRefreshing(true);
+
+    await new Promise(resolve => setTimeout(resolve, 2000));
+
+    await queryClient.invalidateQueries({queryKey: ['alternative_products']});
+    await queryClient.invalidateQueries({queryKey: ['best_buy_products']});
+    await queryClient.invalidateQueries({queryKey: ['reviews']});
+
+    setRefreshing(false);
+  };
+
   const {data: bestBuyProducts, isLoading: isBestBuyProductsLoading} = useQuery(
     {
       queryKey: ['alternative_products'],
@@ -131,10 +142,8 @@ const ProductScreen = () => {
   );
 
   return (
-    <ScrollView>
-      <Pressable onPress={() => navigation.navigate('UniversalSearch')}>
-        <CustomSearch />
-      </Pressable>
+    <RefreshControlWrapper refreshing={refreshing} onRefresh={onRefresh}>
+      <CustomSearch redirectToUniversalScreen={true} />
       <ProductPage product={product} onAddToCart={onAddToCart} />
 
       <ProductGrid
@@ -148,7 +157,9 @@ const ProductScreen = () => {
         data={bestBuyProducts}
         isLoading={isBestBuyProductsLoading}
       />
-    </ScrollView>
+
+      <ProductReviews productId={product?._id} />
+    </RefreshControlWrapper>
   );
 };
 

@@ -127,11 +127,11 @@ const App = () => {
                   component={PharmacyScreen}
                   options={{title: 'Pharmacy'}}
                 /> */}
-                {/* <Tab.Screen
+                <Tab.Screen
                   name="Blog"
                   component={Blog}
                   options={{title: 'Blog'}}
-                /> */}
+                />
                 <Tab.Screen
                   name="Cart"
                   component={CartStack}

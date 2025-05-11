@@ -1,96 +1,28 @@
-import {View, Text, StyleSheet, FlatList} from 'react-native';
+import {View, Text, StyleSheet, FlatList, Dimensions} from 'react-native';
 import CustomCard from '../CustomCard/index';
-import { Category } from '../../redux/slice/categorySlice';
+import {Category} from '../../redux/slice/categorySlice';
 
 interface OurServicesProps {
   categories?: Category[];
   onPress?: (id: string) => void;
 }
 
-const index: React.FC<OurServicesProps> = ({categories, onPress}) => {
-  // const services = [
-  //   {
-  //     title: 'BATHROOM CLEANING',
-  //     description:
-  //       'Expert sofa cleaning to remove stains, odors, and dust, restoring freshness and comfort to your furniture.',
-  //     image: require('../../assets/bathroomCleaning.png'),
-  //   },
-  //   {
-  //     title: 'MARBLE POLISHING',
-  //     description:
-  //       'Expert sofa cleaning to remove stains, odors, and dust, restoring freshness and comfort to your furniture.',
-  //     image: require('../../assets/bathroomCleaning.png'),
-  //   },
-  //   {
-  //     title: 'SOFA CLEANING',
-  //     description:
-  //       'Expert sofa cleaning to remove stains, odors, and dust, restoring freshness and comfort to your furniture.',
-  //     image: require('../../assets/bathroomCleaning.png'),
-  //   },
-  //   {
-  //     title: 'SOFA CLEANING',
-  //     description:
-  //       'Expert sofa cleaning to remove stains, odors, and dust, restoring freshness and comfort to your furniture.',
-  //     image: require('../../assets/bathroomCleaning.png'),
-  //   },
-  //   {
-  //     title: 'SOFA CLEANING',
-  //     description:
-  //       'Expert sofa cleaning to remove stains, odors, and dust, restoring freshness and comfort to your furniture.',
-  //     image: require('../../assets/bathroomCleaning.png'),
-  //   },
-  //   {
-  //     title: 'SOFA CLEANING',
-  //     description:
-  //       'Expert sofa cleaning to remove stains, odors, and dust, restoring freshness and comfort to your furniture.',
-  //     image: require('../../assets/bathroomCleaning.png'),
-  //   },
-  //   {
-  //     title: 'SOFA CLEANING',
-  //     description:
-  //       'Expert sofa cleaning to remove stains, odors, and dust, restoring freshness and comfort to your furniture.',
-  //     image: require('../../assets/bathroomCleaning.png'),
-  //   },
-  //   {
-  //     title: 'SOFA CLEANING',
-  //     description:
-  //       'Expert sofa cleaning to remove stains, odors, and dust, restoring freshness and comfort to your furniture.',
-  //     image: require('../../assets/bathroomCleaning.png'),
-  //   },
-  //   {
-  //     title: 'SOFA CLEANING',
-  //     description:
-  //       'Expert sofa cleaning to remove stains, odors, and dust, restoring freshness and comfort to your furniture.',
-  //     image: require('../../assets/bathroomCleaning.png'),
-  //   },
-  //   {
-  //     title: 'SOFA CLEANING',
-  //     description:
-  //       'Expert sofa cleaning to remove stains, odors, and dust, restoring freshness and comfort to your furniture.',
-  //     image: require('../../assets/bathroomCleaning.png'),
-  //   },
-  //   {
-  //     title: 'SOFA CLEANING',
-  //     description:
-  //       'Expert sofa cleaning to remove stains, odors, and dust, restoring freshness and comfort to your furniture.',
-  //     image: require('../../assets/bathroomCleaning.png'),
-  //   },
-  //   {
-  //     title: 'SOFA CLEANING',
-  //     description:
-  //       'Expert sofa cleaning to remove stains, odors, and dust, restoring freshness and comfort to your furniture.',
-  //     image: require('../../assets/bathroomCleaning.png'),
-  //   },
-  // ];
+const screenWidth = Dimensions.get('window').width;
+const CARD_GAP = 20;
+const numColumns = 2;
+const cardWidth = (screenWidth - CARD_GAP * (numColumns + 1)) / numColumns;
 
-  const renderItem = ({ item }: { item: Category }) => (
+const OurServices = ({categories, onPress}: OurServicesProps) => {
+  const renderItem = ({item}: {item: Category}) => (
     <CustomCard
       title={item.name}
       description={item.description}
       image={item.images[0]}
       onPress={() => onPress && onPress(item._id)}
+      width={cardWidth}
     />
   );
+
   return (
     <View style={styles.container}>
       <Text style={styles.heading}>
@@ -101,18 +33,18 @@ const index: React.FC<OurServicesProps> = ({categories, onPress}) => {
       </Text>
       <FlatList
         data={categories}
-        numColumns={2}
+        numColumns={numColumns}
         renderItem={renderItem}
-        keyExtractor={(item) => item._id}
+        keyExtractor={item => item._id}
         showsVerticalScrollIndicator={false}
-        columnWrapperStyle={{ justifyContent: 'space-around', gap: 10 }}
+        columnWrapperStyle={styles.columnWrapper}
         contentContainerStyle={styles.gridContainer}
       />
     </View>
   );
 };
 
-export default index;
+export default OurServices;
 
 const styles = StyleSheet.create({
   container: {
@@ -129,7 +61,10 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   gridContainer: {
-    gap: 10,
-
+    paddingBottom: 20,
+  },
+  columnWrapper: {
+    justifyContent: 'space-between',
+    marginBottom: CARD_GAP,
   },
 });

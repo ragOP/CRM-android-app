@@ -73,7 +73,6 @@ const CartScreen = () => {
     },
   });
 
-
   const handleQuantityChange = (product: string, change: number) => {
     const productId = product?._id;
 
@@ -115,17 +114,13 @@ const CartScreen = () => {
       return;
     }
 
-    console.log('currentSelectedUser', currentSelectedUser);
-
     if (reduxUserRole === 'salesperson' || reduxUserRole === 'dnd') {
-      console.log('currentSelectedUser', currentSelectedUser);
       if (!currentSelectedUser) {
         Alert.alert('Error', 'Please select a user.');
         return;
       }
     }
-    console.log('payload', payload);
-    placeOrderMutation(payload);
+    // placeOrderMutation(payload);
   };
 
   const handleApplyCoupon = coupon => {
@@ -235,13 +230,16 @@ const CartScreen = () => {
     }, 2000);
   }, []);
 
-  console.log('>>>,', selectedUser);
-
   const discountedPriceAfterSubstracting = totalPrice - discountedPrice;
   const couponDiscoountPrice = discountCoupon
     ? calculateDiscount(cartData?.total_price, discountCoupon)
     : 0;
-
+  console.log(
+    cartData,
+    cartData?.total_price,
+    discountCoupon,
+    couponDiscoountPrice,
+  );
   const finalPrice = cartData?.total_price - couponDiscoountPrice;
 
   return (

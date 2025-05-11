@@ -11,7 +11,7 @@ interface ProductPricingProps {
   highlight?: {[key: string]: boolean};
 }
 
-const ProductPricing: React.FC<ProductPricingProps> = ({
+const ProductPricing = ({
   mrp,
   discountPrice,
   discountPercent,
@@ -19,7 +19,7 @@ const ProductPricing: React.FC<ProductPricingProps> = ({
   productName,
   productDescription,
   highlight = {},
-}) => {
+}: ProductPricingProps) => {
   return (
     <View style={styles.container}>
       <View style={styles.priceContainer}>

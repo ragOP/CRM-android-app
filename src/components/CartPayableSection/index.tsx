@@ -1,4 +1,4 @@
-import {useEffect} from 'react';
+import {useEffect, useRef} from 'react';
 import {View, Text, TouchableOpacity, StyleSheet, Alert} from 'react-native';
 import {
   CFErrorResponse,
@@ -17,6 +17,7 @@ import {apiService} from '../../utils/api/apiService';
 import {endpoints} from '../../utils/endpoints';
 import {useMutation, useQueryClient} from '@tanstack/react-query';
 import {placeOrder} from '../../apis/placeOrder';
+import {useAppSelector} from '../../redux/store';
 
 type CartPayableSectionProps = {
   totalAmount: number;
@@ -90,7 +91,6 @@ type CheckoutType = {
 };
 
 export const Checkout = ({
-  onPlaceOrder,
   onValidatePlaceOrder,
   addressId,
   cartId,
@@ -100,37 +100,8 @@ export const Checkout = ({
   const navigation = useNavigation();
   const queryClient = useQueryClient();
 
-  const {mutate: placeOrderMutation, isPending: isPlacingOrder} = useMutation({
-    mutationFn: async payload => placeOrder({payload}),
-    onSuccess: data => {
-      if (data?.response?.success) {
-        Alert.alert(
-          'Order Placed',
-          'Your order has been placed successfully!',
-          [
-            {
-              text: 'Go to Home Page',
-              onPress: () => {
-                navigation.navigate('HomeTab');
-              },
-            },
-            {
-              text: 'Cancel',
-              onPress: () => {},
-            },
-          ],
-        );
-        queryClient.invalidateQueries({queryKey: ['cart_products']});
-      }
-    },
-    onError: error => {
-      console.error('Error placing order:', error);
-      Alert.alert(
-        'Error',
-        'Failed to place the order. Please try again later.',
-      );
-    },
-  });
+  const reduxUser = useAppSelector(state => state.auth.user);
+  const reduxUserRole = reduxUser?.role || 'user';
 
   console.log(
     'Payment Gateway Service Initialized',
@@ -141,11 +112,19 @@ export const Checkout = ({
   );
 
   const onRedirectToPayment = async () => {
-    const isValid = onValidatePlaceOrder();
-
-    if (!isValid) {
+    if (!addressId) {
+      Alert.alert('Error', 'Please select a delivery address.');
       return;
     }
+
+    if (
+      (reduxUserRole === 'salesperson' || reduxUserRole === 'dnd') &&
+      !selectedUser
+    ) {
+      Alert.alert('Error', 'Please select a user.');
+      return;
+    }
+
     try {
       const apiResponse = await apiService({
         endpoint: endpoints.payment,
@@ -157,7 +136,7 @@ export const Checkout = ({
           customerPhone: '98765431237',
         },
       });
-      console.log('Payment API Response:', apiResponse);
+
       const sessionId = apiResponse?.response?.data?.payment_session_id;
       const orderId = apiResponse?.response?.data?.order_id;
 
@@ -194,18 +173,45 @@ export const Checkout = ({
     }
   };
 
+  const handlePlaceOrder = async (orderId: string | number) => {
+    const payload = {
+      orderId,
+      addressId,
+      cartId,
+      couponId,
+      selectedUser,
+    };
+
+    const apiResponse = await placeOrder({payload});
+
+    if (apiResponse?.response?.success) {
+      Alert.alert('Order Placed', 'Your order has been placed successfully!', [
+        {
+          text: 'Go to Home',
+          onPress: () => {
+            navigation.navigate('HomeTab');
+          },
+        },
+        {
+          text: 'Cancel',
+          onPress: () => {},
+        },
+      ]);
+
+      queryClient.invalidateQueries({queryKey: ['cart_products']});
+    } else {
+      Alert.alert(
+        'Error',
+        'Failed to place the order. Please try again later.',
+      );
+    }
+  };
+
   useEffect(() => {
     CFPaymentGatewayService.setCallback({
       onVerify(orderID: string): void {
-        placeOrderMutation({
-          orderId: orderID,
-          addressId,
-          cartId,
-          couponId,
-          selectedUser,
-        });
-
-        console.log('Payment Success, OrderID:', orderID);
+        console.log('');
+        handlePlaceOrder(orderID);
       },
       onError(error: CFErrorResponse, orderID: string): void {
         console.log('Payment Error:', error, orderID);

@@ -42,10 +42,16 @@ const CouponDialog: React.FC<CouponDialogProps> = ({
   const [couponCode, setCouponCode] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
 
+  const couponParams = {
+    showOnlyActive: true,
+    page: 1,
+    per_page: 100,
+  };
+
   const {data: availableCoupons, isLoading} = useQuery({
     queryKey: ['available_coupons'],
-    queryFn: getAllCoupons,
-    select: data => data?.response || [],
+    queryFn: () => getAllCoupons({params: couponParams}),
+    select: data => data?.response?.data?.data || [],
   });
 
   const handleApplyCoupon = (code: string) => {
