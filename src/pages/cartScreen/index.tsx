@@ -258,12 +258,7 @@ const CartScreen = () => {
   const couponDiscoountPrice = discountCoupon
     ? calculateDiscount(cartData?.total_price, discountCoupon)
     : 0;
-  console.log(
-    cartData,
-    cartData?.total_price,
-    discountCoupon,
-    couponDiscoountPrice,
-  );
+
   const finalPrice = cartData?.total_price - couponDiscoountPrice;
 
   return (

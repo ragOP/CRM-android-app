@@ -43,7 +43,7 @@ const CouponDialog: React.FC<CouponDialogProps> = ({
   const [errorMessage, setErrorMessage] = useState('');
 
   const couponParams = {
-    showOnlyActive: true,
+    showOnlyValid: true,
     page: 1,
     per_page: 100,
   };
