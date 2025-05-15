@@ -1,10 +1,11 @@
 import React from 'react';
-import {View, Text, TouchableOpacity, Alert, StyleSheet} from 'react-native';
+import {View, Text, TouchableOpacity, StyleSheet} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useAppDispatch, useAppSelector} from '../../redux/store';
 import {logout} from '../../redux/slice/authSlice';
 import {useNavigation} from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Ionicons';
+import {showSnackbar} from '../../redux/slice/snackbarSlice';
 
 const UserProfileScreen = () => {
   const dispatch = useAppDispatch();
@@ -16,12 +17,18 @@ const UserProfileScreen = () => {
   const handleLogout = async () => {
     dispatch(logout());
     await AsyncStorage.removeItem('userData');
-    Alert.alert('Logged out', 'You have been logged out.');
-    navigation.navigate('LoginScreen');
+    dispatch(
+      showSnackbar({
+        type: 'info',
+        title: 'Logged out successfully!',
+        placement: 'top',
+      }),
+    );
+    navigation.navigate('Account', {screen: 'LoginScreen'});
   };
 
   const handleViewOrders = () => {
-    navigation.navigate('ViewOrderScreen');
+    navigation.navigate('Account', {screen: 'ViewOrderScreen'});
   };
 
   return (

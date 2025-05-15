@@ -4,14 +4,14 @@ import {
   Text,
   StyleSheet,
   ActivityIndicator,
-  Alert,
   TextInput,
 } from 'react-native';
 import {Picker} from '@react-native-picker/picker';
 import {useQuery} from '@tanstack/react-query';
 import {fetchUserDistributors} from '../../apis/fetchUserDistributors';
-import {useAppSelector} from '../../redux/store';
+import {useAppDispatch, useAppSelector} from '../../redux/store';
 import {isArrayWithValues} from '../../utils/array/isArrayWithValues';
+import {showSnackbar} from '../../redux/slice/snackbarSlice';
 
 type OrderForSelectionProps = {
   selectedUser: string | null;
@@ -22,6 +22,8 @@ const OrderForSelection = ({
   selectedUser,
   setSelectedUser,
 }: OrderForSelectionProps) => {
+  const dispatch = useAppDispatch();
+
   const [selectedCount, setSelectedCount] = useState<string>('1');
   const [customCount, setCustomCount] = useState<string>('');
 
@@ -42,7 +44,13 @@ const OrderForSelection = ({
   });
 
   if (isError) {
-    Alert.alert('Error', 'Failed to fetch users. Please try again.');
+    dispatch(
+      showSnackbar({
+        type: 'error',
+        title: 'Failed to fetch users. Please try again.',
+        placement: 'top',
+      }),
+    );
   }
 
   const isCustomCount = selectedCount === 'custom';

@@ -10,17 +10,20 @@ import {
   Platform,
   TouchableWithoutFeedback,
   Keyboard,
-  Alert,
 } from 'react-native';
 import CustomInputField from '../../../components/InputFields';
 import CustomButton from '../../../components/Button';
 import {useNavigation} from '@react-navigation/native';
 import {signupUser} from '../../../apis/signupUser';
+import {useAppDispatch} from '../../../redux/store';
+import {showSnackbar} from '../../../redux/slice/snackbarSlice';
 
 const logo = require('../../../assets/logo.png');
 
 const RegisterScreen = () => {
+  const dispatch = useAppDispatch();
   const navigation = useNavigation();
+
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
@@ -40,11 +43,23 @@ const RegisterScreen = () => {
       !formData.password ||
       !formData.confirmPassword
     ) {
-      Alert.alert('Error', 'Please fill in all fields');
+      dispatch(
+        showSnackbar({
+          type: 'error',
+          title: 'Please fill in all fields',
+          placement: 'top',
+        }),
+      );
       return;
     }
     if (formData.password !== formData.confirmPassword) {
-      Alert.alert('Error', 'Passwords do not match');
+      dispatch(
+        showSnackbar({
+          type: 'error',
+          title: 'Passwords do not match',
+          placement: 'top',
+        }),
+      );
       return;
     }
 
@@ -60,13 +75,31 @@ const RegisterScreen = () => {
         payload,
       });
       if (response?.response?.success) {
-        Alert.alert('Success', 'Account created successfully!');
-        navigation.navigate('LoginScreen');
+        dispatch(
+          showSnackbar({
+            type: 'success',
+            title: 'Account created successfully!',
+            placement: 'top',
+          }),
+        );
+        navigation.navigate('Account', {screen: 'LoginScreen'});
       } else {
-        Alert.alert('Error', response?.response?.message || 'Signup failed');
+        dispatch(
+          showSnackbar({
+            type: 'error',
+            title: response?.response?.message || 'Signup failed',
+            placement: 'top',
+          }),
+        );
       }
     } catch (error: any) {
-      Alert.alert('Error', error?.message || 'Something went wrong');
+      dispatch(
+        showSnackbar({
+          type: 'error',
+          title: error?.response?.data?.message || 'Something went wrong',
+          placement: 'top',
+        }),
+      );
     } finally {
       setIsLoading(false);
     }
@@ -85,7 +118,9 @@ const RegisterScreen = () => {
               <View style={styles.row}>
                 <Text style={styles.normalText}>Already have an account?</Text>
                 <TouchableOpacity
-                  onPress={() => navigation.navigate('LoginScreen')}>
+                  onPress={() =>
+                    navigation.navigate('Account', {screen: 'LoginScreen'})
+                  }>
                   <Text style={styles.linkText}>Login</Text>
                 </TouchableOpacity>
               </View>

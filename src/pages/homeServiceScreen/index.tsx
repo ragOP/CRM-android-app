@@ -5,14 +5,12 @@ import {
   StyleSheet,
   FlatList,
   ActivityIndicator,
-  ToastAndroid,
   ScrollView,
-  Alert,
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import React from 'react';
 import GradientHeader from '../../components/GradientHeader';
-import BookingForm from '../../components/BookingForm';
+import BookingForm from '../../components/BookingForm/BookingForm';
 import OurServices from '../../components/OurServices';
 import PricingCard from '../../components/PricingCard';
 import AboutUs from '../../components/AboutUsSection';
@@ -30,8 +28,10 @@ import {fetchProducts} from '../../apis/fetchProducts';
 import HouseCleaningProductCard from '../../components/HouseCleaningProductCard';
 import {getItem} from '../../utils/local_storage';
 import TestimonialCard from '../../components/TestimonialCard';
-import {useNavigation} from '@react-navigation/native';
+import {useNavigation, useRoute} from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import CustomDialog from '../../components/CustomDialog/CustomDialog';
+import {showSnackbar} from '../../redux/slice/snackbarSlice';
 
 const ourServices = [
   'Home Deep Cleaning',
@@ -121,10 +121,68 @@ interface HouseCleaningProducts {
   discounted_price: number;
 }
 
+const HomeServingProduct = ({
+  isLoading,
+  houseCleaningProducts,
+  handleAddToCart,
+  isPending,
+  setHouseCleaningOffsetY,
+}) => {
+  if (isLoading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#0000ff" />
+        <Text style={styles.loadingText}>Loading products...</Text>
+      </View>
+    );
+  }
+
+  if (houseCleaningProducts.length === 0) {
+    return (
+      <View style={styles.noProductsContainer}>
+        <Text style={styles.noProductsText}>No products available</Text>
+      </View>
+    );
+  }
+
+  return (
+    <View
+      onLayout={event => {
+        setHouseCleaningOffsetY(event.nativeEvent.layout.y);
+      }}
+      style={styles.productsContainer}>
+      <Text style={styles.productsTitle}>Available Products</Text>
+      <FlatList
+        data={houseCleaningProducts}
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        renderItem={({item}) => (
+          <HouseCleaningProductCard
+            _id={item._id}
+            name={item.name}
+            small_description={item.small_description}
+            discounted_price={item.discounted_price}
+            price={item.price}
+            banner_image={item.banner_image}
+            onPress={handleAddToCart}
+            isPending={isPending}
+          />
+        )}
+        keyExtractor={item => item._id}
+      />
+    </View>
+  );
+};
+
 const HouseServiceScreen = () => {
   const dispatch = useAppDispatch();
   const navigation = useNavigation();
+  const houseCleaningRef = useRef<FlatList>(null);
+  const route = useRoute();
 
+  const {service} = route.params || {};
+
+  const categories = useAppSelector(selectCategories);
   const reduxUserId = useAppSelector(state => state.auth.user?.id);
   const isLoggedIn = useAppSelector(state => state.auth.token);
 
@@ -132,12 +190,11 @@ const HouseServiceScreen = () => {
     HouseCleaningProducts[]
   >([]);
   const [isLoading, setIsLoading] = useState(false);
-  const houseCleaningRef = useRef(null);
-  const categories = useAppSelector(selectCategories);
-
-  useEffect(() => {
-    dispatch(fetchCategories({service_id: '67bb851a42d073bcb30015ca'}));
-  }, [dispatch]);
+  const [showLoginDialog, setShowLoginDialog] = useState(false);
+  const [selectedProductId, setSelectedProductId] = useState<string | null>(
+    null,
+  );
+  const [houseCleaningOffsetY, setHouseCleaningOffsetY] = useState<number>(0);
 
   const {data: internalPageConfig} = useQuery({
     queryKey: ['internal_config'],
@@ -153,6 +210,14 @@ const HouseServiceScreen = () => {
     },
   });
 
+  const scrollToProductsSection = () => {
+    if (houseCleaningRef.current && houseCleaningOffsetY !== null) {
+      houseCleaningRef.current.scrollToOffset({
+        offset: houseCleaningOffsetY,
+        animated: true,
+      });
+    }
+  };
   const fetchHouseCleaningProducts = async (id: string) => {
     setIsLoading(true);
     const houseCleaningProductParams = {
@@ -166,6 +231,7 @@ const HouseServiceScreen = () => {
 
       if (apiResponse?.response?.success) {
         setHouseCleaningProducts(apiResponse?.response?.data?.data);
+        scrollToProductsSection();
       } else {
         setHouseCleaningProducts([]);
       }
@@ -198,14 +264,20 @@ const HouseServiceScreen = () => {
       return apiResponse;
     },
     onSuccess: () => {
-      ToastAndroid.show('Product added to cart', ToastAndroid.SHORT);
+      dispatch(
+        showSnackbar({
+          type: 'success',
+          title: 'Product added to cart successfully!',
+          placement: 'top',
+        }),
+      );
       queryClient.invalidateQueries({queryKey: ['cart_products']});
     },
   });
 
-  const onLoginRedirect = async productId => {
+  const onLoginRedirect = async () => {
     const productData = {
-      product_id: productId,
+      product_id: selectedProductId,
       quantity: 1,
     };
 
@@ -225,170 +297,144 @@ const HouseServiceScreen = () => {
     if (isLoggedIn) {
       addToCartMutate(product_id);
     } else {
-      Alert.alert(
-        'User not logged in',
-        'You need to be logged in to add to cart',
-        [
-          {
-            text: 'Cancel',
-            onPress: () => console.log('Cancel Pressed'),
-            style: 'cancel',
-          },
-          {text: 'Login', onPress: () => onLoginRedirect(product_id)},
-        ],
-      );
+      setShowLoginDialog(true);
+      setSelectedProductId(product_id);
     }
   };
 
-  const HomeServingProduct = () => {
-    if (isLoading) {
-      return (
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#0000ff" />
-          <Text style={styles.loadingText}>Loading products...</Text>
-        </View>
-      );
-    }
-
-    if (houseCleaningProducts.length === 0) {
-      return (
-        <View style={styles.noProductsContainer}>
-          <Text style={styles.noProductsText}>No products available</Text>
-        </View>
-      );
-    }
-
-    return (
-      <View style={styles.productsContainer} ref={houseCleaningRef}>
-        <Text style={styles.productsTitle}>Available Products</Text>
-        <FlatList
-          data={houseCleaningProducts}
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          renderItem={({item}) => (
-            <HouseCleaningProductCard
-              _id={item._id}
-              name={item.name}
-              small_description={item.small_description}
-              discounted_price={item.discounted_price}
-              price={item.price}
-              banner_image={item.banner_image}
-              onPress={handleAddToCart}
-              isPending={isPending}
-            />
-          )}
-          keyExtractor={item => item._id}
-        />
-      </View>
-    );
-  };
+  useEffect(() => {
+    dispatch(fetchCategories({service_id: service?._id}));
+  }, [dispatch]);
 
   return (
-    <FlatList
-      ListHeaderComponent={
-        <>
-          <GradientHeader
-            title="Professional Home Cleaning Services"
-            description="Professional home cleaning services tailored to your needs. Book today
+    <>
+      <FlatList
+        ref={houseCleaningRef}
+        ListHeaderComponent={
+          <>
+            <GradientHeader
+              title="Professional Home Cleaning Services"
+              description="Professional home cleaning services tailored to your needs. Book today
                   for a fresher, healthier home."
-          />
-          <BookingForm
-            title="Let's Make Your Home Sparkle – Contact Us!"
-            categories={categories}
-            onClick={handleAddToCart}
-            isPending={isPending}
-          />
+            />
+            <BookingForm
+              title="Let's Make Your Home Sparkle – Contact Us!"
+              categories={categories}
+              onClick={handleAddToCart}
+              isPending={isPending}
+            />
 
-          <OurServices
-            categories={categories}
-            onPress={fetchHouseCleaningProducts}
-          />
+            <OurServices
+              categories={categories}
+              onPress={fetchHouseCleaningProducts}
+            />
 
-          <AboutUs
-            title="About Us"
-            description={internalPageConfig?.aboutDescription}
-            buttonText="Book Now"
-            imageSource={internalPageConfig?.aboutUsImage}
-          />
+            <AboutUs
+              title="About Us"
+              description={internalPageConfig?.aboutDescription}
+              buttonText="Book Now"
+              imageSource={internalPageConfig?.aboutUsImage}
+            />
 
-          <HomeServingProduct />
+            <HomeServingProduct
+              isLoading={isLoading}
+              houseCleaningProducts={houseCleaningProducts}
+              handleAddToCart={handleAddToCart}
+              isPending={isPending}
+              setHouseCleaningOffsetY={setHouseCleaningOffsetY}
+            />
 
-          {/* Our Services and Why Choose Us */}
-          <View style={styles.middleContainer}>
-            <LinearGradient
-              colors={['#82C8E51A', '#00008B33']}
-              start={{x: 0, y: 0}}
-              end={{x: 1, y: 0}}
-              style={styles.gradientContainer}>
-              <View style={{marginBottom: 20}}>
-                <Text style={styles.title}>Our Services</Text>
-                <Text style={styles.midDescription}>
-                  We provide a wide range of cleaning services, including:
+            {/* Our Services and Why Choose Us */}
+            <View style={styles.middleContainer}>
+              <LinearGradient
+                colors={['#82C8E51A', '#00008B33']}
+                start={{x: 0, y: 0}}
+                end={{x: 1, y: 0}}
+                style={styles.gradientContainer}>
+                <View style={{marginBottom: 20}}>
+                  <Text style={styles.title}>Our Services</Text>
+                  <Text style={styles.midDescription}>
+                    We provide a wide range of cleaning services, including:
+                  </Text>
+                  {ourServices.map((item, index) => (
+                    <Text
+                      key={`service-${index}`}
+                      style={styles.listItem}>{`\u2022 ${item}`}</Text>
+                  ))}
+                </View>
+
+                <View style={{marginBottom: 20}}>
+                  <Text style={styles.title}>Why Choose Us?</Text>
+                  {whyChooseUs.map((item, index) => (
+                    <Text
+                      key={`why-${index}`}
+                      style={styles.listItem}>{`\u2022 ${item}`}</Text>
+                  ))}
+                </View>
+
+                <View>
+                  <Text style={styles.title}>Serving Cities Across India</Text>
+                  <Text style={styles.midDescription}>
+                    With our successful presence in Delhi NCR, we've expanded...
+                  </Text>
+                </View>
+              </LinearGradient>
+
+              {/* Testimonial */}
+              <View style={styles.testimonialContainer}>
+                <Text
+                  style={{
+                    color: '#04050B',
+                    fontSize: 18,
+                    textAlign: 'center',
+                    fontWeight: 'bold',
+                    marginBottom: 10,
+                  }}>
+                  Our clients praise us for great service.
                 </Text>
-                {ourServices.map((item, index) => (
-                  <Text
-                    key={`service-${index}`}
-                    style={styles.listItem}>{`\u2022 ${item}`}</Text>
-                ))}
+                <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                  {testimonialsData.map(testimonial => (
+                    <TestimonialCard
+                      key={testimonial.id}
+                      name={testimonial.name}
+                      testimonial={testimonial.testimonial}
+                      image={testimonial.image}
+                    />
+                  ))}
+                </ScrollView>
               </View>
-
-              <View style={{marginBottom: 20}}>
-                <Text style={styles.title}>Why Choose Us?</Text>
-                {whyChooseUs.map((item, index) => (
-                  <Text
-                    key={`why-${index}`}
-                    style={styles.listItem}>{`\u2022 ${item}`}</Text>
-                ))}
-              </View>
-
-              <View>
-                <Text style={styles.title}>Serving Cities Across India</Text>
-                <Text style={styles.midDescription}>
-                  With our successful presence in Delhi NCR, we've expanded...
-                </Text>
-              </View>
-            </LinearGradient>
-
-            {/* Testimonial */}
-            <View style={styles.testimonialContainer}>
-              <Text
-                style={{
-                  color: '#04050B',
-                  fontSize: 18,
-                  textAlign: 'center',
-                  fontWeight: 'bold',
-                  marginBottom: 10,
-                }}>
-                Our clients praise us for great service.
-              </Text>
-              <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                {testimonialsData.map(testimonial => (
-                  <TestimonialCard
-                    key={testimonial.id}
-                    name={testimonial.name}
-                    testimonial={testimonial.testimonial}
-                    image={testimonial.image}
-                  />
-                ))}
-              </ScrollView>
             </View>
-          </View>
-        </>
-      }
-      data={pricingData}
-      renderItem={({item}) => (
-        <PricingCard
-          title={item.title}
-          price={item.price}
-          billingPeriod={item.billingPeriod}
-          features={item.features}
-          buttonText={item.buttonText}
-          type={item.type}
-          highlight={item.highlight}
-        />
-      )}
-      keyExtractor={(item, index) => `pricing-${index}`}
-    />
+          </>
+        }
+        data={pricingData}
+        renderItem={({item}) => (
+          <PricingCard
+            title={item.title}
+            price={item.price}
+            billingPeriod={item.billingPeriod}
+            features={item.features}
+            buttonText={item.buttonText}
+            type={item.type}
+            highlight={item.highlight}
+          />
+        )}
+        keyExtractor={(item, index) => `pricing-${index}`}
+      />
+
+      <CustomDialog
+        visible={showLoginDialog}
+        title="Login Required"
+        message="You need to log in to add products to the cart."
+        primaryLabel="Login"
+        primaryAction={() => {
+          setShowLoginDialog(false);
+          onLoginRedirect();
+        }}
+        secondaryLabel="Cancel"
+        secondaryAction={() => setShowLoginDialog(false)}
+        onDismiss={() => setShowLoginDialog(false)}
+      />
+    </>
   );
 };
 

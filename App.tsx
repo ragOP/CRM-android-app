@@ -1,5 +1,10 @@
 import React from 'react';
-import {SafeAreaView, StatusBar, StyleSheet, Platform} from 'react-native';
+import {
+  SafeAreaView,
+  StatusBar,
+  StyleSheet,
+  Platform,
+} from 'react-native';
 import {NavigationContainer} from '@react-navigation/native';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
@@ -13,11 +18,7 @@ import {persistor, store, useAppSelector} from './src/redux/store';
 import HomePageScreen from './src/pages/HomePageScreen';
 import HomeScreen from './src/pages/homeScreen';
 import RegisterScreen from './src/pages/authScreen/registerScreen';
-import PharmacyScreen from './src/pages/PharmacyScreen';
-import HomeServiceScreen from './src/pages/homeServiceScreen';
 import LaundaryScreen from './src/pages/laundaryScreen';
-import DryCleanScreen from './src/pages/dryCleanScreen';
-import ContactUsScreen from './src/pages/contactUsScreen';
 import ProductScreen from './src/pages/productScreen';
 import CartScreen from './src/pages/cartScreen';
 import UniversalSearchScreen from './src/pages/universalSearchScreen';
@@ -28,6 +29,9 @@ import LoginScreen from './src/pages/authScreen/loginScreen';
 import {PersistGate} from 'redux-persist/integration/react';
 import ViewOrdersScreen from './src/components/ViewOrderScreen/ViewOrderScreen';
 import LoginValidation from './src/components/Validation/LoginValidation';
+import CustomSnackbar from './src/components/CustomSnackbar/CustomSnackbar';
+import {SafeAreaProvider} from 'react-native-safe-area-context';
+import {PaperProvider} from 'react-native-paper';
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -103,48 +107,51 @@ const tabScreenOptions = ({route}: {route: any}) => ({
 });
 
 const App = () => {
+  // const {snackbar, hideSnackbar} = useSnackbar();
+
   return (
     <Provider store={store}>
       <PersistGate loading={null} persistor={persistor}>
         <QueryClientProvider client={queryClient}>
           <NavigationContainer>
-            <SafeAreaView style={styles.safeArea}>
-              <StatusBar
-                barStyle="dark-content"
-                backgroundColor="transparent"
-                translucent
-              />
-              <Tab.Navigator
-                initialRouteName="HomeTab"
-                screenOptions={tabScreenOptions}>
-                <Tab.Screen
-                  name="HomeTab"
-                  component={HomeStack}
-                  options={{title: 'Home'}}
-                />
-                {/* <Tab.Screen
+            <PaperProvider>
+              <SafeAreaProvider>
+                <SafeAreaView style={styles.safeArea}>
+                  <CustomSnackbar />
+                  <StatusBar backgroundColor="transparent" translucent />
+                  <Tab.Navigator
+                    initialRouteName="HomeTab"
+                    screenOptions={tabScreenOptions}>
+                    <Tab.Screen
+                      name="HomeTab"
+                      component={HomeStack}
+                      options={{title: 'Home'}}
+                    />
+                    {/* <Tab.Screen
                   name="Pharmacy"
                   component={PharmacyScreen}
                   options={{title: 'Pharmacy'}}
                 /> */}
-                <Tab.Screen
-                  name="Blog"
-                  component={Blog}
-                  options={{title: 'Blog'}}
-                />
-                <Tab.Screen
-                  name="Cart"
-                  component={CartStack}
-                  options={{title: 'Cart'}}
-                />
+                    <Tab.Screen
+                      name="Blog"
+                      component={Blog}
+                      options={{title: 'Blog'}}
+                    />
+                    <Tab.Screen
+                      name="Cart"
+                      component={CartStack}
+                      options={{title: 'Cart'}}
+                    />
 
-                <Tab.Screen
-                  name="Account"
-                  component={AccountStack}
-                  options={{title: 'Account'}}
-                />
-              </Tab.Navigator>
-            </SafeAreaView>
+                    <Tab.Screen
+                      name="Account"
+                      component={AccountStack}
+                      options={{title: 'Account'}}
+                    />
+                  </Tab.Navigator>
+                </SafeAreaView>
+              </SafeAreaProvider>
+            </PaperProvider>
           </NavigationContainer>
         </QueryClientProvider>
       </PersistGate>

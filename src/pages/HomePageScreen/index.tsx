@@ -80,13 +80,13 @@ const HomePageScreen = () => {
   };
 
   const bestSellerParams = {
-    is_best_seller: true,
+    is_super_selling: true,
     page: 1,
     per_page: 10,
   };
 
   const mostOrderedMedicineParams = {
-    is_best_seller: true,
+    is_most_ordered: true,
     page: 1,
     per_page: 10,
   };

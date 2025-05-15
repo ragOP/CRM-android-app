@@ -1,6 +1,6 @@
 import {View, Text, StyleSheet, ScrollView, Image} from 'react-native';
 import GradientHeader from '../../components/GradientHeader/index';
-import BookingForm from '../../components/BookingForm/index';
+import BookingForm from '../../components/BookingForm/BookingForm';
 import ProductGrid from '../../components/ProductGrid';
 import Blog from '../../components/Blog';
 

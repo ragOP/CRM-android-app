@@ -6,7 +6,7 @@ const LoginValidation = () => {
   const navigation = useNavigation();
 
   const handleLogin = () => {
-    navigation.navigate('AccountStack', {screen: 'LoginScreen'});
+    navigation.navigate('Account', {screen: 'LoginScreen'});
   };
 
   return (

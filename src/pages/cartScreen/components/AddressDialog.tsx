@@ -7,7 +7,6 @@ import {
   StyleSheet,
   FlatList,
   TextInput,
-  Alert,
   ScrollView,
   KeyboardAvoidingView,
   Platform,
@@ -16,9 +15,11 @@ import {
 import Icon from 'react-native-vector-icons/Ionicons';
 import {useMutation, useQueryClient} from '@tanstack/react-query';
 import {updateAddress} from '../../../apis/updateAddress';
-import {useAppSelector} from '../../../redux/store';
+import {useAppDispatch, useAppSelector} from '../../../redux/store';
 import {addAddress} from '../../../apis/addAddress';
 import {deleteAddress} from '../../../apis/deleteAddress';
+import {showSnackbar} from '../../../redux/slice/snackbarSlice';
+import {Badge, Checkbox} from 'react-native-paper';
 
 export type AddressType = 'home' | 'work' | 'other';
 
@@ -34,6 +35,7 @@ export interface Address {
   landmark?: string;
   alternatePhone?: string;
   addressType: AddressType;
+  isPrimary?: boolean;
 }
 
 const addressInit: Omit<Address, '_id'> = {
@@ -47,6 +49,7 @@ const addressInit: Omit<Address, '_id'> = {
   landmark: '',
   alternatePhone: '',
   addressType: 'home',
+  isPrimary: false,
 };
 
 export interface AddressDialogProps {
@@ -64,6 +67,7 @@ const AddressDialog: React.FC<AddressDialogProps> = ({
   onSelect,
   currentAddress,
 }) => {
+  const dispatch = useAppDispatch();
   const queryClient = useQueryClient();
 
   const reduxUser = useAppSelector(state => state.auth.user);
@@ -73,6 +77,10 @@ const AddressDialog: React.FC<AddressDialogProps> = ({
   const [editId, setEditId] = useState<string | null>(null);
   const [form, setForm] = useState<Omit<Address, '_id'>>(addressInit);
   const [isLoading, setIsLoading] = useState(false);
+  const [showLoginDialog, setShowLoginDialog] = useState(false);
+  const [selectedAddressId, setSelectedAddressId] = useState<string | null>(
+    null,
+  );
 
   const {mutate: createAddress} = useMutation({
     mutationFn: async ({address}: {address: Omit<Address, '_id'>}) => {
@@ -91,16 +99,33 @@ const AddressDialog: React.FC<AddressDialogProps> = ({
       setIsLoading(false);
       if (res?.success) {
         queryClient.invalidateQueries({queryKey: ['user_addresses']});
-        Alert.alert('Success', 'Address added successfully');
+        dispatch(
+          showSnackbar({
+            type: 'success',
+            title: 'Address added successfully',
+            placement: 'top',
+          }),
+        );
         setEditId(null);
       } else {
-        Alert.alert('Error', res?.message || 'Failed to add address');
+        dispatch(
+          showSnackbar({
+            type: 'error',
+            title: res?.message || 'Failed to add address',
+            placement: 'top',
+          }),
+        );
       }
     },
     onError: error => {
       setIsLoading(false);
-      console.error('ERROR', error);
-      Alert.alert('Error', 'Failed to add address');
+      dispatch(
+        showSnackbar({
+          type: 'error',
+          title: 'Failed to add address',
+          placement: 'top',
+        }),
+      );
     },
   });
 
@@ -113,6 +138,7 @@ const AddressDialog: React.FC<AddressDialogProps> = ({
       payload: Omit<Address, '_id'>;
     }) => {
       const apiResponse = await updateAddress({id, payload});
+      console.log('apiResponse', apiResponse);
       return apiResponse?.response;
     },
     onMutate: () => setIsLoading(true),
@@ -120,16 +146,34 @@ const AddressDialog: React.FC<AddressDialogProps> = ({
       setIsLoading(false);
       if (res?.success) {
         queryClient.invalidateQueries({queryKey: ['user_addresses']});
-        Alert.alert('Success', 'Address updated successfully');
+        dispatch(
+          showSnackbar({
+            type: 'success',
+            title: 'Address updated successfully',
+            placement: 'top',
+          }),
+        );
         setEditId(null);
       } else {
-        Alert.alert('Error', res?.message || 'Failed to update address');
+        dispatch(
+          showSnackbar({
+            type: 'error',
+            title: res?.message || 'Failed to update address',
+            placement: 'top',
+          }),
+        );
       }
     },
     onError: error => {
       setIsLoading(false);
-      console.error('ERROR', error);
-      Alert.alert('Error', 'Failed to update address');
+      console.error('Error', error);
+      dispatch(
+        showSnackbar({
+          type: 'error',
+          title: 'Failed to update address',
+          placement: 'top',
+        }),
+      );
     },
   });
 
@@ -143,15 +187,33 @@ const AddressDialog: React.FC<AddressDialogProps> = ({
       setIsLoading(false);
       if (res?.success) {
         queryClient.invalidateQueries({queryKey: ['user_addresses']});
-        Alert.alert('Success', 'Address deleted successfully');
+        dispatch(
+          showSnackbar({
+            type: 'success',
+            title: 'Address deleted successfully',
+            placement: 'top',
+          }),
+        );
       } else {
-        Alert.alert('Error', res?.message || 'Failed to delete address');
+        dispatch(
+          showSnackbar({
+            type: 'error',
+            title: res?.message || 'Failed to delete address',
+            placement: 'top',
+          }),
+        );
       }
     },
     onError: error => {
       setIsLoading(false);
       console.error('ERROR', error);
-      Alert.alert('Error', 'Failed to delete address');
+      dispatch(
+        showSnackbar({
+          type: 'error',
+          title: 'Failed to delete address',
+          placement: 'top',
+        }),
+      );
     },
   });
 
@@ -167,7 +229,13 @@ const AddressDialog: React.FC<AddressDialogProps> = ({
     ];
     for (let field of requiredFields) {
       if (!form[field]?.trim()) {
-        Alert.alert('Error', 'Please fill all required fields');
+        dispatch(
+          showSnackbar({
+            type: 'error',
+            title: `Please fill ${field}`,
+            placement: 'top',
+          }),
+        );
         return;
       }
     }
@@ -186,18 +254,16 @@ const AddressDialog: React.FC<AddressDialogProps> = ({
   };
 
   const confirmDelete = (id: string) => {
+    console.log('confirmDelete', id);
     if (!id) {
       return;
     }
-    Alert.alert('Delete', 'Are you sure?', [
-      {text: 'Cancel', style: 'cancel'},
-      {
-        text: 'Delete',
-        style: 'destructive',
-        onPress: () => removeAddress({id}),
-      },
-    ]);
+
+    setSelectedAddressId(id);
+    setShowLoginDialog(true);
   };
+
+  console.log('addresses', showLoginDialog);
 
   const renderItem = ({item}: {item: Address}) => {
     const isSelected = currentAddress?._id === item?._id;
@@ -210,9 +276,20 @@ const AddressDialog: React.FC<AddressDialogProps> = ({
         }}
         activeOpacity={0.6}>
         <View style={styles.cardContent}>
-          <Text style={styles.name}>
-            {item.name} <Text style={styles.type}>({item.addressType})</Text>
-          </Text>
+          <View style={styles.cardHeader}>
+            <View>
+              <Text style={styles.name}>
+                {item.name}{' '}
+                <Text style={styles.type}>({item.addressType})</Text>
+              </Text>
+            </View>
+            {item.isPrimary && (
+              <View style={styles.primaryBadge}>
+                <Text style={styles.primaryBadgeText}>Primary</Text>
+              </View>
+            )}
+          </View>
+
           <Text style={styles.line}>
             {item.address}, {item.locality}
           </Text>
@@ -245,138 +322,203 @@ const AddressDialog: React.FC<AddressDialogProps> = ({
   }, [visible, showForm]);
 
   return (
-    <Modal visible={visible} transparent animationType="fade">
-      <View style={styles.overlay}>
-        <TouchableOpacity style={StyleSheet.absoluteFill} onPress={onClose} />
-        <KeyboardAvoidingView
-          style={styles.container}
-          behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-          <View style={styles.dialog}>
-            <View style={styles.header}>
-              <Text style={styles.title}>
-                {showForm
-                  ? editId
-                    ? 'Edit Address'
-                    : 'Add New Address'
-                  : 'Saved Addresses'}
-              </Text>
-              <TouchableOpacity onPress={onClose}>
-                <Icon name="close" size={24} color="#333" />
-              </TouchableOpacity>
-            </View>
-            <View style={styles.divider} />
-            {isLoading ? (
-              <ActivityIndicator
-                size="large"
-                color="#007AFF"
-                style={styles.loader}
-              />
-            ) : showForm ? (
-              <ScrollView contentContainerStyle={styles.scrollContent}>
-                {[
-                  {key: 'name', placeholder: 'Full Name', keyboard: 'default'},
-                  {
-                    key: 'mobile',
-                    placeholder: 'Mobile Number',
-                    keyboard: 'phone-pad',
-                  },
-                  {key: 'pincode', placeholder: 'Pincode', keyboard: 'numeric'},
-                  {
-                    key: 'locality',
-                    placeholder: 'Locality',
-                    keyboard: 'default',
-                  },
-                  {
-                    key: 'address',
-                    placeholder: 'Full Address',
-                    keyboard: 'default',
-                    multiline: true,
-                  },
-                  {key: 'city', placeholder: 'City', keyboard: 'default'},
-                  {key: 'state', placeholder: 'State', keyboard: 'default'},
-                  {
-                    key: 'landmark',
-                    placeholder: 'Landmark (Optional)',
-                    keyboard: 'default',
-                  },
-                  {
-                    key: 'alternatePhone',
-                    placeholder: 'Alternate Phone (Optional)',
-                    keyboard: 'phone-pad',
-                  },
-                ].map(({key, placeholder, keyboard, multiline}) => (
-                  <TextInput
-                    key={key}
-                    style={[styles.input, multiline && styles.multilineInput]}
-                    placeholder={placeholder}
-                    keyboardType={keyboard as any}
-                    multiline={!!multiline}
-                    value={(form as any)[key]}
-                    onChangeText={text =>
-                      setForm(prev => ({...prev, [key]: text}))
-                    }
-                  />
-                ))}
-                <View style={styles.types}>
-                  {['home', 'work', 'other'].map(t => (
-                    <TouchableOpacity
-                      key={t}
-                      style={[
-                        styles.typeBtn,
-                        form.addressType === t && styles.typeBtnActive,
-                      ]}
-                      onPress={() =>
-                        setForm(prev => ({
-                          ...prev,
-                          addressType: t as AddressType,
-                        }))
-                      }>
-                      <Text
+    <>
+      <Modal visible={visible} transparent animationType="fade">
+        <View style={styles.overlay}>
+          <TouchableOpacity style={StyleSheet.absoluteFill} onPress={onClose} />
+          <KeyboardAvoidingView
+            style={styles.container}
+            behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+            <View style={styles.dialog}>
+              <View style={styles.header}>
+                <Text style={styles.title}>
+                  {showForm
+                    ? editId
+                      ? 'Edit Address'
+                      : 'Add New Address'
+                    : 'Saved Addresses'}
+                </Text>
+                <TouchableOpacity onPress={onClose}>
+                  <Icon name="close" size={24} color="#333" />
+                </TouchableOpacity>
+              </View>
+              <View style={styles.divider} />
+              {isLoading ? (
+                <ActivityIndicator
+                  size="large"
+                  color="#007AFF"
+                  style={styles.loader}
+                />
+              ) : showForm ? (
+                <ScrollView contentContainerStyle={styles.scrollContent}>
+                  {[
+                    {
+                      key: 'name',
+                      placeholder: 'Full Name',
+                      keyboard: 'default',
+                    },
+                    {
+                      key: 'mobile',
+                      placeholder: 'Mobile Number',
+                      keyboard: 'phone-pad',
+                    },
+                    {
+                      key: 'pincode',
+                      placeholder: 'Pincode',
+                      keyboard: 'numeric',
+                    },
+                    {
+                      key: 'locality',
+                      placeholder: 'Locality',
+                      keyboard: 'default',
+                    },
+                    {
+                      key: 'address',
+                      placeholder: 'Full Address',
+                      keyboard: 'default',
+                      multiline: true,
+                    },
+                    {key: 'city', placeholder: 'City', keyboard: 'default'},
+                    {key: 'state', placeholder: 'State', keyboard: 'default'},
+                    {
+                      key: 'landmark',
+                      placeholder: 'Landmark (Optional)',
+                      keyboard: 'default',
+                    },
+                    {
+                      key: 'alternatePhone',
+                      placeholder: 'Alternate Phone (Optional)',
+                      keyboard: 'phone-pad',
+                    },
+                  ].map(({key, placeholder, keyboard, multiline}) => (
+                    <TextInput
+                      key={key}
+                      style={[styles.input, multiline && styles.multilineInput]}
+                      placeholder={placeholder}
+                      keyboardType={keyboard as any}
+                      multiline={!!multiline}
+                      value={(form as any)[key]}
+                      onChangeText={text =>
+                        setForm(prev => ({...prev, [key]: text}))
+                      }
+                    />
+                  ))}
+
+                  <TouchableOpacity
+                    style={styles.primaryFormContainer}
+                    onPress={() =>
+                      setForm(prev => ({...prev, isPrimary: !form.isPrimary}))
+                    }>
+                    <Text>Is Primary Address</Text>
+                    <Checkbox
+                      status={form.isPrimary ? 'checked' : 'unchecked'}
+                    />
+                  </TouchableOpacity>
+                  <View style={styles.types}>
+                    <Text>Address Type: </Text>
+                    {['home', 'work', 'other'].map(t => (
+                      <TouchableOpacity
+                        key={t}
                         style={[
-                          styles.typeText,
-                          form.addressType === t && styles.typeTextActive,
-                        ]}>
-                        {t.charAt(0).toUpperCase() + t.slice(1)}
+                          styles.typeBtn,
+                          form.addressType === t && styles.typeBtnActive,
+                        ]}
+                        onPress={() =>
+                          setForm(prev => ({
+                            ...prev,
+                            addressType: t as AddressType,
+                          }))
+                        }>
+                        <Text
+                          style={[
+                            styles.typeText,
+                            form.addressType === t && styles.typeTextActive,
+                          ]}>
+                          {t.charAt(0).toUpperCase() + t.slice(1)}
+                        </Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                  <View style={styles.footerBtns}>
+                    <TouchableOpacity
+                      style={styles.cancelBtn}
+                      onPress={() => setShowForm(false)}>
+                      <Text style={styles.cancelTxt}>Cancel</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={styles.saveBtn} onPress={onSave}>
+                      <Text style={styles.saveTxt}>
+                        {editId ? 'Update' : 'Save'}
                       </Text>
                     </TouchableOpacity>
-                  ))}
-                </View>
-                <View style={styles.footerBtns}>
-                  <TouchableOpacity
-                    style={styles.cancelBtn}
-                    onPress={() => setShowForm(false)}>
-                    <Text style={styles.cancelTxt}>Cancel</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity style={styles.saveBtn} onPress={onSave}>
-                    <Text style={styles.saveTxt}>
-                      {editId ? 'Update' : 'Save'}
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-              </ScrollView>
-            ) : (
-              <FlatList
-                data={addresses}
-                keyExtractor={i => i._id}
-                renderItem={renderItem}
-                contentContainerStyle={styles.flatListContent}
-                ListEmptyComponent={
-                  <Text style={styles.empty}>No addresses saved.</Text>
-                }
-              />
-            )}
-            {!showForm && (
-              <TouchableOpacity
-                style={styles.addNew}
-                onPress={() => setShowForm(true)}
-                disabled={addresses?.length >= 3}>
-                <Text style={styles.addNewTxt}>+ Add New Address</Text>
-              </TouchableOpacity>
-            )}
+                  </View>
+                </ScrollView>
+              ) : (
+                <FlatList
+                  data={addresses}
+                  keyExtractor={i => i._id}
+                  renderItem={renderItem}
+                  contentContainerStyle={styles.flatListContent}
+                  ListEmptyComponent={
+                    <Text style={styles.empty}>No addresses saved.</Text>
+                  }
+                />
+              )}
+              {!showForm && (
+                <TouchableOpacity
+                  style={styles.addNew}
+                  onPress={() => setShowForm(true)}
+                  disabled={addresses?.length >= 3}>
+                  <Text style={styles.addNewTxt}>+ Add New Address</Text>
+                </TouchableOpacity>
+              )}
+            </View>
+          </KeyboardAvoidingView>
+        </View>
+        {/* <CustomDialog
+          visible={true}
+          title="Delete Address"
+          message="Are you sure you want to delete this address?"
+          primaryLabel="Delete"
+          primaryAction={() => {
+            setShowLoginDialog(false);
+            if (selectedAddressId) {
+              removeAddress({id: selectedAddressId});
+            }
+          }}
+          secondaryLabel="Cancel"
+          secondaryAction={() => setShowLoginDialog(false)}
+          onDismiss={() => setShowLoginDialog(false)}
+        /> */}
+
+        {showLoginDialog && (
+          <View style={styles.confirmDialogOverlay}>
+            <View style={styles.confirmDialog}>
+              <Text style={styles.confirmTitle}>Delete Address</Text>
+              <Text style={styles.confirmMessage}>
+                Are you sure you want to delete this address?
+              </Text>
+              <View style={styles.confirmActions}>
+                <TouchableOpacity
+                  style={styles.confirmCancel}
+                  onPress={() => setShowLoginDialog(false)}>
+                  <Text style={styles.cancelTxt}>Cancel</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.confirmDelete}
+                  onPress={() => {
+                    setShowLoginDialog(false);
+                    if (selectedAddressId) {
+                      removeAddress({id: selectedAddressId});
+                    }
+                  }}>
+                  <Text style={styles.deleteTxt}>Delete</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
           </View>
-        </KeyboardAvoidingView>
-      </View>
-    </Modal>
+        )}
+      </Modal>
+    </>
   );
 };
 
@@ -430,6 +572,12 @@ const styles = StyleSheet.create({
   cardContent: {
     flex: 1,
   },
+  cardHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 2,
+    padding: 2,
+  },
   name: {fontSize: 15, fontWeight: '500', marginBottom: 4},
   type: {fontSize: 13, color: '#666', fontWeight: '400'},
   line: {fontSize: 13, color: '#555', marginBottom: 2},
@@ -459,8 +607,9 @@ const styles = StyleSheet.create({
   },
   types: {
     flexDirection: 'row',
-    justifyContent: 'space-around',
+    alignItems: 'center',
     marginBottom: 16,
+    gap: 8,
   },
   typeBtn: {
     paddingVertical: 6,
@@ -500,4 +649,62 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
   },
   saveTxt: {color: '#FFF', fontSize: 16},
+  primaryBadge: {
+    backgroundColor: '#007AFF',
+    borderRadius: 8,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    marginLeft: 8,
+  },
+  primaryBadgeText: {
+    color: '#fff',
+    fontSize: 12,
+    fontWeight: 'bold',
+  },
+  primaryFormContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+
+  confirmDialogOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0,0,0,0.3)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  confirmDialog: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 24,
+    width: '80%',
+    // alignItems: 'center',
+  },
+  confirmTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 12,
+  },
+  confirmMessage: {
+    fontSize: 16,
+    marginBottom: 24,
+  },
+  confirmActions: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    width: '100%',
+  },
+  confirmCancel: {
+    marginRight: 16,
+  },
+  confirmDelete: {
+    backgroundColor: '#FF3B30',
+    borderRadius: 6,
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+  },
+  deleteTxt: {
+    color: '#fff',
+    fontWeight: 'bold',
+  },
 });

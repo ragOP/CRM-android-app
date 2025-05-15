@@ -7,9 +7,11 @@ import {
   StyleSheet,
   ActivityIndicator,
   TouchableOpacity,
-  Button,
 } from 'react-native';
 import axios from 'axios';
+import {BACKEND_URL} from '../../utils/url';
+import {Button, Icon, IconButton} from 'react-native-paper';
+import {isArrayWithValues} from '../../utils/array/isArrayWithValues';
 
 interface Author {
   _id: string;
@@ -67,9 +69,7 @@ const BlogScreen = () => {
 
   const fetchBlogs = async () => {
     try {
-      const response = await axios.get(
-        'https://2c66-84-247-129-99.ngrok-free.app/api/blog',
-      );
+      const response = await axios.get(`${BACKEND_URL}/api/blog`);
       if (response.data?.data) {
         setBlogList(response.data.data);
       } else {
@@ -86,9 +86,7 @@ const BlogScreen = () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await axios.get(
-        `https://2c66-84-247-129-99.ngrok-free.app/api/blog/${id}`,
-      );
+      const response = await axios.get(`${BACKEND_URL}/api/blog/${id}`);
       setSelectedBlog(response.data.data);
     } catch (error) {
       console.error('Error fetching blog details:', error);
@@ -122,27 +120,40 @@ const BlogScreen = () => {
 
   if (selectedBlog) {
     return (
-      <ScrollView contentContainerStyle={styles.container}>
+      <ScrollView contentContainerStyle={{flex: 1}}>
         <TouchableOpacity onPress={handleBack} style={styles.customButton}>
-          <Text style={styles.customButtonText}>Back to Blogs</Text>
+          <IconButton
+            icon="arrow-left"
+            iconColor="#000"
+            size={24}
+            onPress={handleBack}
+          />
+          <Text style={styles.customButtonText}>Back</Text>
         </TouchableOpacity>
 
-        <Image
-          source={{uri: selectedBlog.bannerImageUrl}}
-          style={styles.banner}
-        />
-        <Text style={styles.title}>{selectedBlog.title}</Text>
-        <Text style={styles.author}>
-          By {selectedBlog.author?.name ?? 'Unknown Author'}
-        </Text>
-        <Text style={styles.description}>{selectedBlog.short_description}</Text>
-        <Text style={styles.content}>{stripHtml(selectedBlog.content)}</Text>
+        <View style={{padding: 16}}>
+          <Image
+            source={{uri: selectedBlog.bannerImageUrl}}
+            style={styles.banner}
+          />
+          <Text style={styles.title}>{selectedBlog.title}</Text>
+          <Text style={styles.author}>
+            By {selectedBlog.author?.name ?? 'Unknown Author'}
+          </Text>
+          <Text style={styles.description}>
+            {selectedBlog.short_description}
+          </Text>
+          <Text style={styles.content}>{stripHtml(selectedBlog.content)}</Text>
+        </View>
       </ScrollView>
     );
   }
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
+      <Text style={styles.title}>
+        Blogs {isArrayWithValues(blogList) ? `(${blogList.length})` : ''}
+      </Text>
       {blogList.map(item => (
         <TouchableOpacity
           key={item._id}
@@ -184,7 +195,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 20,
     fontWeight: '700',
-    marginBottom: 6,
+    marginBottom: 12,
   },
   author: {
     fontSize: 14,
@@ -208,21 +219,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   customButton: {
-    backgroundColor: '#007BFF', // Blue background color
-    borderRadius: 50, // Rounded corners
-    paddingVertical: 12, // Vertical padding
-    paddingHorizontal: 24, // Horizontal padding
-    marginTop: 20, // Top margin for spacing
-    alignItems: 'center', // Center text horizontally
-    justifyContent: 'center', // Center text vertically
-    elevation: 5, // Shadow for Android
-    shadowColor: '#000', // Shadow color for iOS
-    shadowOffset: {width: 0, height: 2}, // Shadow offset
-    shadowOpacity: 0.2, // Shadow opacity
-    shadowRadius: 4, // Shadow radius for iOS
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 10,
   },
   customButtonText: {
-    color: '#fff', // White text color
+    color: '#000', // White text color
     fontSize: 18, // Text size
     fontWeight: '600', // Text weight
     textAlign: 'center', // Center align text

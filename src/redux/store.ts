@@ -3,6 +3,7 @@ import productSlice from './slice/productsSlice';
 import categorySlice from './slice/categorySlice';
 import servicesSlice from './slice/servicesSlice';
 import authSlice from './slice/authSlice';
+import snackbarSlice from './slice/snackbarSlice';
 import {TypedUseSelectorHook, useDispatch, useSelector} from 'react-redux';
 
 import {persistStore, persistReducer} from 'redux-persist';
@@ -20,6 +21,7 @@ const rootReducer = combineReducers({
   category: categorySlice,
   services: servicesSlice,
   auth: authSlice,
+  snackbar: snackbarSlice,
 });
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);

@@ -1,6 +1,6 @@
-import {View, Text, ScrollView, StyleSheet, Alert} from 'react-native';
+import {View, Text, ScrollView, StyleSheet} from 'react-native';
 import GradientHeader from '../../components/GradientHeader/index';
-import BookingForm from '../../components/BookingForm/index';
+import BookingForm from '../../components/BookingForm/BookingForm';
 import AboutUs from '../../components/AboutUsSection/index';
 import TestimonialCard from '../../components/TestimonialCard';
 import OurServices from '../../components/OurServices';
@@ -15,9 +15,10 @@ import {
 import {useEffect, useState, useRef} from 'react';
 import {fetchProducts} from '../../apis/fetchProducts';
 import LaundryServiceCard from '../../components/LaundryServiceCard';
-import {getItem} from '../../utils/local_storage';
-import {useNavigation} from '@react-navigation/native';
+import {useNavigation, useRoute} from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import CustomDialog from '../../components/CustomDialog/CustomDialog';
+import {showSnackbar} from '../../redux/slice/snackbarSlice';
 
 const testimonialsData = [
   {
@@ -63,6 +64,9 @@ interface LaundryProduct {
 const LaundaryScreen = () => {
   const dispatch = useAppDispatch();
   const navigation = useNavigation();
+  const route = useRoute();
+
+  const {service} = route.params;
 
   const reduxUserId = useAppSelector(state => state.auth.user?.id);
 
@@ -72,12 +76,12 @@ const LaundaryScreen = () => {
   const scrollViewRef = useRef<ScrollView>(null);
   const [laundryProducts, setLaundryProducts] = useState<LaundryProduct[]>([]);
   const [laundryOffsetY, setLaundryOffsetY] = useState(0);
+  const [showLoginDialog, setShowLoginDialog] = useState(false);
+  const [selectedProductId, setSelectedProductId] = useState<string | null>(
+    null,
+  );
 
   const queryClient = useQueryClient();
-
-  useEffect(() => {
-    dispatch(fetchCategories({service_id: '67bb85be42d073bcb30015d9'}));
-  }, []);
 
   const {data: internalPageConfig} = useQuery({
     queryKey: ['internal_config'],
@@ -95,7 +99,6 @@ const LaundaryScreen = () => {
 
   const {mutate: addToCartMutate, isPending} = useMutation({
     mutationFn: async (product_id: string) => {
-
       const payload = {
         product_id,
         quantity: 1,
@@ -111,12 +114,24 @@ const LaundaryScreen = () => {
       return apiResponse;
     },
     onSuccess: () => {
-      Alert.alert('Success', 'Product added to cart successfully!');
+      dispatch(
+        showSnackbar({
+          type: 'success',
+          title: 'Product added to cart successfully!',
+          placement: 'top',
+        }),
+      );
       queryClient.invalidateQueries({queryKey: ['cart_products']});
     },
 
     onError: () => {
-      Alert.alert('Error', 'Failed to add product to cart. Please try again.');
+      dispatch(
+        showSnackbar({
+          type: 'error',
+          title: 'Failed to add product to cart. Please try again.',
+          placement: 'top',
+        }),
+      );
     },
   });
 
@@ -124,9 +139,9 @@ const LaundaryScreen = () => {
     scrollViewRef.current?.scrollTo({y: laundryOffsetY, animated: true});
   };
 
-  const onLoginRedirect = async productId => {
+  const onLoginRedirect = async () => {
     const productData = {
-      product_id: productId,
+      product_id: selectedProductId,
       quantity: 1,
     };
 
@@ -146,18 +161,8 @@ const LaundaryScreen = () => {
     if (isLoggedIn) {
       addToCartMutate(productId);
     } else {
-      Alert.alert(
-        'User not logged in',
-        'You need to be logged in to add to cart',
-        [
-          {
-            text: 'Cancel',
-            onPress: () => console.log('Cancel Pressed'),
-            style: 'cancel',
-          },
-          {text: 'Login', onPress: () => onLoginRedirect(productId)},
-        ],
-      );
+      setShowLoginDialog(true);
+      setSelectedProductId(productId);
     }
   };
 
@@ -178,93 +183,113 @@ const LaundaryScreen = () => {
     }
   };
 
+  useEffect(() => {
+    dispatch(fetchCategories({service_id: service._id}));
+  }, []);
+
   return (
-    <ScrollView ref={scrollViewRef}>
-      <GradientHeader
-        title="Get Your Laundry Done!"
-        description="Visit, call, or drop us a message—we’re just around the corner!"
-      />
+    <>
+      <ScrollView ref={scrollViewRef}>
+        <GradientHeader
+          title="Get Your Laundry Done!"
+          description="Visit, call, or drop us a message—we’re just around the corner!"
+        />
 
-      <BookingForm
-        title="Request Pickup"
-        categories={categories}
-        onClick={handleAddToCart}
-        isPending={isPending}
-      />
+        <BookingForm
+          title="Request Pickup"
+          categories={categories}
+          onClick={handleAddToCart}
+          isPending={isPending}
+        />
 
-      <OurServices categories={categories} onPress={fetchLaundryProducts} />
+        <OurServices categories={categories} onPress={fetchLaundryProducts} />
 
-      <AboutUs
-        title="We care for your Clothes"
-        description={internalPageConfig?.aboutDescription}
-        buttonText="Book Now"
-        imageSource={internalPageConfig?.aboutUsImage}
-      />
-      {/* A weird design component that need to be redesigned from figma */}
+        <AboutUs
+          title="We care for your Clothes"
+          description={internalPageConfig?.aboutDescription}
+          buttonText="Book Now"
+          imageSource={internalPageConfig?.aboutUsImage}
+        />
+        {/* A weird design component that need to be redesigned from figma */}
 
-      <View
-        style={styles.productsContainer}
-        onLayout={event => {
-          setLaundryOffsetY(event.nativeEvent.layout.y);
-        }}>
-        <Text style={styles.productsTitle}>Available Products</Text>
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          style={styles.container}>
-          {laundryProducts.length > 0 ? (
-            laundryProducts.map((product, serviceIndex) => (
-              <LaundryServiceCard
-                key={product._id}
-                productId={product._id}
-                productType={product.name}
-                price={product.price}
-                originalPrice={product.discounted_price}
-                description={product.small_description}
-                features={
-                  serviceIndex === 0
-                    ? product.full_description.split('✔')
-                    : product.full_description.split('✔')
-                }
-                serviceIndex={serviceIndex}
-                handleAddToCart={handleAddToCart}
-                isPending={isPending}
-              />
-            ))
-          ) : (
-            <View style={styles.noProductsContainer}>
-              <Text style={styles.noProductsText}>
-                No products available at the moment.
-              </Text>
-            </View>
-          )}
-        </ScrollView>
-      </View>
-
-      {/* Testimonial */}
-      <View style={styles.testimonialContainer}>
-        <Text
-          style={{
-            color: '#04050B',
-            fontSize: 18,
-            textAlign: 'center',
-            fontWeight: 'bold',
-            marginBottom: 10,
+        <View
+          style={styles.productsContainer}
+          onLayout={event => {
+            setLaundryOffsetY(event.nativeEvent.layout.y);
           }}>
-          Our clients praise us for great service.
-        </Text>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-          {testimonialsData.map(testimonial => (
-            <TestimonialCard
-              key={testimonial.id}
-              name={testimonial.name}
-              testimonial={testimonial.testimonial}
-              image={testimonial.image}
-            />
-          ))}
-        </ScrollView>
-      </View>
-    </ScrollView>
+          <Text style={styles.productsTitle}>Available Products</Text>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            style={styles.container}>
+            {laundryProducts.length > 0 ? (
+              laundryProducts.map((product, serviceIndex) => (
+                <LaundryServiceCard
+                  key={product._id}
+                  productId={product._id}
+                  productType={product.name}
+                  price={product.price}
+                  originalPrice={product.discounted_price}
+                  description={product.small_description}
+                  features={
+                    serviceIndex === 0
+                      ? product.full_description.split('✔')
+                      : product.full_description.split('✔')
+                  }
+                  serviceIndex={serviceIndex}
+                  handleAddToCart={handleAddToCart}
+                  isPending={isPending}
+                />
+              ))
+            ) : (
+              <View style={styles.noProductsContainer}>
+                <Text style={styles.noProductsText}>
+                  No products available at the moment.
+                </Text>
+              </View>
+            )}
+          </ScrollView>
+        </View>
+
+        {/* Testimonial */}
+        <View style={styles.testimonialContainer}>
+          <Text
+            style={{
+              color: '#04050B',
+              fontSize: 18,
+              textAlign: 'center',
+              fontWeight: 'bold',
+              marginBottom: 10,
+            }}>
+            Our clients praise us for great service.
+          </Text>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+            {testimonialsData.map(testimonial => (
+              <TestimonialCard
+                key={testimonial.id}
+                name={testimonial.name}
+                testimonial={testimonial.testimonial}
+                image={testimonial.image}
+              />
+            ))}
+          </ScrollView>
+        </View>
+      </ScrollView>
+
+      <CustomDialog
+        visible={showLoginDialog}
+        title="Login Required"
+        message="You need to log in to add products to the cart."
+        primaryLabel="Login"
+        primaryAction={() => {
+          setShowLoginDialog(false);
+          onLoginRedirect();
+        }}
+        secondaryLabel="Cancel"
+        secondaryAction={() => setShowLoginDialog(false)}
+        onDismiss={() => setShowLoginDialog(false)}
+      />
+    </>
   );
 };
 

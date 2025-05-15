@@ -1,11 +1,13 @@
-import React, {useState, useEffect} from 'react';
-import {View, Text, StyleSheet, ActivityIndicator, Alert} from 'react-native';
+import React, {useState} from 'react';
+import {View, Text, StyleSheet} from 'react-native';
 import CustomInputField from '../InputFields';
 import CustomDropdown from '../DropDown';
 import CustomButton from '../Button';
 import {Category} from '../../redux/slice/categorySlice';
 import {fetchProducts} from '../../apis/fetchProducts';
 import {useQuery} from '@tanstack/react-query';
+import {useAppDispatch} from '../../redux/store';
+import {showSnackbar} from '../../redux/slice/snackbarSlice';
 
 interface BookingFormProps {
   title: string;
@@ -14,8 +16,15 @@ interface BookingFormProps {
   isPending?: boolean;
 }
 
-const index: React.FC<BookingFormProps> = ({title, categories, onClick, isPending}) => {
-const [bookingData, setBookingData] = useState({
+const BookingForm: React.FC<BookingFormProps> = ({
+  title,
+  categories,
+  onClick,
+  isPending,
+}) => {
+  const dispatch = useAppDispatch();
+
+  const [bookingData, setBookingData] = useState({
     name: '',
     phoneNumber: '',
     selectedService: '',
@@ -39,7 +48,12 @@ const [bookingData, setBookingData] = useState({
     <View style={styles.container}>
       <Text style={styles.title}>{title}</Text>
       <View style={styles.inputContainer}>
-        <View style={{flex: 1, flexDirection: 'row', justifyContent: 'space-between', }}>
+        <View
+          style={{
+            flex: 1,
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+          }}>
           <CustomInputField
             fontSize={14}
             InputWidth={49}
@@ -47,7 +61,9 @@ const [bookingData, setBookingData] = useState({
             placeholder="Name"
             value={bookingData.name}
             maxLength={72}
-            onChangeText={text => setBookingData(prev => ({...prev, name: text}))}
+            onChangeText={text =>
+              setBookingData(prev => ({...prev, name: text}))
+            }
           />
           <CustomInputField
             fontSize={14}
@@ -57,10 +73,17 @@ const [bookingData, setBookingData] = useState({
             value={bookingData.phoneNumber}
             numeric
             maxLength={10}
-            onChangeText={text => setBookingData(prev => ({...prev, phoneNumber: text}))}
+            onChangeText={text =>
+              setBookingData(prev => ({...prev, phoneNumber: text}))
+            }
           />
         </View>
-        <View style={{flex: 1, flexDirection: 'row', justifyContent: 'space-between', }}>
+        <View
+          style={{
+            flex: 1,
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+          }}>
           <CustomDropdown
             InputHeight={50}
             fontSize={12}
@@ -81,7 +104,9 @@ const [bookingData, setBookingData] = useState({
             radius={50}
             label="Select Package"
             selectedValue={bookingData.selectedPackage}
-            onValueChange={itemValue => setBookingData(prev => ({...prev, selectedPackage: itemValue}))}
+            onValueChange={itemValue =>
+              setBookingData(prev => ({...prev, selectedPackage: itemValue}))
+            }
             options={products}
           />
         </View>
@@ -93,17 +118,29 @@ const [bookingData, setBookingData] = useState({
         title={isPending ? 'Loading....' : 'Book Now'}
         iconName={'../../assets/cleaningIcon.svg'}
         onPress={() => {
-          const { name, phoneNumber, selectedService, selectedPackage } = bookingData;
-          if(!name || !phoneNumber || !selectedService || !selectedPackage) {
-            Alert.alert('Error', 'Please fill all the fields');
+          const {name, phoneNumber, selectedService, selectedPackage} =
+            bookingData;
+          if (!name || !phoneNumber || !selectedService || !selectedPackage) {
+            dispatch(
+              showSnackbar({
+                type: 'error',
+                title: 'Please fill all the fields',
+                placement: 'top',
+              }),
+            );
             return;
           }
           if (isPending) return;
           onClick && onClick(selectedPackage);
-          setBookingData(prev => ({...prev, name: '', phoneNumber: '', selectedService: '', selectedPackage: ''}));
+          setBookingData(prev => ({
+            ...prev,
+            name: '',
+            phoneNumber: '',
+            selectedService: '',
+            selectedPackage: '',
+          }));
         }}
       />
-      
     </View>
   );
 };
@@ -139,4 +176,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default index;
+export default BookingForm;

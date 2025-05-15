@@ -8,7 +8,6 @@ import {
   ScrollView,
   KeyboardAvoidingView,
   Platform,
-  Alert,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useNavigation} from '@react-navigation/native';
@@ -21,6 +20,7 @@ import {useAppDispatch, useAppSelector} from '../../../redux/store';
 import {login} from '../../../redux/slice/authSlice';
 import {useMutation, useQueryClient} from '@tanstack/react-query';
 import {addCart} from '../../../apis/addCart';
+import {showSnackbar} from '../../../redux/slice/snackbarSlice';
 
 const LoginScreen = () => {
   const dispatch = useAppDispatch();
@@ -40,10 +40,22 @@ const LoginScreen = () => {
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({queryKey: ['cart_products']});
-      Alert.alert('Success', 'Product added to cart successfully!');
+      dispatch(
+        showSnackbar({
+          type: 'success',
+          title: 'Product added to cart!',
+          placement: 'top',
+        }),
+      );
     },
     onError: () => {
-      Alert.alert('Error', 'Failed to add product to cart. Please try again.');
+      dispatch(
+        showSnackbar({
+          type: 'error',
+          title: 'Failed to add product to cart. Please try again!',
+          placement: 'top',
+        }),
+      );
     },
   });
 
@@ -78,7 +90,10 @@ const LoginScreen = () => {
 
   const handleLogin = async () => {
     if (!email || !password) {
-      Alert.alert('Error', 'Please fill in all fields');
+      console.log('Please fill in all fields');
+      dispatch(
+        showSnackbar({type: 'info', title: 'Please fill in all fields'}),
+      );
       return;
     }
 
@@ -119,33 +134,49 @@ const LoginScreen = () => {
           JSON.stringify(localStoragePayload),
         );
 
-        Alert.alert('Success', 'Login successful');
+        dispatch(
+          showSnackbar({
+            type: 'success',
+            title: 'Login successful!',
+            placement: 'top',
+          }),
+        );
+
         const savedData = await AsyncStorage.getItem('tempProduct');
         if (savedData) {
-          console.log('SAVED DATA', savedData);
-
           const {product, timestamp} = JSON.parse(savedData);
 
-          console.log('PRODUCT', product);
           if (product) {
             const currentTime = Date.now();
             const fiveMinutes = 5 * 60 * 1000;
             if (currentTime - timestamp <= fiveMinutes) {
               await checkAndAddProductAfterLogin({userId: userData?.id});
-              navigation.navigate('CartScreen');
+              navigation.navigate('Cart', {
+                screen: 'CartScreen',
+              });
             }
           } else {
-            navigation.navigate('AccountStack', {screen: 'UserProfileScreen'});
+            navigation.navigate('Account', {screen: 'UserProfileScreen'});
           }
         }
       } else {
-        navigation.navigate('AccountStack', {screen: 'UserProfileScreen'});
+        console.log('Login failed:', response?.message);
+        dispatch(
+          showSnackbar({
+            type: 'error',
+            title: response?.message || 'Login failed. Please try again.',
+            placement: 'top',
+          }),
+        );
+        navigation.navigate('Account', {screen: 'UserProfileScreen'});
       }
     } catch (error: any) {
       console.log(error);
-      Alert.alert(
-        'Error',
-        error?.response?.data?.message || 'Something went wrong',
+      dispatch(
+        showSnackbar({
+          type: 'error',
+          title: error?.response?.data?.message || 'Something went wrong',
+        }),
       );
     } finally {
       setIsLoading(false);
@@ -165,7 +196,9 @@ const LoginScreen = () => {
             <View style={styles.row}>
               <Text style={styles.normalText}>Don't have an account? </Text>
               <TouchableOpacity
-                onPress={() => navigation.navigate('RegisterScreen')}>
+                onPress={() =>
+                  navigation.navigate('Account', {screen: 'RegisterScreen'})
+                }>
                 <Text style={styles.linkText}>Sign Up</Text>
               </TouchableOpacity>
             </View>

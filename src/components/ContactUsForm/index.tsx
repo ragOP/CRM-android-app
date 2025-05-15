@@ -1,11 +1,15 @@
 import {useState} from 'react';
-import {View, Text, StyleSheet, Alert} from 'react-native';
+import {View, Text, StyleSheet} from 'react-native';
 import CustomInputField from '../InputFields';
 import CustomButton from '../Button';
 import {useMutation} from '@tanstack/react-query';
 import {QueryFormPayload, submitQueryForm} from '../../apis/submitQueryForm';
+import {useAppDispatch} from '../../redux/store';
+import {showSnackbar} from '../../redux/slice/snackbarSlice';
 
 const ContactUsForm = () => {
+  const dispatch = useAppDispatch();
+
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -17,14 +21,26 @@ const ContactUsForm = () => {
       return await submitQueryForm({payload: formData});
     },
     onSuccess: () => {
-      Alert.alert('Success', 'Form submitted successfully');
+      dispatch(
+        showSnackbar({
+          type: 'success',
+          title: 'Form submitted successfully!',
+          placement: 'top',
+        }),
+      );
       setFormData({name: '', email: '', subject: ''});
     },
   });
 
   const handleSubmitForm = async () => {
     if (!formData.name || !formData.email || !formData.subject) {
-      Alert.alert('Error','Please fill all the fields');
+      dispatch(
+        showSnackbar({
+          type: 'error',
+          title: 'Please fill all the fields',
+          placement: 'top',
+        }),
+      );
       return;
     }
     submitQuery(formData);
@@ -72,7 +88,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     margin: 10,
-    paddingHorizontal: 10
+    paddingHorizontal: 10,
   },
   heading: {
     fontSize: 18,

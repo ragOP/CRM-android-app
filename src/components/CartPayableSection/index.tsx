@@ -1,5 +1,5 @@
-import {useEffect, useRef} from 'react';
-import {View, Text, TouchableOpacity, StyleSheet, Alert} from 'react-native';
+import {useEffect, useState} from 'react';
+import {View, Text, TouchableOpacity, StyleSheet} from 'react-native';
 import {
   CFErrorResponse,
   CFPaymentGatewayService,
@@ -15,9 +15,11 @@ import {
 import {useNavigation} from '@react-navigation/native';
 import {apiService} from '../../utils/api/apiService';
 import {endpoints} from '../../utils/endpoints';
-import {useMutation, useQueryClient} from '@tanstack/react-query';
+import {useQueryClient} from '@tanstack/react-query';
 import {placeOrder} from '../../apis/placeOrder';
-import {useAppSelector} from '../../redux/store';
+import {useAppDispatch, useAppSelector} from '../../redux/store';
+import {showSnackbar} from '../../redux/slice/snackbarSlice';
+import CustomDialog from '../CustomDialog/CustomDialog';
 
 type CartPayableSectionProps = {
   totalAmount: number;
@@ -61,6 +63,7 @@ const CartPayableSection = ({
       cartId={cartId}
       couponId={couponId}
       selectedUser={selectedUser}
+      totalAmount={totalAmount}
     />
   </View>
 );
@@ -88,6 +91,7 @@ type CheckoutType = {
   cartId: string | number;
   couponId: string | number;
   selectedUser: string | null;
+  totalAmount: number;
 };
 
 export const Checkout = ({
@@ -96,24 +100,26 @@ export const Checkout = ({
   cartId,
   couponId,
   selectedUser,
+  totalAmount,
 }: CheckoutType) => {
   const navigation = useNavigation();
   const queryClient = useQueryClient();
+  const dispatch = useAppDispatch();
 
   const reduxUser = useAppSelector(state => state.auth.user);
   const reduxUserRole = reduxUser?.role || 'user';
 
-  console.log(
-    'Payment Gateway Service Initialized',
-    addressId,
-    cartId,
-    couponId,
-    selectedUser,
-  );
+  const [showLoginDialog, setShowLoginDialog] = useState(false);
 
   const onRedirectToPayment = async () => {
     if (!addressId) {
-      Alert.alert('Error', 'Please select a delivery address.');
+      dispatch(
+        showSnackbar({
+          type: 'error',
+          title: 'Please select a delivery address',
+          placement: 'top',
+        }),
+      );
       return;
     }
 
@@ -121,7 +127,13 @@ export const Checkout = ({
       (reduxUserRole === 'salesperson' || reduxUserRole === 'dnd') &&
       !selectedUser
     ) {
-      Alert.alert('Error', 'Please select a user.');
+      dispatch(
+        showSnackbar({
+          type: 'error',
+          title: 'Please select a user',
+          placement: 'top',
+        }),
+      );
       return;
     }
 
@@ -130,7 +142,7 @@ export const Checkout = ({
         endpoint: endpoints.payment,
         method: 'POST',
         data: {
-          amount: 1000,
+          amount: totalAmount,
           customerId: '123456789',
           customerEmail: 'test@gmail.com',
           customerPhone: '98765431237',
@@ -141,7 +153,13 @@ export const Checkout = ({
       const orderId = apiResponse?.response?.data?.order_id;
 
       if (!sessionId || !orderId) {
-        Alert.alert('Payment Error', 'Invalid session or order information.');
+        dispatch(
+          showSnackbar({
+            type: 'error',
+            title: 'Invalid session or order information',
+            placement: 'top',
+          }),
+        );
         return;
       }
 
@@ -173,6 +191,10 @@ export const Checkout = ({
     }
   };
 
+  const onNavigateToHome = () => {
+    navigation.navigate('HomeTab');
+  };
+
   const handlePlaceOrder = async (orderId: string | number) => {
     const payload = {
       orderId,
@@ -185,24 +207,16 @@ export const Checkout = ({
     const apiResponse = await placeOrder({payload});
 
     if (apiResponse?.response?.success) {
-      Alert.alert('Order Placed', 'Your order has been placed successfully!', [
-        {
-          text: 'Go to Home',
-          onPress: () => {
-            navigation.navigate('HomeTab');
-          },
-        },
-        {
-          text: 'Cancel',
-          onPress: () => {},
-        },
-      ]);
+      setShowLoginDialog(true);
 
       queryClient.invalidateQueries({queryKey: ['cart_products']});
     } else {
-      Alert.alert(
-        'Error',
-        'Failed to place the order. Please try again later.',
+      dispatch(
+        showSnackbar({
+          type: 'error',
+          title: 'Failed to place the order. Please try again later.',
+          placement: 'top',
+        }),
       );
     }
   };
@@ -215,20 +229,39 @@ export const Checkout = ({
       },
       onError(error: CFErrorResponse, orderID: string): void {
         console.log('Payment Error:', error, orderID);
-        Alert.alert(
-          'Payment Failed',
-          `Error: ${JSON.stringify(error)}\nOrder ID: ${orderID}`,
+        dispatch(
+          showSnackbar({
+            type: 'error',
+            title: 'Payment failed. Please try again.',
+            placement: 'top',
+          }),
         );
       },
     });
   }, []);
 
   return (
-    <TouchableOpacity
-      style={styles.placeOrderButton}
-      onPress={onRedirectToPayment}>
-      <Text style={styles.placeOrderText}>Place Order</Text>
-    </TouchableOpacity>
+    <>
+      <TouchableOpacity
+        style={styles.placeOrderButton}
+        onPress={onRedirectToPayment}>
+        <Text style={styles.placeOrderText}>Place Order</Text>
+      </TouchableOpacity>
+
+      <CustomDialog
+        visible={showLoginDialog}
+        title="Order placed"
+        message="Your order has been placed successfully. "
+        primaryLabel="Go to Home"
+        primaryAction={() => {
+          setShowLoginDialog(false);
+          onNavigateToHome();
+        }}
+        secondaryLabel="Cancel"
+        secondaryAction={() => setShowLoginDialog(false)}
+        onDismiss={() => setShowLoginDialog(false)}
+      />
+    </>
   );
 };
 

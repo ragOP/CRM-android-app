@@ -1,6 +1,5 @@
 import React, {useCallback, useState} from 'react';
 import {
-  Alert,
   RefreshControl,
   SafeAreaView,
   ScrollView,
@@ -16,7 +15,7 @@ import ProductGrid from '../../components/ProductGrid';
 import AddressDialog, {Address} from './components/AddressDialog';
 import {getAddresses} from '../../apis/getAddresses';
 import {useMutation, useQuery, useQueryClient} from '@tanstack/react-query';
-import {useAppSelector} from '../../redux/store';
+import {useAppDispatch, useAppSelector} from '../../redux/store';
 import {fetchCart} from '../../apis/fetchCart';
 import {fetchProducts} from '../../apis/fetchProducts';
 import {isArrayWithValues} from '../../utils/array/isArrayWithValues';
@@ -26,8 +25,10 @@ import CustomLoader from '../../components/Loaders/CustomLoader';
 import {calculateDiscount} from '../../utils/discount/calculateDiscount';
 import {getDiscountBasedOnRole} from '../../utils/products/getDiscountBasedOnRole';
 import OrderForSelection from '../../components/OrderForSelection/OrderForSelection';
+import {showSnackbar} from '../../redux/slice/snackbarSlice';
 
 const CartScreen = () => {
+  const dispatch = useAppDispatch();
   const queryClient = useQueryClient();
   const navigation = useNavigation();
 
@@ -107,16 +108,27 @@ const CartScreen = () => {
     };
 
     if (!payload?.cartId || !payload.addressId || !payload.orderId) {
-      Alert.alert(
-        'Error',
-        'Please select a valid address and cart before placing an order.',
+      dispatch(
+        showSnackbar({
+          type: 'error',
+          title:
+            'Please select a valid address and cart before placing an order.',
+          placement: 'top',
+        }),
       );
+
       return;
     }
 
     if (reduxUserRole === 'salesperson' || reduxUserRole === 'dnd') {
       if (!currentSelectedUser) {
-        Alert.alert('Error', 'Please select a user.');
+        dispatch(
+          showSnackbar({
+            type: 'error',
+            title: 'Please select a user.',
+            placement: 'top',
+          }),
+        );
         return;
       }
     }
@@ -196,7 +208,13 @@ const CartScreen = () => {
 
   const onValidatePlaceOrder = () => {
     if (!currentAddress) {
-      Alert.alert('Error', 'Please select a delivery address.');
+      dispatch(
+        showSnackbar({
+          type: 'error',
+          title: 'Please select a delivery address.',
+          placement: 'top',
+        }),
+      );
       return false;
     }
 
@@ -204,7 +222,13 @@ const CartScreen = () => {
       (reduxUserRole === 'salesperson' || reduxUserRole === 'dnd') &&
       !selectedUser
     ) {
-      Alert.alert('Error', 'Please select a user.');
+      dispatch(
+        showSnackbar({
+          type: 'error',
+          title: 'Please select a user.',
+          placement: 'top',
+        }),
+      );
       return false;
     }
 

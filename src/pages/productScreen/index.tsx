@@ -1,9 +1,8 @@
 import React from 'react';
-import {ScrollView, Alert} from 'react-native';
 import CustomSearch from '../../components/CustomSearch';
 import ProductPage from '../../components/ProductPage';
 import {useNavigation, useRoute} from '@react-navigation/native';
-import {useAppSelector} from '../../redux/store';
+import {useAppDispatch, useAppSelector} from '../../redux/store';
 import {useMutation, useQuery, useQueryClient} from '@tanstack/react-query';
 import {addCart} from '../../apis/addCart';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -11,9 +10,12 @@ import {fetchProducts} from '../../apis/fetchProducts';
 import ProductGrid from '../../components/ProductGrid';
 import ProductReviews from './components/ProductReviews';
 import RefreshControlWrapper from '../../components/RefreshControlWrapper/RefreshControlWrapper';
+import {showSnackbar} from '../../redux/slice/snackbarSlice';
+import CustomDialog from '../../components/CustomDialog/CustomDialog';
 
 const ProductScreen = () => {
   const route = useRoute();
+  const dispatch = useAppDispatch();
   const navigation = useNavigation();
   const queryClient = useQueryClient();
 
@@ -23,6 +25,7 @@ const ProductScreen = () => {
   const reduxUserId = reduxUser?.id;
 
   const [refreshing, setRefreshing] = React.useState(false);
+  const [showLoginDialog, setShowLoginDialog] = React.useState(false);
 
   const {product} = route.params || {};
 
@@ -33,10 +36,22 @@ const ProductScreen = () => {
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({queryKey: ['cart_products']});
-      Alert.alert('Success', 'Product added to cart successfully!');
+      dispatch(
+        showSnackbar({
+          type: 'success',
+          title: 'Product added to cart!',
+          placement: 'top',
+        }),
+      );
     },
     onError: () => {
-      Alert.alert('Error', 'Failed to add product to cart. Please try again.');
+      dispatch(
+        showSnackbar({
+          type: 'error',
+          title: 'Failed to add product to cart. Please try again!',
+          placement: 'top',
+        }),
+      );
     },
   });
 
@@ -63,17 +78,7 @@ const ProductScreen = () => {
 
   const onAddToCart = () => {
     if (!reduxToken) {
-      Alert.alert(
-        'Login Required',
-        'You need to log in to add products to the cart.',
-        [
-          {text: 'Cancel', style: 'cancel'},
-          {
-            text: 'Login',
-            onPress: () => onSaveProductLocallyAndLogin(),
-          },
-        ],
-      );
+      setShowLoginDialog(true);
       return;
     }
 
@@ -142,24 +147,40 @@ const ProductScreen = () => {
   );
 
   return (
-    <RefreshControlWrapper refreshing={refreshing} onRefresh={onRefresh}>
-      <CustomSearch redirectToUniversalScreen={true} />
-      <ProductPage product={product} onAddToCart={onAddToCart} />
+    <>
+      <RefreshControlWrapper refreshing={refreshing} onRefresh={onRefresh}>
+        <CustomSearch redirectToUniversalScreen={true} />
+        <ProductPage product={product} onAddToCart={onAddToCart} />
 
-      <ProductGrid
-        title="Alternative Products"
-        data={alternativeProducts}
-        isLoading={isAlternativeProductsLoading}
+        <ProductGrid
+          title="Alternative Products"
+          data={alternativeProducts}
+          isLoading={isAlternativeProductsLoading}
+        />
+
+        <ProductGrid
+          title="Best Buys"
+          data={bestBuyProducts}
+          isLoading={isBestBuyProductsLoading}
+        />
+
+        <ProductReviews productId={product?._id} />
+      </RefreshControlWrapper>
+
+      <CustomDialog
+        visible={showLoginDialog}
+        title="Login Required"
+        message="You need to log in to add products to the cart."
+        primaryLabel="Login"
+        primaryAction={() => {
+          setShowLoginDialog(false);
+          onSaveProductLocallyAndLogin();
+        }}
+        secondaryLabel="Cancel"
+        secondaryAction={() => setShowLoginDialog(false)}
+        onDismiss={() => setShowLoginDialog(false)}
       />
-
-      <ProductGrid
-        title="Best Buys"
-        data={bestBuyProducts}
-        isLoading={isBestBuyProductsLoading}
-      />
-
-      <ProductReviews productId={product?._id} />
-    </RefreshControlWrapper>
+    </>
   );
 };
 

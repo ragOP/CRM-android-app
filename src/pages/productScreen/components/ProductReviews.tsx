@@ -8,13 +8,14 @@ import {
   Modal,
   TextInput,
   TouchableOpacity,
-  Alert,
 } from 'react-native';
 import StarRating, {StarRatingDisplay} from 'react-native-star-rating-widget';
 import {useMutation, useQuery, useQueryClient} from '@tanstack/react-query';
 import {fetchReviews} from '../../../apis/fetchReviews';
 import {createReviews} from '../../../apis/createReviews';
 import {ToastAndroid} from 'react-native';
+import {useAppDispatch} from '../../../redux/store';
+import {showSnackbar} from '../../../redux/slice/snackbarSlice';
 
 export type ReviewPayload = {
   productId: string;
@@ -113,6 +114,7 @@ type ProductReviewsProps = {
 };
 
 const ProductReviews = ({productId}: ProductReviewsProps) => {
+  const dispatch = useAppDispatch();
   const queryClient = useQueryClient();
 
   const [title, setTitle] = useState('');
@@ -156,19 +158,22 @@ const ProductReviews = ({productId}: ProductReviewsProps) => {
     onSuccess: res => {
       if (res?.response?.success) {
         console.log('Review posted successfully:', res);
-        ToastAndroid.show('Review posted successfully', ToastAndroid.SHORT);
+        dispatch(
+          showSnackbar({
+            type: 'success',
+            title: 'Review posted successfully!',
+            placement: 'top',
+          }),
+        );
         queryClient.invalidateQueries({queryKey: ['reviews', productId]});
       } else {
         const errorMessage = res?.response?.data?.message;
-        Alert.alert(
-          'Error',
-          errorMessage || 'Failed to post review. Please try again.',
-          [
-            {
-              text: 'OK',
-              onPress: () => setShowModal(false),
-            },
-          ],
+        dispatch(
+          showSnackbar({
+            type: 'error',
+            title: errorMessage || 'Failed to post review. Please try again.',
+            placement: 'top',
+          }),
         );
       }
     },
