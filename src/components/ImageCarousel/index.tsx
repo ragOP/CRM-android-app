@@ -56,7 +56,7 @@ export default ImageCarousel;
 
 export const styles = StyleSheet.create({
   container: {
-    marginTop: 80,
+    marginTop: 40,
     paddingHorizontal: 20,
   },
   image: {

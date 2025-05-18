@@ -12,6 +12,7 @@ import axios from 'axios';
 import {BACKEND_URL} from '../../utils/url';
 import {Button, Icon, IconButton} from 'react-native-paper';
 import {isArrayWithValues} from '../../utils/array/isArrayWithValues';
+import { useNavigation } from '@react-navigation/native';
 
 interface Author {
   _id: string;
@@ -62,6 +63,8 @@ const stripHtml = (html: string): string => {
 };
 
 const BlogScreen = () => {
+  const navigation = useNavigation();
+
   const [blogList, setBlogList] = useState<BlogData[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [selectedBlog, setSelectedBlog] = useState<BlogData | null>(null);
@@ -151,9 +154,17 @@ const BlogScreen = () => {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.title}>
-        Blogs {isArrayWithValues(blogList) ? `(${blogList.length})` : ''}
-      </Text>
+      <View style={styles.headerContainer}>
+        <IconButton
+          icon="arrow-left"
+          iconColor="#000"
+          size={24}
+          onPress={() => navigation.goBack()}
+        />
+        <Text style={[styles.title, {marginTop: 8}]}>
+          Blogs {isArrayWithValues(blogList) ? `(${blogList.length})` : ''}
+        </Text>
+      </View>
       {blogList.map(item => (
         <TouchableOpacity
           key={item._id}
@@ -177,7 +188,14 @@ const BlogScreen = () => {
 
 const styles = StyleSheet.create({
   container: {
-    padding: 16,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+  },
+  headerContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 16,
+    gap: 8,
   },
   blogCard: {
     marginBottom: 24,

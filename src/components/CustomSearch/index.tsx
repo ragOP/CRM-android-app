@@ -122,7 +122,7 @@ export const SearchBox = ({
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    // flex: 1,
     justifyContent: 'space-between',
     flexDirection: 'row',
     alignItems: 'center',
