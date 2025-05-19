@@ -80,12 +80,12 @@ const ProductPage = ({
           />
           <View style={styles.content}>
             <ProductVariants variants={product?.variants || []} />
-            <DottedHorizontalRule
+            {/* <DottedHorizontalRule
               dotSize={4}
               dotColor="#4D4D4D"
               spacing={5}
               thickness={1}
-            />
+            /> */}
             {product?.dosage && (
               <ProductDosage
                 dosage={{
@@ -94,7 +94,7 @@ const ProductPage = ({
                 }}
               />
             )}
-            <SimilarProducts products={similarProducts} />
+            {/* <SimilarProducts products={similarProducts} /> */}
             <ProductDetails
               description={product.full_description}
               features={product.features}

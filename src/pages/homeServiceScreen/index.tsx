@@ -177,6 +177,8 @@ const HomeServingProduct = ({
 const HouseServiceScreen = () => {
   const dispatch = useAppDispatch();
   const navigation = useNavigation();
+    const queryClient = useQueryClient();
+
   const houseCleaningRef = useRef<FlatList>(null);
   const route = useRoute();
 
@@ -243,7 +245,6 @@ const HouseServiceScreen = () => {
     }
   };
 
-  const queryClient = useQueryClient();
   const {mutate: addToCartMutate, isPending} = useMutation({
     mutationFn: async (product_id: string) => {
       const userData = await getItem('userData');

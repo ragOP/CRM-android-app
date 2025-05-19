@@ -12,6 +12,7 @@ import ProductCard from '../ProductCard';
 import {useNavigation} from '@react-navigation/native';
 import {getDiscountBasedOnRole} from '../../utils/products/getDiscountBasedOnRole';
 import {useAppSelector} from '../../redux/store';
+import Icon from 'react-native-vector-icons/Ionicons';
 
 type ProductGridProps = {
   rows?: number;
@@ -77,7 +78,15 @@ const ProductGrid = ({
           onPress={() =>
             navigation.navigate('HomeTab', {screen: 'UniversalSearch'})
           }>
-          <Text style={styles.viewAll}>View all →</Text>
+          <View style={{flexDirection: 'row', alignItems: 'center'}}>
+            <Text style={styles.viewAll}>View all</Text>
+            <Icon
+              name="arrow-forward"
+              size={16}
+              color="#00008B"
+              style={{marginLeft: 2, marginTop: 2}}
+            />
+          </View>
         </TouchableOpacity>
       </View>
 

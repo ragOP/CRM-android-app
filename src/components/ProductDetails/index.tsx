@@ -53,7 +53,7 @@ const ProductDetails = ({
             FAQs
           </Text>
         </TouchableOpacity>
-        <TouchableOpacity
+        {/* <TouchableOpacity
           style={styles.tab}
           onPress={() => setActiveTab('bought')}>
           <Text
@@ -63,7 +63,7 @@ const ProductDetails = ({
             ]}>
             Customers Also Bought
           </Text>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
       </View>
 
       <View style={styles.contentContainer}>

@@ -70,16 +70,13 @@ const UserProfileScreen = () => {
 
         <ScrollView contentContainerStyle={styles.content}>
           {/* Personal Info */}
-          <Text style={styles.section}>👤 Personal Information</Text>
-          <Row icon="person-outline" label={`Name: ${user?.name || 'N/A'}`} />
-          <Row icon="mail-outline" label={`Email: ${user?.email || 'N/A'}`} />
-          <Row
-            icon="briefcase-outline"
-            label={`Role: ${user?.role || 'User'}`}
-          />
+          {/* <Text style={styles.section}>👤 Personal Information</Text>
+          <Row icon="edit" label={"Edit Profile"} /> */}
 
           {/* Orders */}
-          <Text style={styles.section}>🧾 Orders</Text>
+          <Text style={styles.section}>🧾 Account</Text>
+          <Row icon="person-outline" label={'Edit Profile'} />
+
           <Row
             icon="clipboard-outline"
             label="My Orders"
@@ -103,10 +100,10 @@ const UserProfileScreen = () => {
         <Row icon="notifications-outline" label="Notification Settings" /> */}
 
           {/* Help & Support */}
-          {/* <Text style={styles.section}>❓ Help & Support</Text>
-        <Row icon="help-circle-outline" label="Help Center" />
-        <Row icon="document-text-outline" label="Terms & Conditions" />
-        <Row icon="chatbox-ellipses-outline" label="Contact Support" /> */}
+          <Text style={styles.section}>❓ Help & Support</Text>
+          <Row icon="help-circle-outline" label="Help Center" />
+          {/* <Row icon="document-text-outline" label="Terms & Conditions" /> */}
+          <Row icon="chatbox-ellipses-outline" label="Contact Support" />
 
           {/* Logout */}
           <Text style={styles.section}>🔓 Account</Text>
@@ -166,7 +163,8 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   content: {
-    padding: 20,
+    paddingHorizontal: 20,
+    paddingVertical: 5,
     paddingBottom: 80,
   },
   section: {

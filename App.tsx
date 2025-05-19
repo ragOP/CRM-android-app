@@ -11,6 +11,7 @@ import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import {Provider} from 'react-redux';
 import {QueryClient, QueryClientProvider} from '@tanstack/react-query';
 import Icon from 'react-native-vector-icons/Ionicons';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
 import {persistor, store, useAppSelector} from './src/redux/store';
 
@@ -89,20 +90,20 @@ const CartStack = () => {
 
 const tabScreenOptions = ({route}: {route: any}) => ({
   headerShown: false,
-  tabBarIcon: ({color, size}: {color: string; size: number}) => {
-    let iconName = 'home';
+  tabBarIcon: ({color, size, focused}: {color: string; size: number; focused: boolean}) => {
+    let iconName = 'home-outline';
     if (route.name === 'HomeTab') {
-      iconName = 'home';
+      iconName = focused ? 'home' : 'home-outline';
     } else if (route.name === 'Pharmacy') {
-      iconName = 'medkit';
+      iconName = focused ? 'medical-bag' : 'medical-bag-outline';
     } else if (route.name === 'Cart') {
-      iconName = 'cart';
+      iconName = focused ? 'cart' : 'cart-outline';
     } else if (route.name === 'Account') {
-      iconName = 'person';
+      iconName = focused ? 'account' : 'account-outline';
     } else if (route.name === 'Blog') {
-      iconName = 'book';
+      iconName = focused ? 'post' : 'post-outline';
     }
-    return <Icon name={iconName} size={size} color={color} />;
+    return <MaterialCommunityIcons name={iconName} size={size} color={color} />;
   },
 });
 
