@@ -74,6 +74,7 @@ const RegisterScreen = () => {
       const response = await signupUser({
         payload,
       });
+      console.log('Signup response:', response);
       if (response?.response?.success) {
         dispatch(
           showSnackbar({
@@ -84,10 +85,12 @@ const RegisterScreen = () => {
         );
         navigation.navigate('Account', {screen: 'LoginScreen'});
       } else {
+        const errorMessage =
+          response?.response?.data?.message || 'Signup failed';
         dispatch(
           showSnackbar({
             type: 'error',
-            title: response?.response?.message || 'Signup failed',
+            title: errorMessage,
             placement: 'top',
           }),
         );

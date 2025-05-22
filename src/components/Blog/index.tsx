@@ -12,7 +12,8 @@ import axios from 'axios';
 import {BACKEND_URL} from '../../utils/url';
 import {Button, Icon, IconButton} from 'react-native-paper';
 import {isArrayWithValues} from '../../utils/array/isArrayWithValues';
-import { useNavigation } from '@react-navigation/native';
+import {useNavigation} from '@react-navigation/native';
+import LinearGradient from 'react-native-linear-gradient';
 
 interface Author {
   _id: string;
@@ -114,75 +115,83 @@ const BlogScreen = () => {
 
   if (loading) {
     return (
-      <View style={styles.center}>
+      <LinearGradient
+        colors={['#f5f7fa', '#c3cfe2']}
+        style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
         <ActivityIndicator size="large" color="#007BFF" />
         <Text>Loading...</Text>
-      </View>
+      </LinearGradient>
     );
   }
 
   if (selectedBlog) {
     return (
-      <ScrollView contentContainerStyle={{flex: 1}}>
-        <TouchableOpacity onPress={handleBack} style={styles.customButton}>
-          <IconButton
-            icon="arrow-left"
-            iconColor="#000"
-            size={24}
-            onPress={handleBack}
-          />
-          <Text style={styles.customButtonText}>Back</Text>
-        </TouchableOpacity>
+      <LinearGradient colors={['#f5f7fa', '#c3cfe2']} style={{flex: 1}}>
+        <ScrollView contentContainerStyle={{flexGrow: 1}}>
+          <TouchableOpacity onPress={handleBack} style={styles.customButton}>
+            <IconButton
+              icon="arrow-left"
+              iconColor="#000"
+              size={24}
+              onPress={handleBack}
+            />
+            <Text style={styles.customButtonText}>Back</Text>
+          </TouchableOpacity>
 
-        <View style={{padding: 16}}>
-          <Image
-            source={{uri: selectedBlog.bannerImageUrl}}
-            style={styles.banner}
-          />
-          <Text style={styles.title}>{selectedBlog.title}</Text>
-          <Text style={styles.author}>
-            By {selectedBlog.author?.name ?? 'Unknown Author'}
-          </Text>
-          <Text style={styles.description}>
-            {selectedBlog.short_description}
-          </Text>
-          <Text style={styles.content}>{stripHtml(selectedBlog.content)}</Text>
-        </View>
-      </ScrollView>
+          <View style={{padding: 16}}>
+            <Image
+              source={{uri: selectedBlog.bannerImageUrl}}
+              style={styles.banner}
+            />
+            <Text style={styles.title}>{selectedBlog.title}</Text>
+            <Text style={styles.author}>
+              By {selectedBlog.author?.name ?? 'Unknown Author'}
+            </Text>
+            <Text style={styles.description}>
+              {selectedBlog.short_description}
+            </Text>
+            <Text style={styles.content}>
+              {stripHtml(selectedBlog.content)}
+            </Text>
+          </View>
+        </ScrollView>
+      </LinearGradient>
     );
   }
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <View style={styles.headerContainer}>
-        <IconButton
-          icon="arrow-left"
-          iconColor="#000"
-          size={24}
-          onPress={() => navigation.goBack()}
-        />
-        <Text style={[styles.title, {marginTop: 8}]}>
-          Blogs {isArrayWithValues(blogList) ? `(${blogList.length})` : ''}
-        </Text>
-      </View>
-      {blogList.map(item => (
-        <TouchableOpacity
-          key={item._id}
-          style={styles.blogCard}
-          onPress={() => handleBlogPress(item._id)}>
-          <Image
-            source={{uri: item.bannerImageUrl}}
-            style={styles.banner}
-            resizeMode="cover"
+    <LinearGradient colors={['#f5f7fa', '#c3cfe2']} style={{flex: 1}}>
+      <ScrollView contentContainerStyle={styles.container}>
+        <View style={styles.headerContainer}>
+          <IconButton
+            icon="arrow-left"
+            iconColor="#000"
+            size={24}
+            onPress={() => navigation.goBack()}
           />
-          <Text style={styles.title}>{item.title}</Text>
-          <Text style={styles.author}>
-            By {item.author?.name ?? 'Unknown Author'}
+          <Text style={[styles.title, {marginTop: 8}]}>
+            Blogs {isArrayWithValues(blogList) ? `(${blogList.length})` : ''}
           </Text>
-          <Text style={styles.description}>{item.short_description}</Text>
-        </TouchableOpacity>
-      ))}
-    </ScrollView>
+        </View>
+        {blogList.map(item => (
+          <TouchableOpacity
+            key={item._id}
+            style={styles.blogCard}
+            onPress={() => handleBlogPress(item._id)}>
+            <Image
+              source={{uri: item.bannerImageUrl}}
+              style={styles.banner}
+              resizeMode="cover"
+            />
+            <Text style={styles.title}>{item.title}</Text>
+            <Text style={styles.author}>
+              By {item.author?.name ?? 'Unknown Author'}
+            </Text>
+            <Text style={styles.description}>{item.short_description}</Text>
+          </TouchableOpacity>
+        ))}
+      </ScrollView>
+    </LinearGradient>
   );
 };
 
@@ -243,10 +252,10 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   customButtonText: {
-    color: '#000', // White text color
-    fontSize: 18, // Text size
-    fontWeight: '600', // Text weight
-    textAlign: 'center', // Center align text
+    color: '#000',
+    fontSize: 18,
+    fontWeight: '600',
+    textAlign: 'center',
   },
 });
 
