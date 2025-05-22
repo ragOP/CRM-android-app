@@ -10,6 +10,7 @@ import {useNavigation} from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import {useQuery} from '@tanstack/react-query';
 import {fetchOrders} from '../../apis/fetchOrders';
+import LinearGradient from 'react-native-linear-gradient';
 
 const ViewOrdersScreen = () => {
   const navigation = useNavigation();
@@ -60,41 +61,46 @@ const ViewOrdersScreen = () => {
   );
 
   return (
-    <View style={styles.container}>
-      <View style={styles.topHeader}>
-        <Icon
-          name="arrow-back"
-          size={24}
-          color="#000"
-          onPress={() => navigation.navigate('UserProfileScreen')}
-        />
-        <Text style={styles.title}>Your Orders</Text>
-      </View>
+    <LinearGradient colors={['#dbe6fd', '#b1b2ff']} style={styles.gradient}>
+      <View style={styles.container}>
+        <View style={styles.topHeader}>
+          <Icon
+            name="arrow-back"
+            size={24}
+            color="#000"
+            onPress={() => navigation.navigate('UserProfileScreen')}
+          />
+          <Text style={styles.title}>Your Orders</Text>
+        </View>
 
-      {/* Show loading indicator while fetching data */}
-      {isLoading ? (
-        <ActivityIndicator size="large" color="#007AFF" style={styles.loader} />
-      ) : ordersData && ordersData.length > 0 ? (
-        <FlatList
-          data={ordersData} // Use fetched orders data
-          keyExtractor={item => item._id}
-          renderItem={renderOrder}
-          contentContainerStyle={styles.listContent}
-        />
-      ) : (
-        // Show fallback message if no orders are found
-        <Text style={styles.noOrdersText}>No orders found.</Text>
-      )}
-    </View>
+        {/* Show loading indicator while fetching data */}
+        {isLoading ? (
+          <View style={styles.loaderContainer}>
+            <ActivityIndicator size="large" color="#007AFF" />
+          </View>
+        ) : ordersData && ordersData.length > 0 ? (
+          <FlatList
+            data={ordersData}
+            keyExtractor={item => item._id}
+            renderItem={renderOrder}
+            contentContainerStyle={styles.listContent}
+          />
+        ) : (
+          <Text style={styles.noOrdersText}>No orders found.</Text>
+        )}
+      </View>
+    </LinearGradient>
   );
 };
 
 export default ViewOrdersScreen;
 
 const styles = StyleSheet.create({
+  gradient: {
+    flex: 1,
+  },
   container: {
     flex: 1,
-    backgroundColor: '#f9f9f9',
     padding: 16,
     gap: 16,
   },
@@ -107,6 +113,12 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     textAlign: 'center',
+  },
+  loaderContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    minHeight: 300,
   },
   loader: {
     marginTop: 20,

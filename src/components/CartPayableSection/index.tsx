@@ -149,6 +149,8 @@ export const Checkout = ({
         },
       });
 
+      console.log('apiResponse', apiResponse);
+
       const sessionId = apiResponse?.response?.data?.payment_session_id;
       const orderId = apiResponse?.response?.data?.order_id;
 
@@ -211,10 +213,11 @@ export const Checkout = ({
 
       queryClient.invalidateQueries({queryKey: ['cart_products']});
     } else {
+      const error = apiResponse?.response?.data?.message;
       dispatch(
         showSnackbar({
           type: 'error',
-          title: 'Failed to place the order. Please try again later.',
+          title: error || 'Failed to place the order. Please try again later.',
           placement: 'top',
         }),
       );

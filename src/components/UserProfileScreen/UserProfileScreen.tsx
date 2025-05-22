@@ -5,7 +5,7 @@ import {
   StyleSheet,
   ScrollView,
   Pressable,
-  Switch,
+  Linking,
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import Icon from 'react-native-vector-icons/Ionicons';
@@ -30,7 +30,6 @@ const UserProfileScreen = () => {
   const dispatch = useAppDispatch();
   const navigation = useNavigation();
   const user = useAppSelector(state => state.auth.user);
-  const [darkMode, setDarkMode] = useState(false);
   const [showLogoutDialog, setShowLogoutDialog] = useState(false);
 
   const handleLogout = async () => {
@@ -48,6 +47,24 @@ const UserProfileScreen = () => {
 
   const handleViewOrders = () => {
     navigation.navigate('Account', {screen: 'ViewOrderScreen'});
+  };
+
+  const handleTransactions = () => {
+    navigation.navigate('Account', {screen: 'TransactionLogsScreen'});
+  };
+
+  const handleFaq = () => {
+    navigation.navigate('Account', {screen: 'FaqScreen'});
+  };
+
+  const handlePrivacyPolicy = () => {
+    navigation.navigate('Account', {screen: 'PrivacyPolicyScreen'});
+  };
+
+  const handleRateUs = () => {
+    Linking.openURL(
+      'https://play.google.com/store/apps/details?id=com.example.dummyapp',
+    );
   };
 
   return (
@@ -69,49 +86,43 @@ const UserProfileScreen = () => {
         </LinearGradient>
 
         <ScrollView contentContainerStyle={styles.content}>
-          {/* Personal Info */}
-          {/* <Text style={styles.section}>👤 Personal Information</Text>
-          <Row icon="edit" label={"Edit Profile"} /> */}
-
-          {/* Orders */}
+          {/* Account Section */}
           <Text style={styles.section}>🧾 Account</Text>
-          <Row icon="person-outline" label={'Edit Profile'} />
-
+          <Row icon="person-outline" label="Edit Profile" />
           <Row
             icon="clipboard-outline"
             label="My Orders"
             onPress={handleViewOrders}
           />
-
-          {/* Preferences */}
-          {/* <Text style={styles.section}>⚙️ Preferences</Text>
-        <Row
-          icon="moon-outline"
-          label="Dark Mode"
-          rightComponent={
-            <Switch value={darkMode} onValueChange={setDarkMode} />
-          }
-        />
-        <Row icon="language-outline" label="Language: English" /> */}
-
-          {/* App Settings */}
-          {/* <Text style={styles.section}>🛠️ App Settings</Text>
-        <Row icon="lock-closed-outline" label="Change Password" />
-        <Row icon="notifications-outline" label="Notification Settings" /> */}
-
-          {/* Help & Support */}
-          <Text style={styles.section}>❓ Help & Support</Text>
-          <Row icon="help-circle-outline" label="Help Center" />
-          {/* <Row icon="document-text-outline" label="Terms & Conditions" /> */}
-          <Row icon="chatbox-ellipses-outline" label="Contact Support" />
-
-          {/* Logout */}
-          <Text style={styles.section}>🔓 Account</Text>
+          <Row
+            icon="swap-horizontal-outline"
+            label="Transaction Logs"
+            onPress={handleTransactions}
+          />
           <Row
             icon="log-out-outline"
             label="Logout"
             onPress={() => setShowLogoutDialog(true)}
           />
+
+          {/* Policy & Info */}
+          <Text style={styles.section}>📄 Info & Policy</Text>
+          <Row icon="help-buoy-outline" label="FAQ" onPress={handleFaq} />
+          <Row
+            icon="shield-checkmark-outline"
+            label="Privacy Policy"
+            onPress={handlePrivacyPolicy}
+          />
+          <Row icon="document-text-outline" label="Terms & Conditions" />
+
+          {/* Help & Support */}
+          <Text style={styles.section}>❓ Help & Support</Text>
+          <Row icon="help-circle-outline" label="Help Center" />
+          <Row icon="chatbox-ellipses-outline" label="Contact Support" />
+
+          {/* Rate Us */}
+          <Text style={styles.section}>⭐ Rate Us</Text>
+          <Row icon="star-outline" label="Rate Us" onPress={handleRateUs} />
         </ScrollView>
       </View>
 
@@ -165,21 +176,21 @@ const styles = StyleSheet.create({
   content: {
     paddingHorizontal: 20,
     paddingVertical: 5,
-    paddingBottom: 80,
+    paddingBottom: 40,
   },
   section: {
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: '600',
     color: '#444',
-    marginTop: 28,
-    marginBottom: 10,
+    marginTop: 18,
+    marginBottom: 12,
   },
   row: {
     backgroundColor: '#fff',
     borderRadius: 12,
-    padding: 14,
-    paddingHorizontal: 16,
-    marginBottom: 12,
+    padding: 13,
+    paddingHorizontal: 15,
+    marginBottom: 7,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',

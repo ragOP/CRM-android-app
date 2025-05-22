@@ -9,6 +9,7 @@ import {endpoints} from '../../utils/endpoints';
 import {showSnackbar} from '../../redux/slice/snackbarSlice';
 import CustomDialog from '../CustomDialog/CustomDialog';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
 type ProductCardProps = {
   data: any;
@@ -127,12 +128,13 @@ const ProductCard = ({
           </Text>
         </View>
         <View style={styles.buttonRow}>
-          <TouchableOpacity style={styles.cartBtn} onPress={handleAddToCart}>
-            <Text style={styles.cartBtnText}>Add to Cart</Text>
+          <TouchableOpacity style={styles.buyBtn} onPress={handleAddToCart}>
+            <Icon name="cart-outline" size={16} color="#fff" />
+            <Text style={styles.buyBtnText}>Add to Cart</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.buyBtn} onPress={handleBuyNow}>
+          {/* <TouchableOpacity style={styles.buyBtn} onPress={handleBuyNow}>
             <Text style={styles.buyBtnText}>Buy Now</Text>
-          </TouchableOpacity>
+          </TouchableOpacity> */}
         </View>
       </TouchableOpacity>
 
@@ -230,12 +232,15 @@ const styles = StyleSheet.create({
   buyBtn: {
     flex: 1,
     borderWidth: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    justifyContent: 'center',
     borderColor: 'transparent',
     backgroundColor: '#00008B',
     borderRadius: 8,
     paddingVertical: 6,
     paddingHorizontal: 6,
-    alignItems: 'center',
   },
   buyBtnText: {
     color: '#fff',

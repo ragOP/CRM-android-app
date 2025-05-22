@@ -10,7 +10,6 @@ import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import {Provider} from 'react-redux';
 import {QueryClient, QueryClientProvider} from '@tanstack/react-query';
-import Icon from 'react-native-vector-icons/Ionicons';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
 import {persistor, store, useAppSelector} from './src/redux/store';
@@ -33,6 +32,7 @@ import LoginValidation from './src/components/Validation/LoginValidation';
 import CustomSnackbar from './src/components/CustomSnackbar/CustomSnackbar';
 import {SafeAreaProvider} from 'react-native-safe-area-context';
 import {PaperProvider} from 'react-native-paper';
+import TransactionLogs from './src/components/TransactionLogs/TransactionLogs';
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -69,6 +69,7 @@ const AccountStack = () => {
         </>
       )}
       <Stack.Screen name="ViewOrderScreen" component={ViewOrdersScreen} />
+      <Stack.Screen name="TransactionLogsScreen" component={TransactionLogs} />
     </Stack.Navigator>
   );
 };

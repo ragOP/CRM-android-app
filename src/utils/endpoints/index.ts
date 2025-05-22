@@ -20,4 +20,5 @@ export const endpoints = {
   internal_page: 'api/internal',
   payment: 'api/payment/create-session',
   cashfreeOrderDetails: 'api/payment/details',
+  transactions: 'api/transaction/user',
 };
