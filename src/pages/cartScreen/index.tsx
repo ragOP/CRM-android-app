@@ -27,6 +27,19 @@ import {getDiscountBasedOnRole} from '../../utils/products/getDiscountBasedOnRol
 import OrderForSelection from '../../components/OrderForSelection/OrderForSelection';
 import {showSnackbar} from '../../redux/slice/snackbarSlice';
 
+function formatAddress(address) {
+  if (!address) return '';
+  // Only include non-empty fields
+  const parts = [
+    address.name,
+    address.address,
+    address.city,
+    address.state,
+    address.pincode,
+  ].filter(Boolean);
+  return parts.join(', ');
+}
+
 const CartScreen = () => {
   const dispatch = useAppDispatch();
   const queryClient = useQueryClient();
@@ -153,11 +166,7 @@ const CartScreen = () => {
   };
 
   const primaryAddress = currentAddress;
-  const deliverTo = `${primaryAddress?.name || ''}, ${
-    primaryAddress?.address || ''
-  }, ${primaryAddress?.city || ''}, ${primaryAddress?.state || ''}, ${
-    primaryAddress?.pincode
-  }`;
+  const deliverTo = formatAddress(primaryAddress);
 
   const lastMinuteBuyProductsParams = {
     is_best_seller: true,

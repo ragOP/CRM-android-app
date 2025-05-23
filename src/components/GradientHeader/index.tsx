@@ -16,6 +16,8 @@ import {
   selectServices,
 } from '../../redux/slice/servicesSlice';
 import {useNavigation} from '@react-navigation/native';
+import Icon from 'react-native-vector-icons/Ionicons';
+import {IconButton} from 'react-native-paper';
 
 interface GradientHeaderProps {
   title: string;
@@ -92,6 +94,7 @@ const GradientHeader = ({
     if (!isArrayWithValues(services)) return null;
     const items = services.slice(0, 4); // Show only 4
     const itemWidth = getItemWidth(items.length);
+
     return (
       <View style={styles.categoryContainer}>
         {items.map((category: any, index: number) => (
@@ -129,8 +132,20 @@ const GradientHeader = ({
       colors={['#82C8E5', '#F7F7F7']}
       style={[styles.header, {height}]}>
       <View style={styles.container}>
-        <Text style={styles.headerTitle}>{title}</Text>
-        <Text style={styles.subTitle}>{description}</Text>
+        <View style={{display: 'flex', flexDirection: 'row', gap: 1}}>
+          {!isHomePage && (
+            <IconButton
+              icon="arrow-left"
+              size={24}
+              onPress={() => navigation.goBack()}
+              style={{backgroundColor: 'transparent', color: "#000", }}
+            />
+          )}
+          <View style={{display: 'flex', flexDirection: 'column'}}>
+            <Text style={styles.headerTitle}>{title}</Text>
+            <Text style={styles.subTitle}>{description}</Text>
+          </View>
+        </View>
         {isHomePage && <>{isFetching ? renderSkeleton() : renderServices()}</>}
       </View>
     </LinearGradient>
@@ -146,8 +161,8 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'flex-start',
-    paddingHorizontal: 16,
-    paddingTop: 10
+    paddingHorizontal:12,
+    paddingTop: 10,
   },
   headerTitle: {
     fontSize: 22,

@@ -11,6 +11,7 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import {useQuery} from '@tanstack/react-query';
 import {fetchOrders} from '../../apis/fetchOrders';
 import LinearGradient from 'react-native-linear-gradient';
+import {isArrayWithValues} from '../../utils/array/isArrayWithValues';
 
 const ViewOrdersScreen = () => {
   const navigation = useNavigation();
@@ -61,7 +62,7 @@ const ViewOrdersScreen = () => {
   );
 
   return (
-    <LinearGradient colors={['#dbe6fd', '#b1b2ff']} style={styles.gradient}>
+    <LinearGradient colors={['#e3e6ee', '#bfc8e4']} style={styles.gradient}>
       <View style={styles.container}>
         <View style={styles.topHeader}>
           <Icon
@@ -73,12 +74,11 @@ const ViewOrdersScreen = () => {
           <Text style={styles.title}>Your Orders</Text>
         </View>
 
-        {/* Show loading indicator while fetching data */}
         {isLoading ? (
           <View style={styles.loaderContainer}>
             <ActivityIndicator size="large" color="#007AFF" />
           </View>
-        ) : ordersData && ordersData.length > 0 ? (
+        ) : isArrayWithValues(ordersData) ? (
           <FlatList
             data={ordersData}
             keyExtractor={item => item._id}
@@ -86,7 +86,18 @@ const ViewOrdersScreen = () => {
             contentContainerStyle={styles.listContent}
           />
         ) : (
-          <Text style={styles.noOrdersText}>No orders found.</Text>
+          <View style={styles.emptyStateContainer}>
+            <Icon
+              name="cube-outline"
+              size={54}
+              color="#bfc8e4"
+              style={{marginBottom: 12}}
+            />
+            <Text style={styles.emptyTitle}>No Orders Yet</Text>
+            <Text style={styles.emptySubtitle}>
+              You haven't placed any orders yet.
+            </Text>
+          </View>
         )}
       </View>
     </LinearGradient>
@@ -125,6 +136,26 @@ const styles = StyleSheet.create({
   },
   listContent: {
     paddingBottom: 16,
+  },
+  emptyStateContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 40,
+    paddingHorizontal: 24,
+  },
+  emptyTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#888',
+    marginBottom: 6,
+    textAlign: 'center',
+  },
+  emptySubtitle: {
+    fontSize: 14,
+    color: '#aaa',
+    textAlign: 'center',
+    lineHeight: 20,
   },
   noOrdersText: {
     fontSize: 16,

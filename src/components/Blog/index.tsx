@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useState, useCallback} from 'react';
 import {
   View,
   Text,
@@ -7,13 +7,15 @@ import {
   StyleSheet,
   ActivityIndicator,
   TouchableOpacity,
+  RefreshControl,
 } from 'react-native';
 import axios from 'axios';
 import {BACKEND_URL} from '../../utils/url';
-import {Button, Icon, IconButton} from 'react-native-paper';
+import {Button, IconButton} from 'react-native-paper';
 import {isArrayWithValues} from '../../utils/array/isArrayWithValues';
 import {useNavigation} from '@react-navigation/native';
 import LinearGradient from 'react-native-linear-gradient';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
 interface Author {
   _id: string;
@@ -68,6 +70,7 @@ const BlogScreen = () => {
 
   const [blogList, setBlogList] = useState<BlogData[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const [refreshing, setRefreshing] = useState<boolean>(false);
   const [selectedBlog, setSelectedBlog] = useState<BlogData | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -77,12 +80,15 @@ const BlogScreen = () => {
       if (response.data?.data) {
         setBlogList(response.data.data);
       } else {
+        setBlogList([]);
         console.warn('No blog data found');
       }
     } catch (error) {
+      setBlogList([]);
       console.error('Error fetching blog data:', error);
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
   };
 
@@ -112,6 +118,11 @@ const BlogScreen = () => {
     setSelectedBlog(null);
     setError(null);
   };
+
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    fetchBlogs();
+  }, []);
 
   if (loading) {
     return (
@@ -161,7 +172,11 @@ const BlogScreen = () => {
 
   return (
     <LinearGradient colors={['#f5f7fa', '#c3cfe2']} style={{flex: 1}}>
-      <ScrollView contentContainerStyle={styles.container}>
+      <ScrollView
+        contentContainerStyle={styles.container}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }>
         <View style={styles.headerContainer}>
           <IconButton
             icon="arrow-left"
@@ -173,23 +188,38 @@ const BlogScreen = () => {
             Blogs {isArrayWithValues(blogList) ? `(${blogList.length})` : ''}
           </Text>
         </View>
-        {blogList.map(item => (
-          <TouchableOpacity
-            key={item._id}
-            style={styles.blogCard}
-            onPress={() => handleBlogPress(item._id)}>
-            <Image
-              source={{uri: item.bannerImageUrl}}
-              style={styles.banner}
-              resizeMode="cover"
+        {isArrayWithValues(blogList) ? (
+          blogList.map(item => (
+            <TouchableOpacity
+              key={item._id}
+              style={styles.blogCard}
+              onPress={() => handleBlogPress(item._id)}>
+              <Image
+                source={{uri: item.bannerImageUrl}}
+                style={styles.banner}
+                resizeMode="cover"
+              />
+              <Text style={styles.title}>{item.title}</Text>
+              <Text style={styles.author}>
+                By {item.author?.name ?? 'Unknown Author'}
+              </Text>
+              <Text style={styles.description}>{item.short_description}</Text>
+            </TouchableOpacity>
+          ))
+        ) : (
+          <View style={styles.emptyStateContainer}>
+            <MaterialCommunityIcons
+              name="post-outline"
+              size={54}
+              color="#bfc8e4"
+              style={{marginBottom: 12}}
             />
-            <Text style={styles.title}>{item.title}</Text>
-            <Text style={styles.author}>
-              By {item.author?.name ?? 'Unknown Author'}
+            <Text style={styles.emptyTitle}>No Blogs Yet</Text>
+            <Text style={styles.emptySubtitle}>
+              There are no blogs available at the moment.
             </Text>
-            <Text style={styles.description}>{item.short_description}</Text>
-          </TouchableOpacity>
-        ))}
+          </View>
+        )}
       </ScrollView>
     </LinearGradient>
   );
@@ -199,6 +229,7 @@ const styles = StyleSheet.create({
   container: {
     paddingHorizontal: 16,
     paddingVertical: 8,
+    flexGrow: 1,
   },
   headerContainer: {
     flexDirection: 'row',
@@ -256,6 +287,26 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '600',
     textAlign: 'center',
+  },
+  emptyStateContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 40,
+    paddingHorizontal: 24,
+  },
+  emptyTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#888',
+    marginBottom: 6,
+    textAlign: 'center',
+  },
+  emptySubtitle: {
+    fontSize: 14,
+    color: '#aaa',
+    textAlign: 'center',
+    lineHeight: 20,
   },
 });
 

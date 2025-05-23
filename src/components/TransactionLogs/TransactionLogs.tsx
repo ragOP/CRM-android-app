@@ -231,7 +231,7 @@ const TransactionLogs = () => {
               <Text style={styles.emptySubtitle}>
                 You haven't made any payments yet.
               </Text>
-            </View>{' '}
+            </View>
           </>
         )}
       </View>
