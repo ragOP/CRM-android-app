@@ -33,6 +33,7 @@ import CustomSnackbar from './src/components/CustomSnackbar/CustomSnackbar';
 import {SafeAreaProvider} from 'react-native-safe-area-context';
 import {PaperProvider} from 'react-native-paper';
 import TransactionLogs from './src/components/TransactionLogs/TransactionLogs';
+import ForgetPasswordScreen from './src/pages/forgetPasswordScreen';
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -65,6 +66,7 @@ const AccountStack = () => {
       ) : (
         <>
           <Stack.Screen name="LoginScreen" component={LoginScreen} />
+          <Stack.Screen name="ForgetPasswordScreen" component={ForgetPasswordScreen} />
           <Stack.Screen name="RegisterScreen" component={RegisterScreen} />
         </>
       )}

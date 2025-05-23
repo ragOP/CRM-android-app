@@ -225,7 +225,19 @@ const LoginScreen = () => {
               onPress={handleLogin}
             />
           </View>
-
+          <TouchableOpacity
+            onPress={() => navigation.navigate('ForgetPasswordScreen')}
+            style={{
+              alignSelf: 'center',
+              marginBottom: 10,
+            }}>
+            <View style={{flexDirection: 'row', alignItems: 'center', gap: 5}}>
+              <Text style={{color: '#000'}}>Dont remember your password? </Text>
+              <Text style={{color: '#000', fontWeight: 'bold'}}>
+                Forgot Password
+              </Text>
+            </View>
+          </TouchableOpacity>
           <View style={styles.bottomContainer}>
             <Text style={styles.footerText}>
               By signing up, you agree to the{' '}

@@ -1,6 +1,7 @@
 export const endpoints = {
   login: 'api/auth/user/login',
   signup: 'api/auth/user/register',
+  forgetPassword: 'api/auth/user/forgot-password',
   product: 'api/product',
   category: 'api/category',
   service: 'api/service',
