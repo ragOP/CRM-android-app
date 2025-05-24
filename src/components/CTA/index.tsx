@@ -7,7 +7,7 @@ import {
   TouchableOpacity,
   ImageBackground,
 } from 'react-native';
-import CustomButton from '../Button';
+import CustomButton from '../Button/CustomButton';
 
 interface CustomCTAProps {
   leftImage?: any;

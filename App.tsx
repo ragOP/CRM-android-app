@@ -34,6 +34,9 @@ import {SafeAreaProvider} from 'react-native-safe-area-context';
 import {PaperProvider} from 'react-native-paper';
 import TransactionLogs from './src/components/TransactionLogs/TransactionLogs';
 import ForgetPasswordScreen from './src/pages/forgetPasswordScreen';
+import FaqScreen from './src/components/Faq';
+import PrivacyPolicyScreen from './src/components/PrivacyPolicy';
+import TermsConditionsScreen from './src/components/TermsCondition';
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -71,8 +74,11 @@ const AccountStack = () => {
         </>
       )}
       <Stack.Screen name="ViewOrderScreen" component={ViewOrdersScreen} />
-      <Stack.Screen name="TransactionLogsScreen" component={TransactionLogs} />
-    </Stack.Navigator>
+      <Stack.Screen name="TransactionLogsScreen" component={TransactionLogs} /> 
+      <Stack.Screen name="FaqScreen" component={FaqScreen} />
+      <Stack.Screen name="PrivacyPolicyScreen" component={PrivacyPolicyScreen} />
+      <Stack.Screen name="TermsConditionsScreen" component={TermsConditionsScreen} />
+    </Stack.Navigator>  
   );
 };
 

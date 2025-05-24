@@ -1,7 +1,7 @@
 import {useState} from 'react';
 import {View, Text, StyleSheet} from 'react-native';
 import CustomInputField from '../InputFields';
-import CustomButton from '../Button';
+import CustomButton from '../Button/CustomButton';
 import {useMutation} from '@tanstack/react-query';
 import {QueryFormPayload, submitQueryForm} from '../../apis/submitQueryForm';
 import {useAppDispatch} from '../../redux/store';

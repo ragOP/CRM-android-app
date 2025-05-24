@@ -12,7 +12,7 @@ import {
   Keyboard,
 } from 'react-native';
 import CustomInputField from '../../../components/InputFields';
-import CustomButton from '../../../components/Button';
+import CustomButton from '../../../components/Button/CustomButton';
 import {useNavigation} from '@react-navigation/native';
 import {signupUser} from '../../../apis/signupUser';
 import {useAppDispatch} from '../../../redux/store';

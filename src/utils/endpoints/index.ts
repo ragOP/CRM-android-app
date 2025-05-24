@@ -22,4 +22,7 @@ export const endpoints = {
   payment: 'api/payment/create-session',
   cashfreeOrderDetails: 'api/payment/details',
   transactions: 'api/transaction/user',
+  faq: "api/faq",
+  privacy_policy: 'api/privacy-policy',
+  terms_and_conditions: 'api/terms-condition',
 };

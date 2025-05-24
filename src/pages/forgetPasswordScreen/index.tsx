@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import CustomInputField from '../../components/InputFields';
-import CustomButton from '../../components/Button';
+import CustomButton from '../../components/Button/CustomButton';
 import {useAppDispatch} from '../../redux/store';
 import {showSnackbar} from '../../redux/slice/snackbarSlice';
 import {forgetPassword} from '../../apis/forgetPassword';

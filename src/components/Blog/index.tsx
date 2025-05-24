@@ -16,6 +16,7 @@ import {isArrayWithValues} from '../../utils/array/isArrayWithValues';
 import {useNavigation} from '@react-navigation/native';
 import LinearGradient from 'react-native-linear-gradient';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import RenderHTML from 'react-native-render-html';
 
 interface Author {
   _id: string;
@@ -161,9 +162,10 @@ const BlogScreen = () => {
             <Text style={styles.description}>
               {selectedBlog.short_description}
             </Text>
-            <Text style={styles.content}>
+            {/* <Text style={styles.content}>
               {stripHtml(selectedBlog.content)}
-            </Text>
+            </Text> */}
+            <RenderHTML source={{html: selectedBlog.content}} />
           </View>
         </ScrollView>
       </LinearGradient>

@@ -14,7 +14,7 @@ import {useNavigation} from '@react-navigation/native';
 
 const logo = require('../../../assets/logo.png');
 import CustomInputField from '../../../components/InputFields';
-import CustomButton from '../../../components/Button';
+import CustomButton from '../../../components/Button/CustomButton';
 import {loginUser} from '../../../apis/login';
 import {useAppDispatch, useAppSelector} from '../../../redux/store';
 import {login} from '../../../redux/slice/authSlice';

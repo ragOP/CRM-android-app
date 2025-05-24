@@ -61,6 +61,10 @@ const UserProfileScreen = () => {
     navigation.navigate('Account', {screen: 'PrivacyPolicyScreen'});
   };
 
+  const handleTermsConditions = () => {
+    navigation.navigate('Account', {screen: 'TermsConditionsScreen'});
+  };
+
   const handleRateUs = () => {
     Linking.openURL(
       'https://play.google.com/store/apps/details?id=com.example.dummyapp',
@@ -113,7 +117,7 @@ const UserProfileScreen = () => {
             label="Privacy Policy"
             onPress={handlePrivacyPolicy}
           />
-          <Row icon="document-text-outline" label="Terms & Conditions" />
+          <Row icon="document-text-outline" label="Terms & Conditions" onPress={handleTermsConditions} />
 
           {/* Help & Support */}
           <Text style={styles.section}>❓ Help & Support</Text>

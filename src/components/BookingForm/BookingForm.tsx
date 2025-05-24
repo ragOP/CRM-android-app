@@ -2,7 +2,7 @@ import React, {useState} from 'react';
 import {View, Text, StyleSheet} from 'react-native';
 import CustomInputField from '../InputFields';
 import CustomDropdown from '../DropDown';
-import CustomButton from '../Button';
+import CustomButton from '../Button/CustomButton';
 import {Category} from '../../redux/slice/categorySlice';
 import {fetchProducts} from '../../apis/fetchProducts';
 import {useQuery} from '@tanstack/react-query';

@@ -1,8 +1,8 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect, useRef} from 'react';
 import {View, ScrollView, Image, Dimensions, StyleSheet} from 'react-native';
 
 const {width} = Dimensions.get('window');
-const imageWidth = width - 40;
+const imageWidth = width;
 
 const images = [
   require('../../assets/slider-img.png'),
@@ -17,20 +17,50 @@ const images = [
 
 const ImageCarousel: React.FC = () => {
   const [activeIndex, setActiveIndex] = useState(0);
+  const scrollViewRef = useRef<ScrollView>(null);
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const onScroll = (event: { nativeEvent: { contentOffset: { x: number; }; }; }) => {
     const slide = Math.round(event.nativeEvent.contentOffset.x / width);
     setActiveIndex(slide);
   };
 
+  const scrollToNext = () => {
+    const nextIndex = (activeIndex + 1) % images.length;
+    scrollViewRef.current?.scrollTo({x: nextIndex * width, animated: true});
+  };
+
+  useEffect(() => {
+    intervalRef.current = setInterval(scrollToNext, 3000); // Change image every 3 seconds
+
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+    };
+  }, [activeIndex]);
+
+  const handleTouchStart = () => {
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+    }
+  };
+
+  const handleTouchEnd = () => {
+    intervalRef.current = setInterval(scrollToNext, 3000);
+  };
+
   return (
     <View style={styles.container}>
       <ScrollView
+        ref={scrollViewRef}
         horizontal
         pagingEnabled
         showsHorizontalScrollIndicator={false}
         onScroll={onScroll}
-        scrollEventThrottle={16}>
+        scrollEventThrottle={16}
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}>
         {images.map((image, index) => (
           <Image key={index} source={image} style={styles.image} />
         ))}
