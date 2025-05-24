@@ -25,7 +25,7 @@ const TermsConditionsScreen = () => {
     <ScreenLayout title="Terms & Conditions">
       {isLoading ? (
         <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
-          <ActivityIndicator color="#007BFF" />
+          <ActivityIndicator size="large" color="#007BFF" />
         </View>
       ) : (
         <ScrollView contentContainerStyle={styles.content}>

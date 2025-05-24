@@ -25,4 +25,6 @@ export const endpoints = {
   faq: "api/faq",
   privacy_policy: 'api/privacy-policy',
   terms_and_conditions: 'api/terms-condition',
+  app_banner: 'api/app-banner',
+  testimonials: 'api/testimonials',
 };

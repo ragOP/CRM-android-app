@@ -1,4 +1,4 @@
-import {View, Text, StyleSheet, ScrollView, Image} from 'react-native';
+import {View, Text, StyleSheet, ScrollView, Image, ActivityIndicator} from 'react-native';
 import GradientHeader from '../../components/GradientHeader';
 import ImageCarousel from '../../components/ImageCarousel';
 import ProductGrid from '../../components/ProductGrid';
@@ -6,6 +6,7 @@ import CustomCTA from '../../components/CTA';
 import HealthConditionSection from '../../components/HealthCondition';
 import TestimonialCard from '../../components/TestimonialCard';
 import {fetchProducts} from '../../apis/fetchProducts';
+import { fetchTestimonials } from '../../apis/fetchTestimonials';
 import {useQuery} from '@tanstack/react-query';
 import {selectCategories} from '../../redux/slice/categorySlice';
 import {selectServices} from '../../redux/slice/servicesSlice';
@@ -129,6 +130,12 @@ const HomePageScreen = () => {
       return [];
     },
   });
+
+  const {data: testimonialsRes, isLoading: isLoadingTestimonials} = useQuery({
+    queryKey: ['testimonialsRes'],
+    queryFn: fetchTestimonials,
+  });
+  console.log('testimonialsRes', testimonialsRes);
 
   // const [productsData, setProductsData] = useState({
   //   is_fetching: false,
@@ -255,15 +262,21 @@ const HomePageScreen = () => {
           Our clients praise us for great service.
         </Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-          {testimonialsData.map(testimonial => (
+          {isLoadingTestimonials ? (
+            <View style={{flex: 1, alignItems: 'center', justifyContent: 'center'}}>
+              <ActivityIndicator color="#00008B" />
+            </View>
+          ) : (
+            testimonialsRes.map(testimonial => (
             <TestimonialCard
-              key={testimonial.id}
-              name={testimonial.name}
-              testimonial={testimonial.testimonial}
+              key={testimonial._id}
+              name={testimonial.customer_name}
+              testimonial={testimonial.message}
               image={testimonial.image}
               isHomePage
             />
-          ))}
+          ))
+          )}
         </ScrollView>
       </View>
     </ScrollView>

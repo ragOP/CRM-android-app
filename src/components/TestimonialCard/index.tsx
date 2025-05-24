@@ -26,7 +26,7 @@ const TestimonialCard = ({
           <>
             {image && (
               <Image
-                source={image}
+                source={{uri: image}}
                 style={[styles.image, styles.imageRightMargin]}
               />
             )}
