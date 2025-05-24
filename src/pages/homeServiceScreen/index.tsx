@@ -314,7 +314,7 @@ const HouseServiceScreen = () => {
         ListHeaderComponent={
           <>
             <GradientHeader
-              title="Professional Home Cleaning Services"
+              title="Home Cleaning"
               description="Professional home cleaning services tailored to your needs. Book today
                   for a fresher, healthier home."
             />

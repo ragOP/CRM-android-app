@@ -161,7 +161,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'flex-start',
-    paddingHorizontal:12,
+    paddingHorizontal: 16,
     paddingTop: 10,
   },
   headerTitle: {
