@@ -87,21 +87,28 @@ const CartScreen = () => {
     },
   });
 
-  const handleQuantityChange = (product: string, change: number) => {
-    const productId = product?._id;
+const handleQuantityChange = async (product: string, change: number, setIsLoading) => {
+  const productId = product?._id;
 
-    const updatedItem = cartProductsItems?.find(
-      item => item.product._id === productId,
-    );
+  const updatedItem = cartProductsItems?.find(
+    item => item.product._id === productId,
+  );
 
-    if (updatedItem) {
-      updateCart({
+  if (updatedItem) {
+    try {
+      await updateCart({
         user_id: reduxUserId,
         product_id: productId,
         quantity: change,
       });
+    } catch (error) {
+      console.error("Error updating cart:", error);
     }
-  };
+  }
+
+  setIsLoading(false);
+};
+
 
   const handlePlaceOrder = async ({
     orderId,

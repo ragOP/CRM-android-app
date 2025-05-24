@@ -1,14 +1,22 @@
-import {View, Text, TouchableOpacity, StyleSheet, Image} from 'react-native';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  Image,
+  ActivityIndicator,
+} from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import {calculateDiscountPercentage} from '../../utils/percentage/calculateDiscountPercentage';
 import {getDiscountBasedOnRole} from '../../utils/products/getDiscountBasedOnRole';
 import {useAppSelector} from '../../redux/store';
+import {useState} from 'react';
 
 interface CartItemProps {
   item: any;
   productQuantity: number;
   onRemove: () => void;
-  onQuantityChange: (id: string, quantity: number) => void;
+  onQuantityChange: (id: string, quantity: number, setIsLoading) => void;
 }
 
 const CartItem: React.FC<CartItemProps> = ({
@@ -20,6 +28,7 @@ const CartItem: React.FC<CartItemProps> = ({
   const reduxAuth = useAppSelector(state => state.auth);
   const reduxUser = reduxAuth.user;
   const reduxUserRole = reduxUser?.role || 'user';
+  const [isLoading, setIsLoading] = useState(false);
 
   const discountPrice = getDiscountBasedOnRole({
     role: reduxUserRole,
@@ -34,7 +43,9 @@ const CartItem: React.FC<CartItemProps> = ({
       <Image source={{uri: item.images?.[0]}} style={styles.itemImage} />
       <View style={styles.itemDetails}>
         <Text style={styles.itemTitle}>{item?.name}</Text>
-        <Text style={styles.itemDescription}>{item.small_description}</Text>
+        <Text style={styles.itemDescription}>
+          {item.small_description.slice(0, 50) + '...'}
+        </Text>
         <View style={styles.priceContainer}>
           <Text style={styles.itemPrice}>₹{discountPrice}</Text>
           <Text style={styles.itemMrp}>₹{item.price}</Text>
@@ -46,15 +57,34 @@ const CartItem: React.FC<CartItemProps> = ({
         <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
           <View style={styles.quantityContainer}>
             <TouchableOpacity
-              onPress={() =>
-                onQuantityChange(item, Math.max(1, productQuantity - 1))
-              }
+              onPress={() => {
+                setIsLoading(true);
+                onQuantityChange(
+                  item,
+                  Math.max(1, productQuantity - 1),
+                  setIsLoading,
+                );
+              }}
               style={styles.quantityButton}>
               <Text style={styles.quantityButtonText}>-</Text>
             </TouchableOpacity>
-            <Text style={styles.quantityText}>{productQuantity}</Text>
+            {isLoading ? (
+              <View
+                style={{
+                  flex: 1,
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                }}>
+                <ActivityIndicator size="small" color="#007BFF" />
+              </View>
+            ) : (
+              <Text style={styles.quantityText}>{productQuantity}</Text>
+            )}
             <TouchableOpacity
-              onPress={() => onQuantityChange(item, productQuantity + 1)}
+              onPress={() => {
+                setIsLoading(true);
+                onQuantityChange(item, productQuantity + 1, setIsLoading);
+              }}
               style={styles.quantityButton}>
               <Text style={styles.quantityButtonText}>+</Text>
             </TouchableOpacity>
