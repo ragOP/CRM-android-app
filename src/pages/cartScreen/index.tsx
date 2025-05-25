@@ -286,6 +286,7 @@ const handleQuantityChange = async (product: string, change: number, setIsLoadin
             <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
           }>
           <CartHeader
+            isAddressPresent
             deliverTo={deliverTo || ''}
             onChangePress={onOpenAddressDialog}
             isAddressLoading={isAddressLoading}

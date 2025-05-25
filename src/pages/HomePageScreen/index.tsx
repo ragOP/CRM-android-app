@@ -140,7 +140,7 @@ const HomePageScreen = () => {
     },
   });
 
-  const {data: internalPageConfig} = useQuery({
+  const {data: internalPageConfig, isLoading: isLoadingInternalPageConfig} = useQuery({
     queryKey: ['internal_config'],
     queryFn: async () => {
       const apiResponse = await apiService({
@@ -209,7 +209,8 @@ const HomePageScreen = () => {
 
   // const productsList = productsData?.data || [];
 
-  console.log('internalPageConfig', internalPageConfig);
+  console.log("isLoadingInternalPageConfig", isLoadingInternalPageConfig);
+  console.log('internalPageConfig', internalPageConfig?.flyer1);
   return (
     <ScrollView style={styles.container}>
       <GradientHeader height={120} title="" description="" isHomePage={true} />
@@ -220,13 +221,26 @@ const HomePageScreen = () => {
         rows={2}
         data={topProducts}
       />
-
-      {internalPageConfig?.flyer1 && (
+      {isLoadingInternalPageConfig ? (
+        <View
+          style={{flex: 1, alignItems: 'center', justifyContent: 'center'}}>
+          <ActivityIndicator color="#00008B" />
+        </View>
+      ): (
         <Image
-          source={{uri: internalPageConfig?.flyer1}}
+          source={{uri: internalPageConfig.flyer1}}
           style={styles.healthBanner}
         />
+        // <Text>hello</Text>
       )}
+    
+    {/* <Image
+    key={6356642}
+      source={{uri: "https://res.cloudinary.com/dacwig3xk/image/upload/v1741701739/uploads/images/jipgabltqov8ltww0wbt.png"}}
+      style={styles.healthBanner}
+      onError={(e) => console.log("Image load error:", e.nativeEvent)}
+    /> */}
+
       {/* <CustomCTA
         leftImage={require('../../assets/left-cta-img.png')}
         text="Save unto 10% extra enjoy FREE delivery with PLUS membership"
@@ -266,7 +280,13 @@ const HomePageScreen = () => {
         data={mostOrderedMedicineProducts}
       />
 
-      {internalPageConfig?.flyer1 && (
+       {isLoadingInternalPageConfig ? (
+        <View
+          style={{flex: 1, alignItems: 'center', justifyContent: 'center'}}>
+          <ActivityIndicator color="#00008B" />
+        </View>
+      ): (
+        internalPageConfig?.flyer1 && 
         <Image
           source={{uri: internalPageConfig?.flyer1}}
           style={styles.healthBanner}
@@ -330,8 +350,8 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   healthBanner: {
-    width: '100%',
-    resizeMode: 'cover',
-    marginVertical: 10,
+    width: "100%",
+    height: 100,
+    resizeMode: 'contain',
   },
 });

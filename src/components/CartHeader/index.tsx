@@ -3,12 +3,14 @@ import {View, Text, TouchableOpacity, StyleSheet} from 'react-native';
 import ContentLoader, {Rect} from 'react-content-loader/native'; // For skeleton loader
 
 type CartHeaderProps = {
+  isAdressPresent: boolean;
   deliverTo: string;
   onChangePress: () => void;
   isAddressLoading?: boolean;
 };
 
 const CartHeader = ({
+  isAdressPresent,
   deliverTo,
   onChangePress,
   isAddressLoading,
@@ -16,7 +18,7 @@ const CartHeader = ({
   <View style={styles.headerContainer}>
     <Text style={styles.cartTitle}>My Cart</Text>
     <View style={styles.deliveryRow}>
-      <Text style={styles.deliveryText}>Deliver to: </Text>
+      {deliverTo && <Text style={styles.deliveryText}>Deliver to: </Text>}
       {isAddressLoading ? (
         // Skeleton Loader
         <ContentLoader
@@ -32,12 +34,12 @@ const CartHeader = ({
           style={styles.deliveryAddress}
           numberOfLines={2}
           ellipsizeMode="tail">
-          {deliverTo}
+          {isAdressPresent ? deliverTo : 'No Address Present'}
         </Text>
       )}
       {!isAddressLoading && (
         <TouchableOpacity onPress={onChangePress} style={styles.changeButton}>
-          <Text style={styles.changeText}>Change</Text>
+          <Text style={styles.changeText}>{isAdressPresent ? 'Change' : 'Add Address'}</Text>
         </TouchableOpacity>
       )}
     </View>

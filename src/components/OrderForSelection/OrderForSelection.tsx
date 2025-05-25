@@ -28,10 +28,9 @@ const OrderForSelection = ({
   const [customCount, setCustomCount] = useState<string>('');
 
   const reduxAuth = useAppSelector(state => state.auth);
-  const reduxUser = reduxAuth.user;
-  const reduxRole = reduxUser?.role;
+  const reduxUser = reduxAuth.user;  const reduxRole = reduxUser?.role;
 
-  const distributorsParams = {role: 'user'};
+  const distributorsParams = {role: reduxRole === 'dnd' ? 'salesperson' : 'user'};
 
   const {
     data: users = [],
