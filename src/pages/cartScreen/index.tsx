@@ -31,7 +31,6 @@ function formatAddress(address) {
   if (!address) return '';
   // Only include non-empty fields
   const parts = [
-    address.name,
     address.address,
     address.city,
     address.state,
