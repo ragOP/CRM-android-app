@@ -44,7 +44,11 @@ const TestimonialCard = ({
           </>
         )}
       </View>
-      <Text style={testimonialTextStyle}>{testimonial}</Text>
+      <Text style={testimonialTextStyle}>
+        {testimonial.length > 100
+          ? `${testimonial.slice(0, 100)}...`
+          : testimonial}
+      </Text>
     </View>
   );
 };

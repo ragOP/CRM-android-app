@@ -135,7 +135,6 @@ const HomePageScreen = () => {
     queryKey: ['testimonialsRes'],
     queryFn: fetchTestimonials,
   });
-  console.log('testimonialsRes', testimonialsRes);
 
   // const [productsData, setProductsData] = useState({
   //   is_fetching: false,

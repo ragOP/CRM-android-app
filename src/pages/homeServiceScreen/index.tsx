@@ -32,6 +32,7 @@ import {useNavigation, useRoute} from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import CustomDialog from '../../components/CustomDialog/CustomDialog';
 import {showSnackbar} from '../../redux/slice/snackbarSlice';
+import {fetchTestimonials} from '../../apis/fetchTestimonials';
 
 const ourServices = [
   'Home Deep Cleaning',
@@ -177,7 +178,7 @@ const HomeServingProduct = ({
 const HouseServiceScreen = () => {
   const dispatch = useAppDispatch();
   const navigation = useNavigation();
-    const queryClient = useQueryClient();
+  const queryClient = useQueryClient();
 
   const houseCleaningRef = useRef<FlatList>(null);
   const route = useRoute();
@@ -210,6 +211,11 @@ const HouseServiceScreen = () => {
       }
       return {};
     },
+  });
+
+  const {data: testimonialsRes, isLoading: isLoadingTestimonials} = useQuery({
+    queryKey: ['testimonialsRes'],
+    queryFn: fetchTestimonials,
   });
 
   const scrollToProductsSection = () => {
@@ -384,24 +390,30 @@ const HouseServiceScreen = () => {
               {/* Testimonial */}
               <View style={styles.testimonialContainer}>
                 <Text
-                  style={{
-                    color: '#04050B',
-                    fontSize: 18,
-                    textAlign: 'center',
-                    fontWeight: 'bold',
-                    marginBottom: 10,
-                  }}>
+                  style={{color: '#00008B', fontSize: 20, fontWeight: 'bold'}}>
                   Our clients praise us for great service.
                 </Text>
                 <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                  {testimonialsData.map(testimonial => (
-                    <TestimonialCard
-                      key={testimonial.id}
-                      name={testimonial.name}
-                      testimonial={testimonial.testimonial}
-                      image={testimonial.image}
-                    />
-                  ))}
+                  {isLoadingTestimonials ? (
+                    <View
+                      style={{
+                        flex: 1,
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}>
+                      <ActivityIndicator color="#00008B" />
+                    </View>
+                  ) : (
+                    testimonialsRes.map(testimonial => (
+                      <TestimonialCard
+                        key={testimonial._id}
+                        name={testimonial.customer_name}
+                        testimonial={testimonial.message}
+                        image={testimonial.image}
+                        isHomePage
+                      />
+                    ))
+                  )}
                 </ScrollView>
               </View>
             </View>

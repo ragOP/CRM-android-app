@@ -1,4 +1,10 @@
-import {View, Text, ScrollView, StyleSheet} from 'react-native';
+import {
+  View,
+  Text,
+  ScrollView,
+  StyleSheet,
+  ActivityIndicator,
+} from 'react-native';
 import GradientHeader from '../../components/GradientHeader/index';
 import BookingForm from '../../components/BookingForm/BookingForm';
 import AboutUs from '../../components/AboutUsSection/index';
@@ -19,37 +25,38 @@ import {useNavigation, useRoute} from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import CustomDialog from '../../components/CustomDialog/CustomDialog';
 import {showSnackbar} from '../../redux/slice/snackbarSlice';
+import {fetchTestimonials} from '../../apis/fetchTestimonials';
 
-const testimonialsData = [
-  {
-    id: '1',
-    name: 'Rajesh Gupta',
-    testimonial:
-      "I have tried several laundry services, but none compare to the exceptional quality and promptness I've experienced with Washmart. Their attention to detail and efficient delivery of clean and fresh clothes are remarkable.",
-    image: require('../../assets/testimonialImage.png'),
-  },
-  {
-    id: '2',
-    name: 'Rajesh Gupta',
-    testimonial:
-      "I have tried several laundry services, but none compare to the exceptional quality and promptness I've experienced with Washmart. Their attention to detail and efficient delivery of clean and fresh clothes are remarkable.",
-    image: require('../../assets/testimonialImage.png'),
-  },
-  {
-    id: '3',
-    name: 'Rajesh Gupta',
-    testimonial:
-      "I have tried several laundry services, but none compare to the exceptional quality and promptness I've experienced with Washmart. Their attention to detail and efficient delivery of clean and fresh clothes are remarkable.",
-    image: require('../../assets/testimonialImage.png'),
-  },
-  {
-    id: '4',
-    name: 'Rajesh Gupta',
-    testimonial:
-      "I have tried several laundry services, but none compare to the exceptional quality and promptness I've experienced with Washmart. Their attention to detail and efficient delivery of clean and fresh clothes are remarkable.",
-    image: require('../../assets/testimonialImage.png'),
-  },
-];
+// const testimonialsData = [
+//   {
+//     id: '1',
+//     name: 'Rajesh Gupta',
+//     testimonial:
+//       "I have tried several laundry services, but none compare to the exceptional quality and promptness I've experienced with Washmart. Their attention to detail and efficient delivery of clean and fresh clothes are remarkable.",
+//     image: require('../../assets/testimonialImage.png'),
+//   },
+//   {
+//     id: '2',
+//     name: 'Rajesh Gupta',
+//     testimonial:
+//       "I have tried several laundry services, but none compare to the exceptional quality and promptness I've experienced with Washmart. Their attention to detail and efficient delivery of clean and fresh clothes are remarkable.",
+//     image: require('../../assets/testimonialImage.png'),
+//   },
+//   {
+//     id: '3',
+//     name: 'Rajesh Gupta',
+//     testimonial:
+//       "I have tried several laundry services, but none compare to the exceptional quality and promptness I've experienced with Washmart. Their attention to detail and efficient delivery of clean and fresh clothes are remarkable.",
+//     image: require('../../assets/testimonialImage.png'),
+//   },
+//   {
+//     id: '4',
+//     name: 'Rajesh Gupta',
+//     testimonial:
+//       "I have tried several laundry services, but none compare to the exceptional quality and promptness I've experienced with Washmart. Their attention to detail and efficient delivery of clean and fresh clothes are remarkable.",
+//     image: require('../../assets/testimonialImage.png'),
+//   },
+// ];
 
 interface LaundryProduct {
   _id: string;
@@ -95,6 +102,11 @@ const LaundaryScreen = () => {
       }
       return {};
     },
+  });
+
+  const {data: testimonialsRes, isLoading: isLoadingTestimonials} = useQuery({
+    queryKey: ['testimonialsRes'],
+    queryFn: fetchTestimonials,
   });
 
   const {mutate: addToCartMutate, isPending} = useMutation({
@@ -264,14 +276,26 @@ const LaundaryScreen = () => {
             Our clients praise us for great service.
           </Text>
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-            {testimonialsData.map(testimonial => (
-              <TestimonialCard
-                key={testimonial.id}
-                name={testimonial.name}
-                testimonial={testimonial.testimonial}
-                image={testimonial.image}
-              />
-            ))}
+            {isLoadingTestimonials ? (
+              <View
+                style={{
+                  flex: 1,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}>
+                <ActivityIndicator color="#00008B" />
+              </View>
+            ) : (
+              testimonialsRes.map(testimonial => (
+                <TestimonialCard
+                  key={testimonial._id}
+                  name={testimonial.customer_name}
+                  testimonial={testimonial.message}
+                  image={testimonial.image}
+                  isHomePage
+                />
+              ))
+            )}
           </ScrollView>
         </View>
       </ScrollView>
