@@ -5,6 +5,9 @@ import ProductGrid from '../../components/ProductGrid';
 import HealthConditionSection from '../../components/HealthCondition';
 import CustomCTA from '../../components/CTA';
 import Blog from '../../components/Blog';
+import { useQuery } from '@tanstack/react-query';
+import { apiService } from '../../utils/api/apiService';
+import { endpoints } from '../../utils/endpoints';
 
 const sportDrinkData = [
   {
@@ -148,6 +151,19 @@ const products = [
 ];
 
 const PharmacyScreen = () => {
+    const {data: internalPageConfig} = useQuery({
+    queryKey: ['internal_config'],
+    queryFn: async () => {
+      const apiResponse = await apiService({
+        endpoint: endpoints.internal_page,
+        method: 'GET',
+      });
+      if (apiResponse?.response?.success) {
+        return apiResponse?.response?.data;
+      }
+      return {};
+    },
+  });
   return (
     <ScrollView
       showsVerticalScrollIndicator={false}
@@ -159,10 +175,12 @@ const PharmacyScreen = () => {
         data={sportDrinkData}
       />
       <HealthConditionSection />
-      <Image
-        source={require('../../assets/healthBanner.png')}
-        style={styles.healthBanner}
-      />
+      {internalPageConfig?.flyer1 && (
+        <Image
+          source={{uri: internalPageConfig?.flyer1}}
+          style={styles.healthBanner}
+        />
+      )}
       <ProductGrid
         title="Shop By Categories"
         highlight={{categories: true}}

@@ -104,10 +104,12 @@ const LaundaryScreen = () => {
     },
   });
 
-  const {data: testimonialsRes, isLoading: isLoadingTestimonials} = useQuery({
-    queryKey: ['testimonialsRes'],
-    queryFn: fetchTestimonials,
-  });
+  const { data: testimonialsRes = [], isLoading: isLoadingTestimonials } =
+    useQuery({
+      queryKey: ["testimonial"],
+      queryFn: () => fetchTestimonials(),
+      select: (data) => data?.data,
+    });
 
   const {mutate: addToCartMutate, isPending} = useMutation({
     mutationFn: async (product_id: string) => {
@@ -285,7 +287,7 @@ const LaundaryScreen = () => {
                 }}>
                 <ActivityIndicator color="#00008B" />
               </View>
-            ) : (
+            ) : (Array.isArray(testimonialsRes) &&
               testimonialsRes.map(testimonial => (
                 <TestimonialCard
                   key={testimonial._id}

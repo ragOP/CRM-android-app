@@ -213,10 +213,12 @@ const HouseServiceScreen = () => {
     },
   });
 
-  const {data: testimonialsRes, isLoading: isLoadingTestimonials} = useQuery({
-    queryKey: ['testimonialsRes'],
-    queryFn: fetchTestimonials,
-  });
+  const { data: testimonialsRes = [], isLoading: isLoadingTestimonials } =
+    useQuery({
+      queryKey: ["testimonial"],
+      queryFn: () => fetchTestimonials(),
+      select: (data) => data?.data,
+    });
 
   const scrollToProductsSection = () => {
     if (houseCleaningRef.current && houseCleaningOffsetY !== null) {
@@ -403,7 +405,7 @@ const HouseServiceScreen = () => {
                       }}>
                       <ActivityIndicator color="#00008B" />
                     </View>
-                  ) : (
+                  ) : (Array.isArray(testimonialsRes) &&
                     testimonialsRes.map(testimonial => (
                       <TestimonialCard
                         key={testimonial._id}

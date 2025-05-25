@@ -1,4 +1,11 @@
-import {View, Text, StyleSheet, ScrollView, Image, ActivityIndicator} from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  Image,
+  ActivityIndicator,
+} from 'react-native';
 import GradientHeader from '../../components/GradientHeader';
 import ImageCarousel from '../../components/ImageCarousel';
 import ProductGrid from '../../components/ProductGrid';
@@ -6,42 +13,44 @@ import CustomCTA from '../../components/CTA';
 import HealthConditionSection from '../../components/HealthCondition';
 import TestimonialCard from '../../components/TestimonialCard';
 import {fetchProducts} from '../../apis/fetchProducts';
-import { fetchTestimonials } from '../../apis/fetchTestimonials';
+import {fetchTestimonials} from '../../apis/fetchTestimonials';
 import {useQuery} from '@tanstack/react-query';
 import {selectCategories} from '../../redux/slice/categorySlice';
 import {selectServices} from '../../redux/slice/servicesSlice';
 import {useAppSelector} from '../../redux/store';
+import {apiService} from '../../utils/api/apiService';
+import {endpoints} from '../../utils/endpoints';
 
-const testimonialsData = [
-  {
-    id: '1',
-    name: 'Rajesh Gupta',
-    testimonial:
-      "I have tried several laundry services, but none compare to the exceptional quality and promptness I've experienced with Washmart. Their attention to detail and efficient delivery of clean and fresh clothes are remarkable.",
-    image: require('../../assets/testimonialImage.png'),
-  },
-  {
-    id: '2',
-    name: 'Rajesh Gupta',
-    testimonial:
-      "I have tried several laundry services, but none compare to the exceptional quality and promptness I've experienced with Washmart. Their attention to detail and efficient delivery of clean and fresh clothes are remarkable.",
-    image: require('../../assets/testimonialImage.png'),
-  },
-  {
-    id: '3',
-    name: 'Rajesh Gupta',
-    testimonial:
-      "I have tried several laundry services, but none compare to the exceptional quality and promptness I've experienced with Washmart. Their attention to detail and efficient delivery of clean and fresh clothes are remarkable.",
-    image: require('../../assets/testimonialImage.png'),
-  },
-  {
-    id: '4',
-    name: 'Rajesh Gupta',
-    testimonial:
-      "I have tried several laundry services, but none compare to the exceptional quality and promptness I've experienced with Washmart. Their attention to detail and efficient delivery of clean and fresh clothes are remarkable.",
-    image: require('../../assets/testimonialImage.png'),
-  },
-];
+// const testimonialsData = [
+//   {
+//     id: '1',
+//     name: 'Rajesh Gupta',
+//     testimonial:
+//       "I have tried several laundry services, but none compare to the exceptional quality and promptness I've experienced with Washmart. Their attention to detail and efficient delivery of clean and fresh clothes are remarkable.",
+//     image: require('../../assets/testimonialImage.png'),
+//   },
+//   {
+//     id: '2',
+//     name: 'Rajesh Gupta',
+//     testimonial:
+//       "I have tried several laundry services, but none compare to the exceptional quality and promptness I've experienced with Washmart. Their attention to detail and efficient delivery of clean and fresh clothes are remarkable.",
+//     image: require('../../assets/testimonialImage.png'),
+//   },
+//   {
+//     id: '3',
+//     name: 'Rajesh Gupta',
+//     testimonial:
+//       "I have tried several laundry services, but none compare to the exceptional quality and promptness I've experienced with Washmart. Their attention to detail and efficient delivery of clean and fresh clothes are remarkable.",
+//     image: require('../../assets/testimonialImage.png'),
+//   },
+//   {
+//     id: '4',
+//     name: 'Rajesh Gupta',
+//     testimonial:
+//       "I have tried several laundry services, but none compare to the exceptional quality and promptness I've experienced with Washmart. Their attention to detail and efficient delivery of clean and fresh clothes are remarkable.",
+//     image: require('../../assets/testimonialImage.png'),
+//   },
+// ];
 
 // const categories = [
 //   {
@@ -131,10 +140,26 @@ const HomePageScreen = () => {
     },
   });
 
-  const {data: testimonialsRes, isLoading: isLoadingTestimonials} = useQuery({
-    queryKey: ['testimonialsRes'],
-    queryFn: fetchTestimonials,
+  const {data: internalPageConfig} = useQuery({
+    queryKey: ['internal_config'],
+    queryFn: async () => {
+      const apiResponse = await apiService({
+        endpoint: endpoints.internal_page,
+        method: 'GET',
+      });
+      if (apiResponse?.response?.success) {
+        return apiResponse?.response?.data;
+      }
+      return {};
+    },
   });
+
+  const {data: testimonialsRes = [], isLoading: isLoadingTestimonials} =
+    useQuery({
+      queryKey: ['testimonial'],
+      queryFn: () => fetchTestimonials(),
+      select: data => data?.data,
+    });
 
   // const [productsData, setProductsData] = useState({
   //   is_fetching: false,
@@ -184,6 +209,7 @@ const HomePageScreen = () => {
 
   // const productsList = productsData?.data || [];
 
+  console.log('internalPageConfig', internalPageConfig);
   return (
     <ScrollView style={styles.container}>
       <GradientHeader height={120} title="" description="" isHomePage={true} />
@@ -194,13 +220,20 @@ const HomePageScreen = () => {
         rows={2}
         data={topProducts}
       />
-      <CustomCTA
+
+      {internalPageConfig?.flyer1 && (
+        <Image
+          source={{uri: internalPageConfig?.flyer1}}
+          style={styles.healthBanner}
+        />
+      )}
+      {/* <CustomCTA
         leftImage={require('../../assets/left-cta-img.png')}
         text="Save unto 10% extra enjoy FREE delivery with PLUS membership"
         highlight={{'10%': true, free: true, plus: true, membership: true}}
         buttonText="Buy Now"
         onPress={() => console.log('CTA clicked!')}
-      />
+      /> */}
 
       <ProductGrid
         title="Super Selling Services"
@@ -233,10 +266,12 @@ const HomePageScreen = () => {
         data={mostOrderedMedicineProducts}
       />
 
-      <Image
-        source={require('../../assets/healthBanner.png')}
-        style={styles.healthBanner}
-      />
+      {internalPageConfig?.flyer1 && (
+        <Image
+          source={{uri: internalPageConfig?.flyer1}}
+          style={styles.healthBanner}
+        />
+      )}
       {/* <ProductGrid
         title="Big Deals On Sports Drinks"
         highlight={{sports: true, drinks: true}}
@@ -262,19 +297,21 @@ const HomePageScreen = () => {
         </Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false}>
           {isLoadingTestimonials ? (
-            <View style={{flex: 1, alignItems: 'center', justifyContent: 'center'}}>
+            <View
+              style={{flex: 1, alignItems: 'center', justifyContent: 'center'}}>
               <ActivityIndicator color="#00008B" />
             </View>
           ) : (
+            Array.isArray(testimonialsRes) &&
             testimonialsRes.map(testimonial => (
-            <TestimonialCard
-              key={testimonial._id}
-              name={testimonial.customer_name}
-              testimonial={testimonial.message}
-              image={testimonial.image}
-              isHomePage
-            />
-          ))
+              <TestimonialCard
+                key={testimonial._id}
+                name={testimonial.customer_name}
+                testimonial={testimonial.message}
+                image={testimonial.image}
+                isHomePage
+              />
+            ))
           )}
         </ScrollView>
       </View>
