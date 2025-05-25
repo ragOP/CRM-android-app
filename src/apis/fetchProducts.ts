@@ -9,7 +9,7 @@ export const fetchProducts = async ({params}: FetchProductsParams) => {
   try {
     const apiResponse = await apiService({
       endpoint: endpoints.product,
-      params: params,
+      params: {...params, is_active: true},
     });
 
     return apiResponse;

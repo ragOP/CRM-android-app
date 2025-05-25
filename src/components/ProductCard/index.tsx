@@ -96,6 +96,16 @@ const ProductCard = ({
 
   const handleAddToCart = () => {
     const productId = data?._id;
+    if(data?.inventory <= 0){
+      dispatch(
+        showSnackbar({
+          type: 'error',
+          title: 'Product is out of stock!',
+          placement: 'top',
+        }),
+      );
+      return
+    }
     if (isLoggedIn) {
       addToCartMutate(productId);
     } else {

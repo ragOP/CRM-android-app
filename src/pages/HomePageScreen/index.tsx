@@ -20,6 +20,8 @@ import {selectServices} from '../../redux/slice/servicesSlice';
 import {useAppSelector} from '../../redux/store';
 import {apiService} from '../../utils/api/apiService';
 import {endpoints} from '../../utils/endpoints';
+import { RefreshControl } from 'react-native';
+import { useCallback, useState } from 'react';
 
 // const testimonialsData = [
 //   {
@@ -82,6 +84,7 @@ import {endpoints} from '../../utils/endpoints';
 const HomePageScreen = () => {
   const categories = useAppSelector(selectCategories);
   const services = useAppSelector(selectServices);
+  const [refreshing, setRefreshing] = useState(false);
 
   const topProductsParams = {
     is_best_seller: true,
@@ -101,7 +104,7 @@ const HomePageScreen = () => {
     per_page: 10,
   };
 
-  const {data: topProducts, isLoading: isLoadingTopProducts} = useQuery({
+  const {data: topProducts, isLoading: isLoadingTopProducts, refetch: refetchTopProducts} = useQuery({
     queryKey: ['top_products'],
     queryFn: async () => {
       const apiResponse = await fetchProducts({params: topProductsParams});
@@ -112,7 +115,8 @@ const HomePageScreen = () => {
     },
   });
 
-  const {data: superSellingProducts, isLoading: isLoadingSuperSellingProducts} =
+  const {data: superSellingProducts, isLoading: isLoadingSuperSellingProducts,
+  refetch: refetchSuperSellingProducts} =
     useQuery({
       queryKey: ['super_selling_products'],
       queryFn: async () => {
@@ -127,6 +131,7 @@ const HomePageScreen = () => {
   const {
     data: mostOrderedMedicineProducts,
     isLoading: isLoadingMostOrderedMedicineProducts,
+  refetch: refetchMostOrdered
   } = useQuery({
     queryKey: ['most_ordered_medicine_products'],
     queryFn: async () => {
@@ -140,7 +145,8 @@ const HomePageScreen = () => {
     },
   });
 
-  const {data: internalPageConfig, isLoading: isLoadingInternalPageConfig} = useQuery({
+  const {data: internalPageConfig, isLoading: isLoadingInternalPageConfig,
+  refetch: refetchInternalConfig} = useQuery({
     queryKey: ['internal_config'],
     queryFn: async () => {
       const apiResponse = await apiService({
@@ -154,12 +160,26 @@ const HomePageScreen = () => {
     },
   });
 
-  const {data: testimonialsRes = [], isLoading: isLoadingTestimonials} =
+  const {data: testimonialsRes = [], isLoading: isLoadingTestimonials,
+  refetch: refetchTestimonials} =
     useQuery({
       queryKey: ['testimonial'],
       queryFn: () => fetchTestimonials(),
       select: data => data?.data,
     });
+
+    // Refresh handler
+const onRefresh = useCallback(async () => {
+  setRefreshing(true);
+  await Promise.all([
+    refetchTopProducts(),
+    refetchSuperSellingProducts(),
+    refetchMostOrdered(),
+    refetchInternalConfig(),
+    refetchTestimonials(),
+  ]);
+  setRefreshing(false);
+}, []);
 
   // const [productsData, setProductsData] = useState({
   //   is_fetching: false,
@@ -212,7 +232,9 @@ const HomePageScreen = () => {
   console.log("isLoadingInternalPageConfig", isLoadingInternalPageConfig);
   console.log('internalPageConfig', internalPageConfig?.flyer1);
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView style={styles.container} refreshControl={
+    <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+  }>
       <GradientHeader height={120} title="" description="" isHomePage={true} />
       <ImageCarousel />
       <ProductGrid

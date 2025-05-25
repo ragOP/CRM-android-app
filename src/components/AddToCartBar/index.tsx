@@ -9,16 +9,17 @@ import {
 
 type AddToCartBarParams = {
   onAddToCart: () => void;
+  onBuyNow: () => void;
 };
 
-const AddToCartBar = ({onAddToCart}: AddToCartBarParams) => {
+const AddToCartBar = ({onAddToCart, onBuyNow}: AddToCartBarParams) => {
   return (
     <SafeAreaView>
       <View style={styles.container}>
         <TouchableOpacity style={styles.addToCartButton} onPress={onAddToCart}>
           <Text style={styles.addToCartText}>Add To Cart</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.buyNowButton}>
+        <TouchableOpacity style={styles.buyNowButton} onPress={onBuyNow}>
           <Text style={styles.buyNowText}>Buy Now</Text>
         </TouchableOpacity>
       </View>

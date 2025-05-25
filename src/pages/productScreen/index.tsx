@@ -88,7 +88,42 @@ const ProductScreen = () => {
       quantity: 1,
     };
 
+    if (product?.type !== 'service' && product?.inventory <= 0) {
+      dispatch(
+        showSnackbar({
+          type: 'error',
+          title: 'Product is out of stock!',
+          placement: 'top',
+        }),
+      );
+      return;
+    }
+
     addToCartMutation({payload});
+  };
+
+  const onBuyNow = () => {
+    if (!reduxToken) {
+      setShowLoginDialog(true);
+      return;
+    }
+
+    const payload = {
+      user_id: reduxUserId,
+      product_id: product?._id,
+      quantity: 1,
+    };
+
+    if (product?.type !== 'service' && product?.inventory <= 0) {
+      dispatch(
+        showSnackbar({
+          type: 'error',
+          title: 'Product is out of stock!',
+          placement: 'top',
+        }),
+      );
+      return;
+    }
   };
 
   const alternativeProductsParams = {
@@ -150,7 +185,11 @@ const ProductScreen = () => {
     <>
       <RefreshControlWrapper refreshing={refreshing} onRefresh={onRefresh}>
         <CustomSearch redirectToUniversalScreen={true} />
-        <ProductPage product={product} onAddToCart={onAddToCart} />
+        <ProductPage
+          product={product}
+          onBuyNow={onBuyNow}
+          onAddToCart={onAddToCart}
+        />
 
         <ProductGrid
           title="Alternative Products"

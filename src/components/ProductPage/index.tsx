@@ -41,12 +41,14 @@ type ProductPageProps = {
   product: ProductType;
   similarProducts?: ProductType[];
   onAddToCart: () => void;
+  onBuyNow: () => void;
 };
 
 const ProductPage = ({
   product,
   similarProducts = [],
   onAddToCart,
+  onBuyNow,
 }: ProductPageProps) => {
   const reduxAuth = useAppSelector(state => state.auth);
   const reduxUser = reduxAuth.user;
@@ -106,7 +108,7 @@ const ProductPage = ({
 
         {/* Fixed button bar at the bottom */}
         <View style={styles.fixedButtonContainer}>
-          <AddToCartBar onAddToCart={onAddToCart} />
+          <AddToCartBar onBuyNow={onBuyNow} onAddToCart={onAddToCart} />
         </View>
       </View>
     </SafeAreaView>
