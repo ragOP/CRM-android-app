@@ -71,7 +71,7 @@ const BuyNowScreen = () => {
       )
     : 0;
   const totalPayable = currentAddress ? (Number(discountedPrice) + Number(taxAmount)).toFixed(2) : 0;
-  console.log('ADDRESS', currentAddress, taxAmount);
+  console.log('ADDRESS', currentAddress, taxAmount );
 
   // Fetch addresses
   const {data: addresses, isLoading: isAddressLoading} = useQuery({
