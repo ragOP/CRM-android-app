@@ -35,8 +35,6 @@ export const getTaxAmount = (products, couponPrice = 0, address = {}, role) => {
     const sgst = Number(item.product.hsn_code?.sgst_rate) || 0;
     const igst = Number(item.product.hsn_code?.igst_rate) || 0;
     const cess = Number(item.product.hsn_code?.cess) || 0;
-    console.log('PRICE', address?.state_code);
-    console.log(cgst, sgst, igst, cess, 'TAX RATES');
 
     let tax = 0;
     if (address?.state_code === SELLER_STATE_CODE) {
@@ -44,8 +42,6 @@ export const getTaxAmount = (products, couponPrice = 0, address = {}, role) => {
     } else {
       tax = taxableAmount * (igst / 100);
     }
-
-    console.log(tax, 'TAX');
 
     tax += taxableAmount * (cess / 100);
 

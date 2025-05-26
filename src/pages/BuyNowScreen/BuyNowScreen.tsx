@@ -206,6 +206,9 @@ const BuyNowScreen = () => {
       addressId: currentAddress?._id,
       productId,
       quantity: quantity,
+      ...(reduxUserRole === 'salesperson' || reduxUserRole === 'dnd'
+        ? {orderedBy: reduxUserId, orderedForUser: selectedUser}
+        : {}),
     };
     const apiResponse = await buyNowOrder({payload});
 
