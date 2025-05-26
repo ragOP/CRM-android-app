@@ -37,6 +37,7 @@ export interface Address {
   alternatePhone?: string;
   addressType: AddressType;
   isPrimary?: boolean;
+  state_code?: string;
 }
 
 const addressInit: Omit<Address, '_id'> = {

@@ -39,7 +39,7 @@ const CartItem: React.FC<CartItemProps> = ({
     salesperson_discounted_price: item.salesperson_discounted_price,
     dnd_discounted_price: item.dnd_discounted_price,
   });
-  
+
   return (
     <View style={styles.cartItemContainer}>
       {/* <View style={styles.badgeContainer}>

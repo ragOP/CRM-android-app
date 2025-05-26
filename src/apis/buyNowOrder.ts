@@ -12,6 +12,7 @@ export const buyNowOrder = async ({payload}: PlaceOrderParams) => {
       method: 'POST',
       data: payload,
     });
+    console.log('payload >>', payload);
     return apiResponse;
   } catch (error) {
     console.error('error');
