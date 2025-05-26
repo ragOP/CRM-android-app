@@ -16,11 +16,11 @@ const AddToCartBar = ({onAddToCart, onBuyNow}: AddToCartBarParams) => {
   return (
     <SafeAreaView>
       <View style={styles.container}>
-        <TouchableOpacity style={styles.addToCartButton} onPress={onAddToCart}>
-          <Text style={styles.addToCartText}>Add To Cart</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.buyNowButton} onPress={onBuyNow}>
+        <TouchableOpacity style={styles.addToCartButton} onPress={onBuyNow}>
           <Text style={styles.buyNowText}>Buy Now</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.buyNowButton} onPress={onAddToCart}>
+          <Text style={styles.addToCartText}>Add To Cart</Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>

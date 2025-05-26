@@ -1,10 +1,5 @@
 import React from 'react';
-import {
-  SafeAreaView,
-  StatusBar,
-  StyleSheet,
-  Platform,
-} from 'react-native';
+import {SafeAreaView, StatusBar, StyleSheet, Platform} from 'react-native';
 import {NavigationContainer} from '@react-navigation/native';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
@@ -37,6 +32,7 @@ import ForgetPasswordScreen from './src/pages/forgetPasswordScreen';
 import FaqScreen from './src/components/Faq';
 import PrivacyPolicyScreen from './src/components/PrivacyPolicy';
 import TermsConditionsScreen from './src/components/TermsCondition';
+import BuyNowScreen from './src/pages/BuyNowScreen/BuyNowScreen';
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -55,6 +51,7 @@ const HomeStack = () => {
       <Stack.Screen name="LaundaryScreen" component={LaundaryScreen} />
       <Stack.Screen name="HouseServiceScreen" component={HouseServiceScreen} />
       <Stack.Screen name="ProductScreen" component={ProductScreen} />
+      <Stack.Screen name="BuyNowScreen" component={BuyNowScreen} />
     </Stack.Navigator>
   );
 };
@@ -69,16 +66,25 @@ const AccountStack = () => {
       ) : (
         <>
           <Stack.Screen name="LoginScreen" component={LoginScreen} />
-          <Stack.Screen name="ForgetPasswordScreen" component={ForgetPasswordScreen} />
+          <Stack.Screen
+            name="ForgetPasswordScreen"
+            component={ForgetPasswordScreen}
+          />
           <Stack.Screen name="RegisterScreen" component={RegisterScreen} />
         </>
       )}
       <Stack.Screen name="ViewOrderScreen" component={ViewOrdersScreen} />
-      <Stack.Screen name="TransactionLogsScreen" component={TransactionLogs} /> 
+      <Stack.Screen name="TransactionLogsScreen" component={TransactionLogs} />
       <Stack.Screen name="FaqScreen" component={FaqScreen} />
-      <Stack.Screen name="PrivacyPolicyScreen" component={PrivacyPolicyScreen} />
-      <Stack.Screen name="TermsConditionsScreen" component={TermsConditionsScreen} />
-    </Stack.Navigator>  
+      <Stack.Screen
+        name="PrivacyPolicyScreen"
+        component={PrivacyPolicyScreen}
+      />
+      <Stack.Screen
+        name="TermsConditionsScreen"
+        component={TermsConditionsScreen}
+      />
+    </Stack.Navigator>
   );
 };
 
@@ -99,7 +105,15 @@ const CartStack = () => {
 
 const tabScreenOptions = ({route}: {route: any}) => ({
   headerShown: false,
-  tabBarIcon: ({color, size, focused}: {color: string; size: number; focused: boolean}) => {
+  tabBarIcon: ({
+    color,
+    size,
+    focused,
+  }: {
+    color: string;
+    size: number;
+    focused: boolean;
+  }) => {
     let iconName = 'home-outline';
     if (route.name === 'HomeTab') {
       iconName = focused ? 'home' : 'home-outline';

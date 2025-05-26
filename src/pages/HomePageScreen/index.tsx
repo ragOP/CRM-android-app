@@ -20,8 +20,8 @@ import {selectServices} from '../../redux/slice/servicesSlice';
 import {useAppSelector} from '../../redux/store';
 import {apiService} from '../../utils/api/apiService';
 import {endpoints} from '../../utils/endpoints';
-import { RefreshControl } from 'react-native';
-import { useCallback, useState } from 'react';
+import {RefreshControl} from 'react-native';
+import {useCallback, useState} from 'react';
 
 // const testimonialsData = [
 //   {
@@ -104,7 +104,11 @@ const HomePageScreen = () => {
     per_page: 10,
   };
 
-  const {data: topProducts, isLoading: isLoadingTopProducts, refetch: refetchTopProducts} = useQuery({
+  const {
+    data: topProducts,
+    isLoading: isLoadingTopProducts,
+    refetch: refetchTopProducts,
+  } = useQuery({
     queryKey: ['top_products'],
     queryFn: async () => {
       const apiResponse = await fetchProducts({params: topProductsParams});
@@ -115,23 +119,25 @@ const HomePageScreen = () => {
     },
   });
 
-  const {data: superSellingProducts, isLoading: isLoadingSuperSellingProducts,
-  refetch: refetchSuperSellingProducts} =
-    useQuery({
-      queryKey: ['super_selling_products'],
-      queryFn: async () => {
-        const apiResponse = await fetchProducts({params: bestSellerParams});
-        if (apiResponse?.response?.success) {
-          return apiResponse?.response?.data?.data;
-        }
-        return [];
-      },
-    });
+  const {
+    data: superSellingProducts,
+    isLoading: isLoadingSuperSellingProducts,
+    refetch: refetchSuperSellingProducts,
+  } = useQuery({
+    queryKey: ['super_selling_products'],
+    queryFn: async () => {
+      const apiResponse = await fetchProducts({params: bestSellerParams});
+      if (apiResponse?.response?.success) {
+        return apiResponse?.response?.data?.data;
+      }
+      return [];
+    },
+  });
 
   const {
     data: mostOrderedMedicineProducts,
     isLoading: isLoadingMostOrderedMedicineProducts,
-  refetch: refetchMostOrdered
+    refetch: refetchMostOrdered,
   } = useQuery({
     queryKey: ['most_ordered_medicine_products'],
     queryFn: async () => {
@@ -145,8 +151,11 @@ const HomePageScreen = () => {
     },
   });
 
-  const {data: internalPageConfig, isLoading: isLoadingInternalPageConfig,
-  refetch: refetchInternalConfig} = useQuery({
+  const {
+    data: internalPageConfig,
+    isLoading: isLoadingInternalPageConfig,
+    refetch: refetchInternalConfig,
+  } = useQuery({
     queryKey: ['internal_config'],
     queryFn: async () => {
       const apiResponse = await apiService({
@@ -160,26 +169,28 @@ const HomePageScreen = () => {
     },
   });
 
-  const {data: testimonialsRes = [], isLoading: isLoadingTestimonials,
-  refetch: refetchTestimonials} =
-    useQuery({
-      queryKey: ['testimonial'],
-      queryFn: () => fetchTestimonials(),
-      select: data => data?.data,
-    });
+  const {
+    data: testimonialsRes = [],
+    isLoading: isLoadingTestimonials,
+    refetch: refetchTestimonials,
+  } = useQuery({
+    queryKey: ['testimonial'],
+    queryFn: () => fetchTestimonials(),
+    select: data => data?.data,
+  });
 
-    // Refresh handler
-const onRefresh = useCallback(async () => {
-  setRefreshing(true);
-  await Promise.all([
-    refetchTopProducts(),
-    refetchSuperSellingProducts(),
-    refetchMostOrdered(),
-    refetchInternalConfig(),
-    refetchTestimonials(),
-  ]);
-  setRefreshing(false);
-}, []);
+  // Refresh handler
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await Promise.all([
+      refetchTopProducts(),
+      refetchSuperSellingProducts(),
+      refetchMostOrdered(),
+      refetchInternalConfig(),
+      refetchTestimonials(),
+    ]);
+    setRefreshing(false);
+  }, []);
 
   // const [productsData, setProductsData] = useState({
   //   is_fetching: false,
@@ -230,9 +241,11 @@ const onRefresh = useCallback(async () => {
   // const productsList = productsData?.data || [];
 
   return (
-    <ScrollView style={styles.container} refreshControl={
-    <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-  }>
+    <ScrollView
+      style={styles.container}
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+      }>
       <GradientHeader height={120} title="" description="" isHomePage={true} />
       <ImageCarousel />
       <ProductGrid
@@ -242,19 +255,18 @@ const onRefresh = useCallback(async () => {
         data={topProducts}
       />
       {isLoadingInternalPageConfig ? (
-        <View
-          style={{flex: 1, alignItems: 'center', justifyContent: 'center'}}>
+        <View style={{flex: 1, alignItems: 'center', justifyContent: 'center'}}>
           <ActivityIndicator color="#00008B" />
         </View>
-      ): (
+      ) : (
         <Image
           source={{uri: internalPageConfig.flyer1}}
           style={styles.healthBanner}
         />
         // <Text>hello</Text>
       )}
-    
-    {/* <Image
+
+      {/* <Image
     key={6356642}
       source={{uri: "https://res.cloudinary.com/dacwig3xk/image/upload/v1741701739/uploads/images/jipgabltqov8ltww0wbt.png"}}
       style={styles.healthBanner}
@@ -300,17 +312,17 @@ const onRefresh = useCallback(async () => {
         data={mostOrderedMedicineProducts}
       />
 
-       {isLoadingInternalPageConfig ? (
-        <View
-          style={{flex: 1, alignItems: 'center', justifyContent: 'center'}}>
+      {isLoadingInternalPageConfig ? (
+        <View style={{flex: 1, alignItems: 'center', justifyContent: 'center'}}>
           <ActivityIndicator color="#00008B" />
         </View>
-      ): (
-        internalPageConfig?.flyer1 && 
-        <Image
-          source={{uri: internalPageConfig?.flyer1}}
-          style={styles.healthBanner}
-        />
+      ) : (
+        internalPageConfig?.flyer1 && (
+          <Image
+            source={{uri: internalPageConfig?.flyer1}}
+            style={styles.healthBanner}
+          />
+        )
       )}
       {/* <ProductGrid
         title="Big Deals On Sports Drinks"
@@ -338,7 +350,12 @@ const onRefresh = useCallback(async () => {
         <ScrollView horizontal showsHorizontalScrollIndicator={false}>
           {isLoadingTestimonials ? (
             <View
-              style={{flex: 1, alignItems: 'center', justifyContent: 'center'}}>
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                flex: 1,
+                justifyContent: 'center',
+              }}>
               <ActivityIndicator color="#00008B" />
             </View>
           ) : (
@@ -370,7 +387,7 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   healthBanner: {
-    width: "100%",
+    width: '100%',
     height: 100,
     resizeMode: 'contain',
   },

@@ -124,6 +124,8 @@ const ProductScreen = () => {
       );
       return;
     }
+
+    navigation.navigate('BuyNowScreen', {product: product});
   };
 
   const alternativeProductsParams = {
