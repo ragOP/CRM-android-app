@@ -24,6 +24,11 @@ const UniversalSearchScreen: React.FC = () => {
   const dispatch = useAppDispatch();
   const route = useRoute();
 
+  const [products, setProducts] = useState<any[]>([]);
+  const [page, setPage] = useState(1);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(true); // Optional: To stop loading more when done
+
   const {service} = route.params || {};
   const reduxServices = useAppSelector(selectServices);
 
@@ -33,7 +38,7 @@ const UniversalSearchScreen: React.FC = () => {
 
   const [filters, setFilters] = useState<FilterType>({
     page: 1,
-    per_page: 20,
+    per_page: 10,
     search: '',
     category_id: [],
     price_range: [],
@@ -77,7 +82,7 @@ const UniversalSearchScreen: React.FC = () => {
       ...filters,
       search: debouncedQuery,
       page: 1,
-      per_page: 20,
+      per_page: 10,
     });
   };
 
@@ -94,21 +99,59 @@ const UniversalSearchScreen: React.FC = () => {
     },
   });
 
-  useEffect(() => {
-    if (categoryId && isArrayWithValues(categoriesList)) {
-      const currentCategory = categoriesList?.find(
-        category => category._id === categoryId,
-      );
+  const fetchMoreProducts = async () => {
+    if (isLoadingMore || !hasMore) return;
 
-      if (!currentCategory) {
-        return;
-      }
-      setFilters({
+    setIsLoadingMore(true);
+
+    const response = await fetchProducts({
+      params: {
         ...filters,
-        category_id: [currentCategory?._id],
-      });
+        page,
+        per_page: 10,
+        category_id:
+          !isArrayWithValues(filters.category_id) &&
+          isArrayWithValues(categoriesList)
+            ? categoriesList.map(c => c._id)
+            : filters.category_id,
+      },
+    });
+
+    if (response?.response?.success) {
+      const newProducts = response.response.data.data;
+      setProducts(prev => [...prev, ...newProducts]);
+
+      if (newProducts.length === 0) {
+        setHasMore(false); // No more data to load
+      } else {
+        setPage(prev => prev + 1); // Increase page for next load
+      }
     }
-  }, [categoryId]);
+
+    setIsLoadingMore(false);
+  };
+
+useEffect(() => {
+  const loadInitialProducts = async () => {
+    setPage(1);
+    setHasMore(true);
+
+    const response = await fetchProducts({
+      params: {
+        ...filters,
+        page: 1,
+        per_page: 10,
+      },
+    });
+
+    if (response?.response?.success) {
+      setProducts(response.response.data.data);
+    }
+  };
+
+  loadInitialProducts();
+}, [filters, categoriesList]);
+
 
   // useEffect(() => {
   //   if (!isArrayWithValues(reduxServices)) {
@@ -147,32 +190,23 @@ const UniversalSearchScreen: React.FC = () => {
         </View>
       ) : isArrayWithValues(allProducts) ? (
         <FlatList
-          data={allProducts}
-          renderItem={({item}) => {
-            const discountPrice = getDiscountBasedOnRole({
-              role: reduxUserRole,
-              discounted_price: item.discounted_price,
-              original_price: item.price,
-              salesperson_discounted_price: item.salesperson_discounted_price,
-              dnd_discounted_price: item.dnd_discounted_price,
-            });
-            return (
-              <ProductCard
-                data={item}
-                image={item?.banner_image}
-                price={item?.discounted_price}
-                originalPrice={item?.price}
-                title={item?.name}
-                subtitle={item?.small_description}
-              />
-            );
-          }}
+          data={products}
+          renderItem={({item}) => (
+            <ProductCard
+              data={item}
+              image={item?.banner_image}
+              price={item?.discounted_price}
+              originalPrice={item?.price}
+              title={item?.name}
+              subtitle={item?.small_description}
+            />
+          )}
           keyExtractor={item => item.id}
           numColumns={2}
           columnWrapperStyle={{justifyContent: 'space-between'}}
-          contentContainerStyle={{
-            padding: 16,
-          }}
+          contentContainerStyle={{padding: 16}}
+          onEndReached={fetchMoreProducts}
+          onEndReachedThreshold={0.5}
         />
       ) : (
         <View
