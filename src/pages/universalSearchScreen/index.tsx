@@ -25,9 +25,11 @@ const UniversalSearchScreen: React.FC = () => {
   const route = useRoute();
 
   const [products, setProducts] = useState<any[]>([]);
+  const [totalProducts, setTotalProducts] = useState(0);
   const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
-  const [hasMore, setHasMore] = useState(true); // Optional: To stop loading more when done
+  const [refreshing, setRefreshing] = useState(false);
 
   const {service} = route.params || {};
   const reduxServices = useAppSelector(selectServices);
@@ -38,7 +40,7 @@ const UniversalSearchScreen: React.FC = () => {
 
   const [filters, setFilters] = useState<FilterType>({
     page: 1,
-    per_page: 10,
+    per_page: 5,
     search: '',
     category_id: [],
     price_range: [],
@@ -82,33 +84,23 @@ const UniversalSearchScreen: React.FC = () => {
       ...filters,
       search: debouncedQuery,
       page: 1,
-      per_page: 10,
+      per_page: 5,
     });
   };
 
-  const {data: allProducts, isLoading: isProductsLoading} = useQuery({
-    queryKey: ['search_result_products', params],
-    queryFn: async () => {
-      const apiResponse = await fetchProducts({
-        params,
-      });
-      if (apiResponse?.response?.success) {
-        return apiResponse?.response?.data?.data;
-      }
-      return [];
-    },
-  });
-
   const fetchMoreProducts = async () => {
-    if (isLoadingMore || !hasMore) return;
-
+    if (products.length === totalProducts) {
+      console.log('No more data to load');
+      setHasMore(false);
+      return;
+    }
     setIsLoadingMore(true);
 
     const response = await fetchProducts({
       params: {
         ...filters,
         page,
-        per_page: 10,
+        per_page: 5,
         category_id:
           !isArrayWithValues(filters.category_id) &&
           isArrayWithValues(categoriesList)
@@ -118,10 +110,11 @@ const UniversalSearchScreen: React.FC = () => {
     });
 
     if (response?.response?.success) {
-      const newProducts = response.response.data.data;
-      setProducts(prev => [...prev, ...newProducts]);
+      setProducts(prev =>  [...prev, ...response.response.data.data]);
 
-      if (newProducts.length === 0) {
+      setTotalProducts(response.response.data.total);
+      console.log('param page', response.response.data);
+      if (response.response.data.length === 0) {
         setHasMore(false); // No more data to load
       } else {
         setPage(prev => prev + 1); // Increase page for next load
@@ -131,8 +124,8 @@ const UniversalSearchScreen: React.FC = () => {
     setIsLoadingMore(false);
   };
 
-useEffect(() => {
-  const loadInitialProducts = async () => {
+  const handleReload = async () => {
+    setRefreshing(true);
     setPage(1);
     setHasMore(true);
 
@@ -140,75 +133,90 @@ useEffect(() => {
       params: {
         ...filters,
         page: 1,
-        per_page: 10,
+        per_page: 5,
+        category_id:
+          !isArrayWithValues(filters.category_id) &&
+          isArrayWithValues(categoriesList)
+            ? categoriesList.map(c => c._id)
+            : filters.category_id,
       },
     });
 
     if (response?.response?.success) {
       setProducts(response.response.data.data);
+      setTotalProducts(response.response.data.total);
+      setPage(2);
     }
+
+    setRefreshing(false);
   };
 
-  loadInitialProducts();
-}, [filters, categoriesList]);
+  useEffect(() => {
+    const loadInitialProducts = async () => {
+      setPage(1);
+      setHasMore(true);
 
+      const response = await fetchProducts({
+        params: {
+          ...filters,
+          page: 1,
+          per_page: 5,
+          category_id:
+            !isArrayWithValues(filters.category_id) &&
+            isArrayWithValues(categoriesList)
+              ? categoriesList.map(c => c._id)
+              : filters.category_id,
+        },
+      });
 
-  // useEffect(() => {
-  //   if (!isArrayWithValues(reduxServices)) {
-  //     dispatch(fetchReduxServices({}));
-  //   }
-  // }, [dispatch]);
+      if (response?.response?.success) {
+        setProducts(response.response.data.data);
+        setTotalProducts(response.response.data.total);
+        setPage(2);
+      }
+    };
+
+    if (categoriesList) {
+      loadInitialProducts();
+    }
+  }, [filters, categoriesList]);
 
   return (
-    <ScrollView>
-      <CustomSearch
-        searchText={debouncedQuery}
-        onChange={onChangeSearchText}
-        onSearch={onSearch}
-      />
-      <Filter
-        filters={filters}
-        setFilters={setFilters}
-        categoriesList={categoriesList || []}
-      />
-      {isProductsLoading ? (
-        // Skeleton loader for products
-        <View style={{flexDirection: 'row', flexWrap: 'wrap', padding: 16}}>
-          {[...Array(6)].map((_, idx) => (
-            <View
-              key={idx}
-              style={{
-                width: '48%',
-                height: 180,
-                backgroundColor: '#e0e0e0',
-                borderRadius: 12,
-                marginBottom: 16,
-                marginRight: idx % 2 === 0 ? '4%' : 0,
-              }}
-            />
-          ))}
-        </View>
-      ) : isArrayWithValues(allProducts) ? (
-        <FlatList
-          data={products}
-          renderItem={({item}) => (
-            <ProductCard
-              data={item}
-              image={item?.banner_image}
-              price={item?.discounted_price}
-              originalPrice={item?.price}
-              title={item?.name}
-              subtitle={item?.small_description}
-            />
-          )}
-          keyExtractor={item => item.id}
-          numColumns={2}
-          columnWrapperStyle={{justifyContent: 'space-between'}}
-          contentContainerStyle={{padding: 16}}
-          onEndReached={fetchMoreProducts}
-          onEndReachedThreshold={0.5}
+    <FlatList
+      ListHeaderComponent={
+        <>
+          <CustomSearch
+            searchText={debouncedQuery}
+            onChange={onChangeSearchText}
+            onSearch={onSearch}
+          />
+          <Filter
+            filters={filters}
+            setFilters={setFilters}
+            categoriesList={categoriesList || []}
+          />
+        </>
+      }
+      data={products}
+      renderItem={({item}) => (
+        <ProductCard
+          data={item}
+          image={item?.banner_image}
+          price={item?.discounted_price}
+          originalPrice={item?.price}
+          title={item?.name}
+          subtitle={item?.small_description}
         />
-      ) : (
+      )}
+      keyExtractor={item => item._id}
+      numColumns={2}
+      columnWrapperStyle={{justifyContent: 'space-between'}}
+      contentContainerStyle={{padding: 16}}
+      onEndReached={fetchMoreProducts}
+      onEndReachedThreshold={0.5}
+      refreshing={refreshing}
+      onRefresh={handleReload}
+      ListEmptyComponent={
         <View
           style={{
             flex: 1,
@@ -218,8 +226,8 @@ useEffect(() => {
           }}>
           <Text style={{fontSize: 16, color: '#888'}}>No products found</Text>
         </View>
-      )}
-    </ScrollView>
+      }
+    />
   );
 };
 
