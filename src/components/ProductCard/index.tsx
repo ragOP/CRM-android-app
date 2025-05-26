@@ -10,6 +10,7 @@ import {showSnackbar} from '../../redux/slice/snackbarSlice';
 import CustomDialog from '../CustomDialog/CustomDialog';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import InventoryBadge from '../InventoryBadge';
 
 type ProductCardProps = {
   data: any;
@@ -117,6 +118,8 @@ const ProductCard = ({
     // Buy now logic here
   };
 
+  // console.log('data', data);
+  console.log("inventory", data?.inventory)
   return (
     <>
       <TouchableOpacity
@@ -124,6 +127,9 @@ const ProductCard = ({
         style={styles.card}
         activeOpacity={0.9}>
         <View style={styles.topContainer}>
+        <View style={styles.badgeContainer}>
+          <InventoryBadge productInventory={data?.inventory} />
+        </View>
           <Image source={{uri: image}} style={styles.image} />
           <View style={styles.priceRow}>
             <Text style={styles.price}>₹{price}</Text>
@@ -257,4 +263,10 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontSize: 12,
   },
+  badgeContainer: {
+    position: 'absolute',
+    top: 7,
+    right: 7,
+    zIndex: 1,
+  }
 });

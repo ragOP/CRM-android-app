@@ -11,6 +11,7 @@ import {calculateDiscountPercentage} from '../../utils/percentage/calculateDisco
 import {getDiscountBasedOnRole} from '../../utils/products/getDiscountBasedOnRole';
 import {useAppSelector} from '../../redux/store';
 import {useState} from 'react';
+import InventoryBadge from '../InventoryBadge';
 
 interface CartItemProps {
   item: any;
@@ -29,6 +30,7 @@ const CartItem: React.FC<CartItemProps> = ({
   const reduxUser = reduxAuth.user;
   const reduxUserRole = reduxUser?.role || 'user';
   const [isLoading, setIsLoading] = useState(false);
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   const discountPrice = getDiscountBasedOnRole({
     role: reduxUserRole,
@@ -37,9 +39,12 @@ const CartItem: React.FC<CartItemProps> = ({
     salesperson_discounted_price: item.salesperson_discounted_price,
     dnd_discounted_price: item.dnd_discounted_price,
   });
-
+  
   return (
     <View style={styles.cartItemContainer}>
+      {/* <View style={styles.badgeContainer}>
+        <InventoryBadge productInventory={item?.inventory || 0} />
+      </View> */}
       <Image source={{uri: item.images?.[0]}} style={styles.itemImage} />
       <View style={styles.itemDetails}>
         <Text style={styles.itemTitle}>{item?.name}</Text>
@@ -91,9 +96,16 @@ const CartItem: React.FC<CartItemProps> = ({
             </TouchableOpacity>
           </View>
           <TouchableOpacity
-            onPress={() => onRemove()}
+            onPress={async () => {
+              setDeleteLoading(true);
+              onQuantityChange(item, 0, setDeleteLoading);
+            }}
             style={styles.removeButton}>
-            <Icon name="trash-can-outline" size={20} color="#FB6969" />
+            {deleteLoading ? (
+              <ActivityIndicator size="small" color="#FB6969" />
+            ) : (
+              <Icon name="trash-can-outline" size={20} color="#FB6969" />
+            )}
           </TouchableOpacity>
         </View>
       </View>
@@ -178,5 +190,11 @@ const styles = StyleSheet.create({
   },
   removeButton: {
     padding: 8,
+  },
+  badgeContainer: {
+    position: 'absolute',
+    top: 7,
+    right: 7,
+    zIndex: 1,
   },
 });

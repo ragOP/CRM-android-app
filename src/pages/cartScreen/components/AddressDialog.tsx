@@ -20,6 +20,7 @@ import {addAddress} from '../../../apis/addAddress';
 import {deleteAddress} from '../../../apis/deleteAddress';
 import {showSnackbar} from '../../../redux/slice/snackbarSlice';
 import {Badge, Checkbox} from 'react-native-paper';
+import {statesList} from '../../../utils/state/statesList';
 
 export type AddressType = 'home' | 'work' | 'other';
 
@@ -81,15 +82,24 @@ const AddressDialog: React.FC<AddressDialogProps> = ({
   const [selectedAddressId, setSelectedAddressId] = useState<string | null>(
     null,
   );
+  const [stateMenuVisible, setStateMenuVisible] = useState(false);
 
   const {mutate: createAddress} = useMutation({
     mutationFn: async ({address}: {address: Omit<Address, '_id'>}) => {
       if (!reduxUserId) {
         return;
       }
+
+      const matchedState = statesList.find(
+        item => item.name.toLowerCase() === address.state.toLowerCase(),
+      );
+
+      const state_code = matchedState?.code || '';
+
       const payload = {
         ...(address || {}),
         user: reduxUserId,
+        state_code,
       };
       const apiResponse = await addAddress({payload});
       return apiResponse?.response;
@@ -138,7 +148,7 @@ const AddressDialog: React.FC<AddressDialogProps> = ({
       payload: Omit<Address, '_id'>;
     }) => {
       const apiResponse = await updateAddress({id, payload});
-      console.log('apiResponse', apiResponse);
+      console.log('apiResponseAddress', apiResponse);
       return apiResponse?.response;
     },
     onMutate: () => setIsLoading(true),
@@ -379,7 +389,6 @@ const AddressDialog: React.FC<AddressDialogProps> = ({
                       multiline: true,
                     },
                     {key: 'city', placeholder: 'City', keyboard: 'default'},
-                    {key: 'state', placeholder: 'State', keyboard: 'default'},
                     {
                       key: 'landmark',
                       placeholder: 'Landmark (Optional)',
@@ -403,6 +412,30 @@ const AddressDialog: React.FC<AddressDialogProps> = ({
                       }
                     />
                   ))}
+
+                  <TouchableOpacity
+                    onPress={() => setStateMenuVisible(prev => !prev)}
+                    style={styles.dropdownButton}>
+                    <Text>{form.state || 'Select State'}</Text>
+                  </TouchableOpacity>
+
+                  {stateMenuVisible && (
+                    <View style={styles.dropdownMenu}>
+                      <ScrollView style={{maxHeight: 200}}>
+                        {statesList.map(state => (
+                          <TouchableOpacity
+                            key={state.code}
+                            style={styles.dropdownItem}
+                            onPress={() => {
+                              setForm(prev => ({...prev, state: state.name}));
+                              setStateMenuVisible(false);
+                            }}>
+                            <Text>{state.name}</Text>
+                          </TouchableOpacity>
+                        ))}
+                      </ScrollView>
+                    </View>
+                  )}
 
                   <TouchableOpacity
                     style={styles.primaryFormContainer}
@@ -535,7 +568,7 @@ const styles = StyleSheet.create({
   dialog: {
     backgroundColor: '#FFF',
     borderRadius: 12,
-    maxHeight: '90%',
+    maxHeight: '100%',
     width: '100%',
     shadowColor: '#000',
     shadowOpacity: 0.1,
@@ -706,5 +739,29 @@ const styles = StyleSheet.create({
   deleteTxt: {
     color: '#fff',
     fontWeight: 'bold',
+  },
+  dropdownButton: {
+    padding: 12,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 6,
+    marginVertical: 8,
+  },
+  dropdownMenu: {
+    backgroundColor: '#fff',
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 6,
+    position: 'absolute',
+    right: 15,
+    bottom: -30,
+    // top: 'auto', // you may set `top: 0` with proper container layout
+    zIndex: 999, // to bring it above modal content
+    width: '100%',
+  },
+  dropdownItem: {
+    padding: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
   },
 });

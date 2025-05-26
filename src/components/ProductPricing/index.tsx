@@ -1,5 +1,6 @@
 import React from 'react';
 import {View, Text, StyleSheet} from 'react-native';
+import InventoryBadge from '../InventoryBadge';
 
 interface ProductPricingProps {
   mrp: number;
@@ -9,6 +10,7 @@ interface ProductPricingProps {
   productName?: string;
   productDescription?: string;
   highlight?: {[key: string]: boolean};
+  inventory?: number;
 }
 
 const ProductPricing = ({
@@ -19,6 +21,7 @@ const ProductPricing = ({
   productName,
   productDescription,
   highlight = {},
+  inventory,
 }: ProductPricingProps) => {
   return (
     <View style={styles.container}>
@@ -30,6 +33,7 @@ const ProductPricing = ({
         <Text style={styles.freeDelivery}>
           Free <Text style={{color: '#333333'}}>Delivery</Text>
         </Text>
+        <InventoryBadge productInventory={inventory || 0} />
         {specialOffer && (
           <View style={styles.specialOffer}>
             <Text style={styles.specialOfferText}>

@@ -79,6 +79,7 @@ const ProductPage = ({
             highlight={{'50%': true, off: true, free: true}}
             productName={product.name}
             productDescription={product.small_description}
+            inventory={product?.inventory}
           />
           <View style={styles.content}>
             <ProductVariants variants={product?.variants || []} />

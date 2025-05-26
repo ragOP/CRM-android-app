@@ -1,4 +1,4 @@
-import React, {useCallback, useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import {
   RefreshControl,
   SafeAreaView,
@@ -26,6 +26,7 @@ import {calculateDiscount} from '../../utils/discount/calculateDiscount';
 import {getDiscountBasedOnRole} from '../../utils/products/getDiscountBasedOnRole';
 import OrderForSelection from '../../components/OrderForSelection/OrderForSelection';
 import {showSnackbar} from '../../redux/slice/snackbarSlice';
+import { getTaxAmount } from '../../apis/getTaxAmount';
 
 function formatAddress(address) {
   if (!address) return '';
@@ -107,7 +108,6 @@ const handleQuantityChange = async (product: string, change: number, setIsLoadin
 
   setIsLoading(false);
 };
-
 
   const handlePlaceOrder = async ({
     orderId,
@@ -285,7 +285,7 @@ const handleQuantityChange = async (product: string, change: number, setIsLoadin
             <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
           }>
           <CartHeader
-            isAddressPresent
+            isAdressPresent
             deliverTo={deliverTo || ''}
             onChangePress={onOpenAddressDialog}
             isAddressLoading={isAddressLoading}

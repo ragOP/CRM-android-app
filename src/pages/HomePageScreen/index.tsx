@@ -229,8 +229,6 @@ const onRefresh = useCallback(async () => {
 
   // const productsList = productsData?.data || [];
 
-  console.log("isLoadingInternalPageConfig", isLoadingInternalPageConfig);
-  console.log('internalPageConfig', internalPageConfig?.flyer1);
   return (
     <ScrollView style={styles.container} refreshControl={
     <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
