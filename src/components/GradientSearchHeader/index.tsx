@@ -11,9 +11,7 @@ import LinearGradient from 'react-native-linear-gradient';
 
 const GradientSearchHeader = () => {
   return (
-       <LinearGradient
-         colors={['#82C8E5', '#F7F7F7']}
-         style={[styles.container,]}>
+    <LinearGradient colors={['#82C8E5', '#F7F7F7']} style={[styles.container]}>
       {/* Header Section */}
       <View style={styles.header}>
         <Text style={styles.heading}>What are you looking for?</Text>
@@ -30,11 +28,11 @@ const GradientSearchHeader = () => {
       {/* Search Box */}
       <View style={styles.searchContainer}>
         <Image
-            source={require('../../assets/search-icon.png')} // replace with your actual icon
-            style={{width: 16, height: 16, marginRight: 4}}
-            />
+          source={require('../../assets/search-icon.png')} // replace with your actual icon
+          style={{width: 16, height: 16, marginRight: 4}}
+        />
         <TextInput
-          placeholder='search for “headache medicine”'
+          placeholder="Search products"
           placeholderTextColor="#888"
           style={styles.input}
         />

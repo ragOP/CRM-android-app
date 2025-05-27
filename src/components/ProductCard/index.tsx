@@ -97,7 +97,7 @@ const ProductCard = ({
 
   const handleAddToCart = () => {
     const productId = data?._id;
-    if (data?.inventory <= 0) {
+    if (data?.inventory <= 0 && data?.product_type !== 'service') {
       dispatch(
         showSnackbar({
           type: 'error',
@@ -125,9 +125,11 @@ const ProductCard = ({
         style={styles.card}
         activeOpacity={0.9}>
         <View style={styles.topContainer}>
-          <View style={styles.badgeContainer}>
-            <InventoryBadge productInventory={data?.inventory} />
-          </View>
+          {data?.product_type !== 'service' && (
+            <View style={styles.badgeContainer}>
+              <InventoryBadge productInventory={data?.inventory} />
+            </View>
+          )}
           <Image source={{uri: image}} style={styles.image} />
           <View style={styles.priceRow}>
             <Text style={styles.price}>₹{price}</Text>

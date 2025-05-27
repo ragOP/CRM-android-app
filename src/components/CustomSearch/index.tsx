@@ -37,34 +37,32 @@ const CustomSearch = ({
   };
 
   return (
-    <View>
-      <View style={styles.container}>
-        <TouchableOpacity onPress={onBack}>
-          <Image source={require('../../assets/leftarrow.png')} />
-        </TouchableOpacity>
+    <View style={styles.container}>
+      <TouchableOpacity onPress={onBack}>
+        <Icon name="arrow-back" size={24} color="#000" />
+      </TouchableOpacity>
 
+      <View style={{flex: 1, marginLeft: 10}}>
         {redirectToUniversalScreen ? (
-          <View style={{flex: 1}}>
-            <Pressable onPress={onNavigateToUniversalSearch}>
-              <View style={styles.fakeInput}>
-                <View style={styles.fakeInputInnerRow}>
-                  <Icon name="search-outline" size={16} color="#000" />
-                  <Text style={styles.placeholder}>
-                    {searchText || 'Search for “headache medicine”'}
-                  </Text>
-                </View>
-
-                <TouchableOpacity
-                  onPress={onSearch}
-                  style={styles.searchButton}
-                  disabled={true}>
-                  <Text style={styles.searchText} disabled={true}>
-                    Search
-                  </Text>
-                </TouchableOpacity>
+          <Pressable onPress={onNavigateToUniversalSearch}>
+            <View style={styles.fakeInput}>
+              <View style={styles.fakeInputInnerRow}>
+                <Icon name="search-outline" size={24} color="#000" />
+                <Text style={styles.placeholder}>
+                  {searchText || 'Search for products'}
+                </Text>
               </View>
-            </Pressable>
-          </View>
+
+              <TouchableOpacity
+                onPress={onSearch}
+                style={styles.searchButton}
+                disabled={true}>
+                <Text style={styles.searchText} disabled={true}>
+                  Search
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </Pressable>
         ) : (
           <SearchBox
             searchText={searchText}
@@ -73,17 +71,6 @@ const CustomSearch = ({
           />
         )}
       </View>
-
-      {/* <View style={styles.header}>
-        <TouchableOpacity style={styles.upload}>
-          <Image
-            source={require('../../assets/prescriptionIcon.png')} // replace with your actual icon
-            style={styles.icon}
-          />
-          <Text style={styles.prescriptionText}>Order with prescription. </Text>
-          <Text style={styles.uploadNow}>UPLOAD NOW ›</Text>
-        </TouchableOpacity>
-      </View> */}
     </View>
   );
 };
@@ -99,9 +86,8 @@ export const SearchBox = ({
   return (
     <View style={styles.searchContainer}>
       <Icon name="search-outline" size={16} color="#000" />
-
       <TextInput
-        placeholder="Search for “headache medicine”"
+        placeholder="Search products"
         placeholderTextColor="#888"
         style={styles.input}
         value={searchText}
@@ -122,22 +108,18 @@ export const SearchBox = ({
 
 const styles = StyleSheet.create({
   container: {
-    // flex: 1,
-    justifyContent: 'space-between',
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 14,
-    paddingVertical: 10,
+    paddingVertical: 8,
   },
   searchContainer: {
     flexDirection: 'row',
     backgroundColor: '#fff',
     borderRadius: 50,
     alignItems: 'center',
-    marginHorizontal: 10,
+    flex: 1,
     paddingLeft: 12,
     paddingRight: 4,
-    // paddingHorizontal: 12,
     paddingVertical: 4,
     borderColor: '#4D4D4D',
     borderWidth: 1,
@@ -159,31 +141,6 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontWeight: 'bold',
   },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    alignItems: 'center',
-    marginHorizontal: 20,
-  },
-  upload: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flexShrink: 1,
-  },
-  icon: {
-    width: 12,
-    height: 12,
-    marginRight: 4,
-  },
-  prescriptionText: {
-    fontSize: 10,
-    color: '#333',
-  },
-  uploadNow: {
-    fontSize: 10,
-    color: '#00008B',
-    fontWeight: 'bold',
-  },
   fakeInput: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -194,7 +151,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     paddingVertical: 6,
     paddingHorizontal: 8,
-    marginLeft: 8,
+    flex: 1,
   },
   fakeInputInnerRow: {
     flexDirection: 'row',

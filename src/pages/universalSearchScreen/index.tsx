@@ -1,4 +1,4 @@
-import {Text, ScrollView, FlatList, View} from 'react-native';
+import {Text, FlatList, View} from 'react-native';
 import CustomSearch from '../../components/CustomSearch';
 import Filter from '../../components/Filter';
 import ProductCard from '../../components/ProductCard';
@@ -10,7 +10,8 @@ import {fetchCategories} from '../../apis/fetchCategories';
 import {useAppDispatch, useAppSelector} from '../../redux/store';
 import {selectServices} from '../../redux/slice/servicesSlice';
 import {useRoute} from '@react-navigation/native';
-import {getDiscountBasedOnRole} from '../../utils/products/getDiscountBasedOnRole';
+import {ActivityIndicator} from 'react-native-paper';
+import Icon from 'react-native-vector-icons/Ionicons';
 
 export type FilterType = {
   category_id: string[];
@@ -29,6 +30,7 @@ const UniversalSearchScreen: React.FC = () => {
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
   const {service} = route.params || {};
@@ -40,7 +42,7 @@ const UniversalSearchScreen: React.FC = () => {
 
   const [filters, setFilters] = useState<FilterType>({
     page: 1,
-    per_page: 5,
+    per_page: 20,
     search: '',
     category_id: [],
     price_range: [],
@@ -84,12 +86,12 @@ const UniversalSearchScreen: React.FC = () => {
       ...filters,
       search: debouncedQuery,
       page: 1,
-      per_page: 5,
+      per_page: 20,
     });
   };
 
   const fetchMoreProducts = async () => {
-    if (products.length === totalProducts) {
+    if (products.length >= totalProducts) {
       console.log('No more data to load');
       setHasMore(false);
       return;
@@ -100,7 +102,7 @@ const UniversalSearchScreen: React.FC = () => {
       params: {
         ...filters,
         page,
-        per_page: 5,
+        per_page: 20,
         category_id:
           !isArrayWithValues(filters.category_id) &&
           isArrayWithValues(categoriesList)
@@ -110,7 +112,7 @@ const UniversalSearchScreen: React.FC = () => {
     });
 
     if (response?.response?.success) {
-      setProducts(prev =>  [...prev, ...response.response.data.data]);
+      setProducts(prev => [...prev, ...response.response.data.data]);
 
       setTotalProducts(response.response.data.total);
       console.log('param page', response.response.data);
@@ -133,7 +135,7 @@ const UniversalSearchScreen: React.FC = () => {
       params: {
         ...filters,
         page: 1,
-        per_page: 5,
+        per_page: 20,
         category_id:
           !isArrayWithValues(filters.category_id) &&
           isArrayWithValues(categoriesList)
@@ -153,26 +155,34 @@ const UniversalSearchScreen: React.FC = () => {
 
   useEffect(() => {
     const loadInitialProducts = async () => {
-      setPage(1);
-      setHasMore(true);
+      try {
+        setPage(1);
+        setHasMore(true);
 
-      const response = await fetchProducts({
-        params: {
-          ...filters,
-          page: 1,
-          per_page: 5,
-          category_id:
-            !isArrayWithValues(filters.category_id) &&
-            isArrayWithValues(categoriesList)
-              ? categoriesList.map(c => c._id)
-              : filters.category_id,
-        },
-      });
+        setIsLoading(true);
 
-      if (response?.response?.success) {
-        setProducts(response.response.data.data);
-        setTotalProducts(response.response.data.total);
-        setPage(2);
+        const response = await fetchProducts({
+          params: {
+            ...filters,
+            page: 1,
+            per_page: 20,
+            category_id:
+              !isArrayWithValues(filters.category_id) &&
+              isArrayWithValues(categoriesList)
+                ? categoriesList.map(c => c._id)
+                : filters.category_id,
+          },
+        });
+
+        if (response?.response?.success) {
+          setProducts(response.response.data.data);
+          setTotalProducts(response.response.data.total);
+          setPage(2);
+        }
+      } catch (error) {
+        console.error('Error loading initial products:', error);
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -180,6 +190,14 @@ const UniversalSearchScreen: React.FC = () => {
       loadInitialProducts();
     }
   }, [filters, categoriesList]);
+
+  if (isLoading) {
+    return (
+      <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+        <ActivityIndicator size="large" color="#000" />
+      </View>
+    );
+  }
 
   return (
     <FlatList
@@ -211,7 +229,7 @@ const UniversalSearchScreen: React.FC = () => {
       keyExtractor={item => item._id}
       numColumns={2}
       columnWrapperStyle={{justifyContent: 'space-between'}}
-      contentContainerStyle={{padding: 16}}
+      contentContainerStyle={{paddingHorizontal: 8, paddingVertical: 8}}
       onEndReached={fetchMoreProducts}
       onEndReachedThreshold={0.5}
       refreshing={refreshing}
@@ -220,11 +238,36 @@ const UniversalSearchScreen: React.FC = () => {
         <View
           style={{
             flex: 1,
-            alignItems: 'center',
+            marginTop: 100,
             justifyContent: 'center',
+            alignItems: 'center',
             padding: 32,
           }}>
-          <Text style={{fontSize: 16, color: '#888'}}>No products found</Text>
+          <Icon
+            name="cube-outline"
+            size={54}
+            color="grey"
+            style={{marginBottom: 12}}
+          />
+          <Text
+            style={{
+              fontSize: 18,
+              fontWeight: 'bold',
+              color: '#888',
+              marginBottom: 6,
+              textAlign: 'center',
+            }}>
+            No Products Found
+          </Text>
+          <Text
+            style={{
+              fontSize: 14,
+              color: '#aaa',
+              textAlign: 'center',
+              lineHeight: 20,
+            }}>
+            We couldn't find any products matching your search or filters.
+          </Text>
         </View>
       }
     />

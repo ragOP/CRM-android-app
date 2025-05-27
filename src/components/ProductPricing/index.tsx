@@ -11,6 +11,7 @@ interface ProductPricingProps {
   productDescription?: string;
   highlight?: {[key: string]: boolean};
   inventory?: number;
+  productType?: 'product' | 'service';
 }
 
 const ProductPricing = ({
@@ -22,6 +23,7 @@ const ProductPricing = ({
   productDescription,
   highlight = {},
   inventory,
+  productType,
 }: ProductPricingProps) => {
   return (
     <View style={styles.container}>
@@ -33,7 +35,9 @@ const ProductPricing = ({
         <Text style={styles.freeDelivery}>
           Free <Text style={{color: '#333333'}}>Delivery</Text>
         </Text>
-        <InventoryBadge productInventory={inventory || 0} />
+        {productType !== 'service' && (
+          <InventoryBadge productInventory={inventory || 0} />
+        )}
         {specialOffer && (
           <View style={styles.specialOffer}>
             <Text style={styles.specialOfferText}>

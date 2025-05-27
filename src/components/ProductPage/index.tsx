@@ -35,6 +35,8 @@ export type ProductType = {
   createdAt: string;
   updatedAt: string;
   __v: number;
+  inventory?: number;
+  product_type?: 'product' | 'service';
 };
 
 type ProductPageProps = {
@@ -66,6 +68,8 @@ const ProductPage = ({
     product.price,
     discountPrice,
   );
+
+  console.log(product, 'product details');
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.mainContainer}>
@@ -80,6 +84,7 @@ const ProductPage = ({
             productName={product.name}
             productDescription={product.small_description}
             inventory={product?.inventory}
+            productType={product?.product_type || 'product'}
           />
           <View style={styles.content}>
             <ProductVariants variants={product?.variants || []} />

@@ -53,6 +53,10 @@ const UserProfileScreen = () => {
     navigation.navigate('Account', {screen: 'TransactionLogsScreen'});
   };
 
+  const handleEditPage = () => {
+    navigation.navigate('Account', {screen: 'EditProfileScreen'});
+  };
+
   const handleFaq = () => {
     navigation.navigate('Account', {screen: 'FaqScreen'});
   };
@@ -92,7 +96,11 @@ const UserProfileScreen = () => {
         <ScrollView contentContainerStyle={styles.content}>
           {/* Account Section */}
           <Text style={styles.section}>🧾 Account</Text>
-          <Row icon="person-outline" label="Edit Profile" />
+          <Row
+            icon="person-outline"
+            label="Edit Profile"
+            onPress={handleEditPage}
+          />
           <Row
             icon="clipboard-outline"
             label="My Orders"
@@ -117,7 +125,11 @@ const UserProfileScreen = () => {
             label="Privacy Policy"
             onPress={handlePrivacyPolicy}
           />
-          <Row icon="document-text-outline" label="Terms & Conditions" onPress={handleTermsConditions} />
+          <Row
+            icon="document-text-outline"
+            label="Terms & Conditions"
+            onPress={handleTermsConditions}
+          />
 
           {/* Help & Support */}
           <Text style={styles.section}>❓ Help & Support</Text>

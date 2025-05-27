@@ -62,6 +62,7 @@ const CartItem: React.FC<CartItemProps> = ({
         <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
           <View style={styles.quantityContainer}>
             <TouchableOpacity
+              disabled={item.product_type === 'service'}
               onPress={() => {
                 setIsLoading(true);
                 onQuantityChange(
@@ -87,6 +88,7 @@ const CartItem: React.FC<CartItemProps> = ({
               <Text style={styles.quantityText}>{productQuantity}</Text>
             )}
             <TouchableOpacity
+              disabled={item.product_type === 'service'}
               onPress={() => {
                 setIsLoading(true);
                 onQuantityChange(item, productQuantity + 1, setIsLoading);
@@ -95,6 +97,7 @@ const CartItem: React.FC<CartItemProps> = ({
               <Text style={styles.quantityButtonText}>+</Text>
             </TouchableOpacity>
           </View>
+
           <TouchableOpacity
             onPress={async () => {
               setDeleteLoading(true);

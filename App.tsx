@@ -33,6 +33,7 @@ import FaqScreen from './src/components/Faq';
 import PrivacyPolicyScreen from './src/components/PrivacyPolicy';
 import TermsConditionsScreen from './src/components/TermsCondition';
 import BuyNowScreen from './src/pages/BuyNowScreen/BuyNowScreen';
+import EditProfileScreen from './src/components/EditProfileScreen/EditProfileScreen';
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -83,6 +84,10 @@ const AccountStack = () => {
       <Stack.Screen
         name="TermsConditionsScreen"
         component={TermsConditionsScreen}
+      />
+       <Stack.Screen
+        name="EditProfileScreen"
+        component={EditProfileScreen}
       />
     </Stack.Navigator>
   );

@@ -88,7 +88,7 @@ const ProductScreen = () => {
       quantity: 1,
     };
 
-    if (product?.type !== 'service' && product?.inventory <= 0) {
+    if (product?.product_type !== 'service' && product?.inventory <= 0) {
       dispatch(
         showSnackbar({
           type: 'error',
@@ -114,7 +114,7 @@ const ProductScreen = () => {
       quantity: 1,
     };
 
-    if (product?.type !== 'service' && product?.inventory <= 0) {
+    if (product?.product_type !== 'service' && product?.inventory <= 0) {
       dispatch(
         showSnackbar({
           type: 'error',
@@ -155,8 +155,6 @@ const ProductScreen = () => {
   };
 
   const onRefresh = async () => {
-    console.log('REFRESHED');
-
     setRefreshing(true);
 
     await new Promise(resolve => setTimeout(resolve, 2000));
