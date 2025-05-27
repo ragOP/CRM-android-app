@@ -498,11 +498,11 @@ const BuyNowScreen = () => {
         secondaryLabel="Cancel"
         secondaryAction={() => {
           setShowDialog(false);
-          navigation.navigate('Home');
+          navigation.navigate('HomePage');
         }}
         onDismiss={() => {
           setShowDialog(false);
-          navigation.navigate('Home');
+          navigation.navigate('HomePage');
         }}
       />
     </ScrollView>
