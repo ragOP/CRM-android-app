@@ -1,4 +1,4 @@
-import React, {Dispatch, SetStateAction, useState} from 'react';
+import React, {Dispatch, SetStateAction, useEffect} from 'react';
 import {
   View,
   Text,
@@ -16,21 +16,23 @@ import {showSnackbar} from '../../redux/slice/snackbarSlice';
 type OrderForSelectionProps = {
   selectedUser: string | null;
   setSelectedUser: Dispatch<SetStateAction<string | null>>;
+  removeBackground: boolean;
 };
 
 const OrderForSelection = ({
   selectedUser,
   setSelectedUser,
+  removeBackground = false,
 }: OrderForSelectionProps) => {
   const dispatch = useAppDispatch();
 
-  const [selectedCount, setSelectedCount] = useState<string>('1');
-  const [customCount, setCustomCount] = useState<string>('');
-
   const reduxAuth = useAppSelector(state => state.auth);
-  const reduxUser = reduxAuth.user;  const reduxRole = reduxUser?.role;
+  const reduxUser = reduxAuth.user;
+  const reduxRole = reduxUser?.role;
 
-  const distributorsParams = {role: reduxRole === 'dnd' ? 'salesperson' : 'user'};
+  const distributorsParams = {
+    role: reduxRole === 'dnd' ? 'salesperson' : 'user',
+  };
 
   const {
     data: users = [],
@@ -52,10 +54,15 @@ const OrderForSelection = ({
     );
   }
 
-  const isCustomCount = selectedCount === 'custom';
+  useEffect(() => {
+    if (isArrayWithValues(users) && !selectedUser && users[0]?._id) {
+      console.log('USERRR', selectedUser);
+      setSelectedUser(users[0]._id);
+    }
+  }, [users, selectedUser, setSelectedUser]);
 
   return (
-    <View style={styles.container}>
+    <View style={!removeBackground ? styles.container : {}}>
       {(reduxRole === 'dnd' || reduxRole === 'salesperson') && (
         <>
           <Text style={styles.label}>
@@ -71,13 +78,18 @@ const OrderForSelection = ({
                 selectedValue={selectedUser}
                 onValueChange={itemValue => setSelectedUser(itemValue)}
                 style={styles.picker}>
-                <Picker.Item label="Select a user" value={null} />
+                {/* <Picker.Item label="Select a user" value={null} /> */}
                 {isArrayWithValues(users) ? (
                   users?.map((user: any) => (
                     <Picker.Item
                       key={user?._id}
                       label={user?.name}
                       value={user?._id}
+                      color={selectedUser === user?._id ? '#00008B' : '#222'}
+                      style={[
+                        styles.pickerItem,
+                        selectedUser === user?._id && styles.selectedPickerItem,
+                      ]}
                     />
                   ))
                 ) : (
@@ -86,33 +98,6 @@ const OrderForSelection = ({
               </Picker>
             )}
           </View>
-
-          {/* Count Picker */}
-          {/* <Text style={[styles.label, {marginTop: 16}]}>Select Count</Text>
-          <View style={styles.pickerContainer}>
-            <Picker
-              selectedValue={selectedCount}
-              onValueChange={value => setSelectedCount(value)}
-              style={styles.picker}>
-              <Picker.Item label="1" value="1" />
-              <Picker.Item label="2" value="2" />
-              <Picker.Item label="3" value="3" />
-              <Picker.Item label="4" value="4" />
-              <Picker.Item label="5" value="5" />
-              <Picker.Item label="10" value="10" />
-              <Picker.Item label="Custom" value="custom" />
-            </Picker>
-          </View> */}
-
-          {isCustomCount && (
-            <TextInput
-              placeholder="Enter custom count"
-              keyboardType="numeric"
-              value={customCount}
-              onChangeText={setCustomCount}
-              style={styles.input}
-            />
-          )}
         </>
       )}
     </View>
@@ -152,5 +137,14 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     paddingHorizontal: 12,
     backgroundColor: '#FFFFFF',
+  },
+  pickerItem: {
+    fontSize: 16,
+    paddingVertical: 14,
+    backgroundColor: '#F7F7F7',
+  },
+  selectedPickerItem: {
+    color: '#00008B',
+    fontWeight: 'bold',
   },
 });

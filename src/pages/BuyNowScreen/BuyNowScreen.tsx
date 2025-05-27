@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useState, useCallback} from 'react';
 import {
   View,
   Text,
@@ -14,7 +14,6 @@ import {getAddresses} from '../../apis/getAddresses';
 import {useAppDispatch, useAppSelector} from '../../redux/store';
 import {showSnackbar} from '../../redux/slice/snackbarSlice';
 import CustomDialog from '../../components/CustomDialog/CustomDialog';
-import {placeOrder} from '../../apis/placeOrder';
 import {apiService} from '../../utils/api/apiService';
 import {endpoints} from '../../utils/endpoints';
 import {
@@ -31,6 +30,12 @@ import {
 } from 'cashfree-pg-api-contract';
 import {getDiscountBasedOnRole} from '../../utils/products/getDiscountBasedOnRole';
 import {getTaxAmount} from '../../apis/getTaxAmount';
+import Icon from 'react-native-vector-icons/MaterialIcons';
+import {buyNowOrder} from '../../apis/buyNowOrder';
+import OrderForSelection from '../../components/OrderForSelection/OrderForSelection';
+import {Picker} from '@react-native-picker/picker';
+import {isArrayWithValues} from '../../utils/array/isArrayWithValues';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const BuyNowScreen = () => {
   const navigation = useNavigation();
@@ -43,48 +48,83 @@ const BuyNowScreen = () => {
 
   const [currentAddress, setCurrentAddress] = useState(null);
   const [showDialog, setShowDialog] = useState(false);
+  const [quantity, setQuantity] = useState(1);
+
+  const [price, setPrice] = useState(0);
+  const [discountedPrice, setDiscountedPrice] = useState(0);
+  const [taxAmount, setTaxAmount] = useState(0);
+  const [totalPayable, setTotalPayable] = useState(0);
+  const [selectedUser, setSelectedUser] = useState<string | null>(null);
+  const [isPlacingOrder, setIsPlacingOrder] = useState(false);
 
   const {product} = route.params || {};
   const productId = product?._id || '';
 
-  // Pricing logic
-  const price = product?.price || 0;
-  const discountedPrice = getDiscountBasedOnRole({
-    role: reduxUserRole,
-    discounted_price: product?.discounted_price || 0,
-    salesperson_discounted_price: product?.salesperson_discounted_price || 0,
-    dnd_discounted_price: product?.dnd_discounted_price || 0,
-    original_price: product?.price || 0,
-  });
+  useEffect(() => {
+    const newPrice = product?.price || 0;
+    const newDiscountedPrice = getDiscountBasedOnRole({
+      role: reduxUserRole,
+      discounted_price: product?.discounted_price || 0,
+      salesperson_discounted_price: product?.salesperson_discounted_price || 0,
+      dnd_discounted_price: product?.dnd_discounted_price || 0,
+      original_price: product?.price || 0,
+    });
+    setPrice(newPrice);
+    setDiscountedPrice(newDiscountedPrice);
 
-  // Tax and total only after address is selected
-  const taxAmount = currentAddress
-    ? getTaxAmount(
-        [
-          {
-            product,
-            quantity: 1,
-          },
-        ],
-        0,
-        currentAddress,
-      )
-    : 0;
-  const totalPayable = currentAddress ? (Number(discountedPrice) + Number(taxAmount)).toFixed(2) : 0;
-  console.log('ADDRESS', currentAddress, taxAmount);
+    if (currentAddress) {
+      const address = addresses?.find(it => it._id === currentAddress);
+      const tax = Number(
+        getTaxAmount(
+          [
+            {
+              product,
+              quantity,
+            },
+          ],
+          0,
+          address,
+          reduxUserRole,
+        ),
+      );
+
+      setTaxAmount(tax);
+      setTotalPayable(Number(newDiscountedPrice * quantity) + tax);
+    } else {
+      setTaxAmount(0);
+      setTotalPayable(0);
+    }
+  }, [product, quantity, currentAddress, reduxUserRole]);
 
   // Fetch addresses
+  const fetchAddresses = useCallback(async () => {
+    const apiResponse = await getAddresses({id: reduxUserId});
+    const data = apiResponse?.response?.data;
+    if (data?.length > 0) {
+      setCurrentAddress(data[0]);
+    }
+    return data || [];
+  }, [reduxUserId]);
+
   const {data: addresses, isLoading: isAddressLoading} = useQuery({
     queryKey: ['user_addresses'],
-    queryFn: async () => {
-      const apiResponse = await getAddresses({id: reduxUserId});
-      const data = apiResponse?.response?.data;
-      setCurrentAddress(data?.[0] || null);
-      return data || [];
-    },
+    queryFn: fetchAddresses,
   });
 
-  // Payment and order logic
+  const onGoBack = () => {
+    navigation.goBack();
+  };
+
+  const increaseQuantity = () => {
+    setQuantity(prev => prev + 1);
+  };
+
+  const decreaseQuantity = () => {
+    if (quantity > 1) {
+      setQuantity(prev => prev - 1);
+    }
+  };
+
   const onRedirectToPayment = async () => {
     if (!currentAddress) {
       dispatch(
@@ -97,12 +137,20 @@ const BuyNowScreen = () => {
       return;
     }
 
+    if (selectedUser) {
+      await AsyncStorage.setItem('selectedUserId', selectedUser);
+    }
+
+    if (currentAddress) {
+      await AsyncStorage.setItem('selectedAddressId', currentAddress?._id);
+    }
+
     try {
       const apiResponse = await apiService({
         endpoint: endpoints.payment,
         method: 'POST',
         data: {
-          amount: totalPayable,
+          amount: Number(totalPayable),
           customerId: reduxUserId,
           customerEmail: reduxUser?.email || 'test@gmail.com',
           customerPhone: reduxUser?.mobile || '98765431237',
@@ -122,7 +170,6 @@ const BuyNowScreen = () => {
         );
         return;
       }
-
       const session = new CFSession(sessionId, orderId, CFEnvironment.SANDBOX);
 
       const paymentModes = new CFPaymentComponentBuilder()
@@ -146,8 +193,7 @@ const BuyNowScreen = () => {
         theme,
       );
       CFPaymentGatewayService.doPayment(dropPayment);
-    } catch (e: any) {
-      console.log(e);
+    } catch (error: any) {
       dispatch(
         showSnackbar({
           type: 'error',
@@ -159,35 +205,67 @@ const BuyNowScreen = () => {
   };
 
   const handlePlaceOrder = async (orderId: string | number) => {
-    const payload = {
-      orderId,
-      addressId: currentAddress?._id,
-      productId,
-      quantity: 1,
-    };
+    if (isPlacingOrder) {
+      return;
+    }
 
-    const apiResponse = await placeOrder({payload});
+    try {
+      setIsPlacingOrder(true);
 
-    if (apiResponse?.response?.success) {
-      setShowDialog(true);
-    } else {
-      const error = apiResponse?.response?.data?.message;
+      const storedUser = await AsyncStorage.getItem('selectedUserId');
+      const storedAddress = await AsyncStorage.getItem('selectedAddressId');
+
+      console.log('Stored User:', storedUser);
+      console.log('Stored Address:', storedAddress);
+
+      const payload = {
+        orderId,
+        ...(reduxUserRole !== 'salesperson' && reduxUserRole !== 'dnd'
+          ? {addressId: storedAddress}
+          : {}),
+        productId,
+        quantity: quantity,
+        ...(reduxUserRole === 'salesperson' || reduxUserRole === 'dnd'
+          ? {orderedBy: reduxUserId, orderedForUser: storedUser}
+          : {}),
+      };
+
+      const apiResponse = await buyNowOrder({payload});
+
+      if (apiResponse?.response?.success) {
+        setShowDialog(true);
+      } else {
+        const error = apiResponse?.response?.data?.message;
+        dispatch(
+          showSnackbar({
+            type: 'error',
+            title:
+              error || 'Failed to place the order. Please try again later.',
+            placement: 'top',
+          }),
+        );
+      }
+    } catch (error) {
+      console.error('Error placing order:', error);
       dispatch(
         showSnackbar({
           type: 'error',
-          title: error || 'Failed to place the order. Please try again later.',
+          title: 'Failed to place the order. Please try again later.',
           placement: 'top',
         }),
       );
+    } finally {
+      setIsPlacingOrder(false);
     }
   };
 
   useEffect(() => {
     CFPaymentGatewayService.setCallback({
       onVerify(orderID: string): void {
-        handlePlaceOrder(orderID);
+        handlePlaceOrder(orderID, currentAddress, quantity);
       },
       onError(error: CFErrorResponse, orderID: string): void {
+        console.log('Payment Error:', error, orderID);
         dispatch(
           showSnackbar({
             type: 'error',
@@ -197,17 +275,35 @@ const BuyNowScreen = () => {
         );
       },
     });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentAddress, productId]);
+  }, []);
 
-  const onNavigateToHome = () => {
+  const onNavigateToOrder = () => {
     setShowDialog(false);
-    navigation.navigate('HomeTab');
+    navigation.navigate('ViewOrderScreen');
+  };
+
+  const getAddressText = address => {
+    if (!address) return 'Select an address';
+    return [
+      address.name,
+      address.address,
+      address.city,
+      address.state,
+      address.pincode,
+    ]
+      .filter(Boolean)
+      .join(', ');
   };
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.title}>Buy Now</Text>
+      {/* Header with back button */}
+      <View style={styles.header}>
+        <TouchableOpacity onPress={onGoBack} style={styles.backButton}>
+          <Icon name="arrow-back" size={24} color="#00008B" />
+        </TouchableOpacity>
+        <Text style={styles.title}>Buy Now</Text>
+      </View>
 
       {/* Product Card */}
       <View style={styles.productCard}>
@@ -225,60 +321,144 @@ const BuyNowScreen = () => {
         </View>
       </View>
 
+      {/* Quantity Selector */}
+      <View style={styles.quantityContainer}>
+        <Text style={styles.label}>Quantity</Text>
+        <View style={styles.quantityControls}>
+          <TouchableOpacity
+            style={styles.quantityButton}
+            onPress={decreaseQuantity}
+            disabled={quantity <= 1}>
+            <Icon
+              name="remove"
+              size={20}
+              color={quantity <= 1 ? '#ccc' : '#00008B'}
+            />
+          </TouchableOpacity>
+          <Text style={styles.quantityText}>{quantity}</Text>
+          <TouchableOpacity
+            style={styles.quantityButton}
+            onPress={increaseQuantity}>
+            <Icon name="add" size={20} color="#00008B" />
+          </TouchableOpacity>
+        </View>
+      </View>
+
+      <OrderForSelection
+        selectedUser={selectedUser}
+        setSelectedUser={setSelectedUser}
+        removeBackground={true}
+      />
+
       {/* Address Selection */}
-      <Text style={styles.label}>Select Delivery Address</Text>
+      {/* <Text style={styles.label}>Select Delivery Address</Text>
       {isAddressLoading ? (
         <ActivityIndicator size="small" color="#00008B" />
       ) : (
         <View style={styles.dropdownContainer}>
-          {Array.isArray(addresses) && addresses.length > 0 ? (
-            addresses.map(address => (
+          <Menu
+            visible={showDropdown}
+            onDismiss={() => setShowDropdown(false)}
+            anchor={
               <TouchableOpacity
-                key={address._id}
-                style={[
-                  styles.addressOption,
-                  currentAddress?._id === address._id && styles.selectedAddress,
-                ]}
-                onPress={() => setCurrentAddress(address)}>
-                <Text style={styles.addressText}>
-                  {[
-                    address.name,
-                    address.address,
-                    address.city,
-                    address.state,
-                    address.pincode,
-                  ]
-                    .filter(Boolean)
-                    .join(', ')}
+                style={styles.dropdownTrigger}
+                onPress={() => setShowDropdown(true)}>
+                <Text style={styles.dropdownText}>
+                  {getAddressText(currentAddress)}
                 </Text>
+                <Icon
+                  name={showDropdown ? 'arrow-drop-up' : 'arrow-drop-down'}
+                  size={24}
+                  color="#00008B"
+                />
               </TouchableOpacity>
-            ))
-          ) : (
-            <Text style={styles.noAddressText}>
-              No addresses found. Please add an address in your profile.
-            </Text>
-          )}
+            }
+            contentStyle={styles.dropdownContent}>
+            <ScrollView style={{maxHeight: 200}}>
+              {Array.isArray(addresses) && addresses.length > 0 ? (
+                addresses.map(address => (
+                  <Menu.Item
+                    key={address._id}
+                    title={getAddressText(address)}
+                    onPress={() => {
+                      setCurrentAddress(address);
+                      setShowDropdown(false);
+                    }}
+                    style={styles.dropdownItem}
+                  />
+                ))
+              ) : (
+                <Menu.Item
+                  title="No addresses found. Please add an address in your profile."
+                  onPress={() => setShowDropdown(false)}
+                  style={styles.dropdownItem}
+                />
+              )}
+            </ScrollView>
+          </Menu>
         </View>
+      )} */}
+
+      {reduxUserRole === 'user' && (
+        <>
+          <Text style={styles.label}>Select Delivery Address</Text>
+          <View style={styles.pickerContainer}>
+            {isAddressLoading ? (
+              <ActivityIndicator size="small" color="#00008B" />
+            ) : (
+              <Picker
+                selectedValue={currentAddress}
+                onValueChange={itemValue => setCurrentAddress(itemValue)}
+                style={styles.picker}>
+                {isArrayWithValues(addresses) ? (
+                  addresses?.map((address: any) => (
+                    <Picker.Item
+                      key={address}
+                      label={getAddressText(address)}
+                      value={address?._id}
+                      color={
+                        currentAddress === address?._id ? '#00008B' : '#222'
+                      }
+                      style={[
+                        styles.pickerItem,
+                        currentAddress === address?._id &&
+                          styles.selectedPickerItem,
+                      ]}
+                    />
+                  ))
+                ) : (
+                  <Picker.Item label="No users available" value={null} />
+                )}
+              </Picker>
+            )}
+          </View>
+        </>
       )}
 
-      {/* Price Details - only show after address is selected */}
+      {/* Price Details */}
       {currentAddress && (
         <View style={styles.priceDetails}>
           <View style={styles.priceRow}>
-            <Text style={styles.priceLabel}>MRP</Text>
-            <Text style={styles.priceValue}>₹{price}</Text>
+            <Text style={styles.priceLabel}>MRP (x{quantity})</Text>
+            <Text style={styles.priceValue}>
+              ₹{(price * quantity).toFixed(2)}
+            </Text>
           </View>
           <View style={styles.priceRow}>
-            <Text style={styles.priceLabel}>Your Price</Text>
-            <Text style={styles.priceValue}>₹{discountedPrice}</Text>
+            <Text style={styles.priceLabel}>Your Price (x{quantity})</Text>
+            <Text style={styles.priceValue}>
+              ₹{(discountedPrice * quantity).toFixed(2)}
+            </Text>
           </View>
           <View style={styles.priceRow}>
             <Text style={styles.priceLabel}>Tax</Text>
-            <Text style={styles.priceValue}>₹{taxAmount}</Text>
+            <Text style={styles.priceValue}>₹{taxAmount.toFixed(2)}</Text>
           </View>
           <View style={styles.priceRow}>
             <Text style={styles.priceLabelTotal}>Total Payable</Text>
-            <Text style={styles.priceValueTotal}>₹{totalPayable}</Text>
+            <Text style={styles.priceValueTotal}>
+              ₹{totalPayable.toFixed(2)}
+            </Text>
           </View>
         </View>
       )}
@@ -289,19 +469,41 @@ const BuyNowScreen = () => {
           !currentAddress && {backgroundColor: '#ccc'},
         ]}
         onPress={onRedirectToPayment}
-        disabled={!currentAddress}>
-        <Text style={styles.placeOrderText}>Pay & Place Order</Text>
+        disabled={!currentAddress || isPlacingOrder}>
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}>
+          {isPlacingOrder && (
+            <ActivityIndicator
+              size="small"
+              color="#fff"
+              style={{marginRight: 8}}
+            />
+          )}
+          <Text style={styles.placeOrderText}>
+            {isPlacingOrder ? 'Placing order...' : 'Pay & Place Order'}
+          </Text>
+        </View>
       </TouchableOpacity>
-
+      
       <CustomDialog
         visible={showDialog}
         title="Order placed"
         message="Your order has been placed successfully."
-        primaryLabel="Go to Home"
-        primaryAction={onNavigateToHome}
+        primaryLabel="Go to orders"
+        primaryAction={onNavigateToOrder}
         secondaryLabel="Cancel"
-        secondaryAction={() => setShowDialog(false)}
-        onDismiss={() => setShowDialog(false)}
+        secondaryAction={() => {
+          setShowDialog(false);
+          navigation.navigate('HomePage');
+        }}
+        onDismiss={() => {
+          setShowDialog(false);
+          navigation.navigate('HomePage');
+        }}
       />
     </ScrollView>
   );
@@ -314,10 +516,17 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     justifyContent: 'flex-start',
   },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 18,
+  },
+  backButton: {
+    marginRight: 15,
+  },
   title: {
     fontSize: 22,
     fontWeight: 'bold',
-    marginBottom: 18,
     color: '#00008B',
   },
   productCard: {
@@ -378,43 +587,91 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     marginBottom: 8,
     color: '#222',
+    marginTop: 10,
   },
   dropdownContainer: {
     marginBottom: 24,
   },
-  addressOption: {
+  dropdownTrigger: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     padding: 14,
     borderWidth: 1,
     borderColor: '#82C8E5',
     borderRadius: 8,
-    marginBottom: 10,
     backgroundColor: '#F7F7F7',
   },
-  selectedAddress: {
-    borderColor: '#00008B',
-    backgroundColor: '#E3E6EE',
-  },
-  addressText: {
+  dropdownText: {
     fontSize: 15,
     color: '#222',
+    flex: 1,
   },
-  noAddressText: {
-    color: '#888',
-    fontSize: 14,
-    fontStyle: 'italic',
-    marginBottom: 16,
+  dropdownContent: {
+    backgroundColor: '#fff',
+    borderRadius: 8,
+  },
+  dropdownItem: {
+    padding: 12,
+    width: '100%',
   },
   placeOrderButton: {
     backgroundColor: '#00008B',
     paddingVertical: 14,
     borderRadius: 25,
     alignItems: 'center',
+    justifyContent: 'center',
     marginTop: 10,
+    display: 'flex',
+    flexDirection: 'row',
   },
   placeOrderText: {
     color: '#fff',
     fontSize: 16,
     fontWeight: '500',
+  },
+  quantityContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  quantityControls: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#82C8E5',
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+  },
+  quantityButton: {
+    padding: 8,
+  },
+  quantityText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginHorizontal: 12,
+    color: '#00008B',
+  },
+  pickerContainer: {
+    borderWidth: 1,
+    borderColor: '#00008B',
+    borderRadius: 8,
+    backgroundColor: '#FFFFFF',
+  },
+  picker: {
+    height: 50,
+    width: '100%',
+  },
+  pickerItem: {
+    fontSize: 16,
+    paddingVertical: 14,
+    backgroundColor: '#F7F7F7',
+  },
+  selectedPickerItem: {
+    color: '#00008B',
+    fontWeight: 'bold',
   },
 });
 

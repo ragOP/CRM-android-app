@@ -26,7 +26,7 @@ import {calculateDiscount} from '../../utils/discount/calculateDiscount';
 import {getDiscountBasedOnRole} from '../../utils/products/getDiscountBasedOnRole';
 import OrderForSelection from '../../components/OrderForSelection/OrderForSelection';
 import {showSnackbar} from '../../redux/slice/snackbarSlice';
-import { getTaxAmount } from '../../apis/getTaxAmount';
+import {getTaxAmount} from '../../apis/getTaxAmount';
 
 function formatAddress(address) {
   if (!address) return '';
@@ -87,27 +87,31 @@ const CartScreen = () => {
     },
   });
 
-const handleQuantityChange = async (product: string, change: number, setIsLoading) => {
-  const productId = product?._id;
+  const handleQuantityChange = async (
+    product: string,
+    change: number,
+    setIsLoading,
+  ) => {
+    const productId = product?._id;
 
-  const updatedItem = cartProductsItems?.find(
-    item => item.product._id === productId,
-  );
+    const updatedItem = cartProductsItems?.find(
+      item => item.product._id === productId,
+    );
 
-  if (updatedItem) {
-    try {
-      await updateCart({
-        user_id: reduxUserId,
-        product_id: productId,
-        quantity: change,
-      });
-    } catch (error) {
-      console.error("Error updating cart:", error);
+    if (updatedItem) {
+      try {
+        await updateCart({
+          user_id: reduxUserId,
+          product_id: productId,
+          quantity: change,
+        });
+      } catch (error) {
+        console.error('Error updating cart:', error);
+      }
     }
-  }
 
-  setIsLoading(false);
-};
+    setIsLoading(false);
+  };
 
   const handlePlaceOrder = async ({
     orderId,
@@ -270,11 +274,21 @@ const handleQuantityChange = async (product: string, change: number, setIsLoadin
   }, []);
 
   const discountedPriceAfterSubstracting = totalPrice - discountedPrice;
-  const couponDiscoountPrice = discountCoupon
+  const couponDiscountPrice = discountCoupon
     ? calculateDiscount(cartData?.total_price, discountCoupon)
     : 0;
+  const taxAmount = getTaxAmount(
+    cartProductsItems,
+    couponDiscountPrice,
+    currentAddress,
+    reduxUserRole,
+  );
 
-  const finalPrice = cartData?.total_price - couponDiscoountPrice;
+  const finalPrice = (
+    Number(cartData?.total_price) -
+    Number(couponDiscountPrice) +
+    Number(taxAmount)
+  ).toFixed(2);
 
   return (
     <>
@@ -315,8 +329,9 @@ const handleQuantityChange = async (product: string, change: number, setIsLoadin
               platformFee={0}
               discount={discountedPriceAfterSubstracting}
               shippingFee={0}
-              couponDiscount={couponDiscoountPrice}
+              couponDiscount={couponDiscountPrice}
               totalAmount={finalPrice}
+              taxAmount={taxAmount}
             />
           )}
 

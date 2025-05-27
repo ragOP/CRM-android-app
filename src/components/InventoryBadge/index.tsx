@@ -1,12 +1,11 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import {View, Text, StyleSheet} from 'react-native';
 
 interface InventoryBadgeProps {
   productInventory: number;
 }
 
-const InventoryBadge: React.FC<InventoryBadgeProps> = ({ productInventory }) => {
-  console.log("productInventory", productInventory);
+const InventoryBadge: React.FC<InventoryBadgeProps> = ({productInventory}) => {
   if (productInventory > 10) return null;
 
   let label = '';

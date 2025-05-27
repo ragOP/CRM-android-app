@@ -27,5 +27,5 @@ export const endpoints = {
   terms_and_conditions: 'api/terms-condition',
   app_banner: 'api/app-banner',
   testimonials: 'api/testimonials',
-  buyNow: 'api/buy-now',
+  buyNow: 'api/order/buy-now',
 };

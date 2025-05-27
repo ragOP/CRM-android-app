@@ -5,6 +5,7 @@ interface CartBillSummaryProps {
   platformFee: number;
   discount: number;
   couponDiscount: number | string;
+  taxAmount: number | string;
   shippingFee: number | string;
   totalAmount: number;
 }
@@ -15,6 +16,7 @@ const CartBillSummary = ({
   discount,
   shippingFee,
   couponDiscount,
+  taxAmount,
   totalAmount,
 }: CartBillSummaryProps) => (
   <View style={styles.billContainer}>
@@ -46,7 +48,15 @@ const CartBillSummary = ({
         Coupon discount
       </Text>
       <Text style={[styles.billLabel, styles.discountValue]}>
-        {`₹${couponDiscount || 0}`}
+        -{`₹${couponDiscount || 0}`}
+      </Text>
+    </View>
+    <View style={styles.billRow}>
+      <Text style={[styles.billLabel, styles.discountValue]}>
+        Tax amount
+      </Text>
+      <Text style={[styles.billLabel, styles.discountValue]}>
+        +{`₹${taxAmount || 0}`}
       </Text>
     </View>
     <View style={styles.separator} />

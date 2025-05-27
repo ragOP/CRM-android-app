@@ -97,7 +97,7 @@ const ProductCard = ({
 
   const handleAddToCart = () => {
     const productId = data?._id;
-    if(data?.inventory <= 0){
+    if (data?.inventory <= 0) {
       dispatch(
         showSnackbar({
           type: 'error',
@@ -105,7 +105,7 @@ const ProductCard = ({
           placement: 'top',
         }),
       );
-      return
+      return;
     }
     if (isLoggedIn) {
       addToCartMutate(productId);
@@ -118,8 +118,6 @@ const ProductCard = ({
     // Buy now logic here
   };
 
-  // console.log('data', data);
-  console.log("inventory", data?.inventory)
   return (
     <>
       <TouchableOpacity
@@ -127,9 +125,9 @@ const ProductCard = ({
         style={styles.card}
         activeOpacity={0.9}>
         <View style={styles.topContainer}>
-        <View style={styles.badgeContainer}>
-          <InventoryBadge productInventory={data?.inventory} />
-        </View>
+          <View style={styles.badgeContainer}>
+            <InventoryBadge productInventory={data?.inventory} />
+          </View>
           <Image source={{uri: image}} style={styles.image} />
           <View style={styles.priceRow}>
             <Text style={styles.price}>₹{price}</Text>
@@ -268,5 +266,5 @@ const styles = StyleSheet.create({
     top: 7,
     right: 7,
     zIndex: 1,
-  }
+  },
 });

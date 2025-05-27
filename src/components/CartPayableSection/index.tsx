@@ -149,8 +149,6 @@ export const Checkout = ({
         },
       });
 
-      console.log('apiResponse', apiResponse);
-
       const sessionId = apiResponse?.response?.data?.payment_session_id;
       const orderId = apiResponse?.response?.data?.order_id;
 
@@ -227,7 +225,6 @@ export const Checkout = ({
   useEffect(() => {
     CFPaymentGatewayService.setCallback({
       onVerify(orderID: string): void {
-        console.log('');
         handlePlaceOrder(orderID);
       },
       onError(error: CFErrorResponse, orderID: string): void {

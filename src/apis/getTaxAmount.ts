@@ -1,7 +1,7 @@
-import { getDiscountBasedOnRole } from "../utils/products/getDiscountBasedOnRole";
+import {getDiscountBasedOnRole} from '../utils/products/getDiscountBasedOnRole';
 
 export const getTaxAmount = (products, couponPrice = 0, address = {}, role) => {
-  const SELLER_STATE_CODE = "GJ"; // Gujarat
+  const SELLER_STATE_CODE = 'GJ'; // Gujarat
 
   const totalNetAmount = products.reduce((sum, item) => {
     const price = getDiscountBasedOnRole({
@@ -9,7 +9,7 @@ export const getTaxAmount = (products, couponPrice = 0, address = {}, role) => {
       discounted_price: item.product.discounted_price,
       salesperson_discounted_price: item.product.salesperson_discounted_price,
       dnd_discounted_price: item.product.dnd_discounted_price,
-      price: item.product.price,
+      original_price: item.product.price,
     });
     return sum + price * item.quantity;
   }, 0);
@@ -17,13 +17,13 @@ export const getTaxAmount = (products, couponPrice = 0, address = {}, role) => {
   const totalAmount = totalNetAmount;
   let totalTax = 0;
 
-  products.forEach((item) => {
+  products.forEach(item => {
     const price = getDiscountBasedOnRole({
       role,
       discounted_price: item.product.discounted_price,
       salesperson_discounted_price: item.product.salesperson_discounted_price,
       dnd_discounted_price: item.product.dnd_discounted_price,
-      price: item.product.price,
+      original_price: item.product.price,
     });
     const itemTotal = price * item.quantity;
 
