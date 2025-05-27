@@ -35,6 +35,7 @@ import {buyNowOrder} from '../../apis/buyNowOrder';
 import OrderForSelection from '../../components/OrderForSelection/OrderForSelection';
 import {Picker} from '@react-native-picker/picker';
 import {isArrayWithValues} from '../../utils/array/isArrayWithValues';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const BuyNowScreen = () => {
   const navigation = useNavigation();
@@ -47,7 +48,6 @@ const BuyNowScreen = () => {
 
   const [currentAddress, setCurrentAddress] = useState(null);
   const [showDialog, setShowDialog] = useState(false);
-  const [showDropdown, setShowDropdown] = useState(false);
   const [quantity, setQuantity] = useState(1);
 
   // State for prices and tax
@@ -56,6 +56,7 @@ const BuyNowScreen = () => {
   const [taxAmount, setTaxAmount] = useState(0);
   const [totalPayable, setTotalPayable] = useState(0);
   const [selectedUser, setSelectedUser] = useState<string | null>(null);
+  const [isPlacingOrder, setIsPlacingOrder] = useState(false);
 
   const {product} = route.params || {};
   const productId = product?._id || '';
@@ -75,7 +76,6 @@ const BuyNowScreen = () => {
 
     if (currentAddress) {
       const address = addresses?.find(it => it._id === currentAddress);
-      console.log(currentAddress, address);
       const tax = Number(
         getTaxAmount(
           [
@@ -117,7 +117,6 @@ const BuyNowScreen = () => {
     navigation.goBack();
   };
 
-  // Quantity handlers
   const increaseQuantity = () => {
     setQuantity(prev => prev + 1);
   };
@@ -128,7 +127,6 @@ const BuyNowScreen = () => {
     }
   };
 
-  // Payment and order logic
   const onRedirectToPayment = async () => {
     if (!currentAddress) {
       dispatch(
@@ -139,6 +137,10 @@ const BuyNowScreen = () => {
         }),
       );
       return;
+    }
+
+    if (selectedUser) {
+      await AsyncStorage.setItem('selectedUserId', selectedUser);
     }
 
     try {
@@ -201,37 +203,62 @@ const BuyNowScreen = () => {
   };
 
   const handlePlaceOrder = async (orderId: string | number) => {
-    const payload = {
-      orderId,
-      addressId: currentAddress?._id,
-      productId,
-      quantity: quantity,
-      ...(reduxUserRole === 'salesperson' || reduxUserRole === 'dnd'
-        ? {orderedBy: reduxUserId, orderedForUser: selectedUser}
-        : {}),
-    };
-    const apiResponse = await buyNowOrder({payload});
+    if (isPlacingOrder) {
+      return;
+    }
 
-    if (apiResponse?.response?.success) {
-      setShowDialog(true);
-    } else {
-      const error = apiResponse?.response?.data?.message;
+    try {
+      setIsPlacingOrder(true);
+
+      const storedUser = await AsyncStorage.getItem('selectedUserId');
+      const payload = {
+        orderId,
+        ...(reduxUserRole !== 'salesperson' && reduxUserRole !== 'dnd'
+          ? {addressId: currentAddress?._id}
+          : {}),
+        productId,
+        quantity: quantity,
+        ...(reduxUserRole === 'salesperson' || reduxUserRole === 'dnd'
+          ? {orderedBy: reduxUserId, orderedForUser: storedUser}
+          : {}),
+      };
+
+      const apiResponse = await buyNowOrder({payload});
+
+      if (apiResponse?.response?.success) {
+        setShowDialog(true);
+      } else {
+        const error = apiResponse?.response?.data?.message;
+        dispatch(
+          showSnackbar({
+            type: 'error',
+            title:
+              error || 'Failed to place the order. Please try again later.',
+            placement: 'top',
+          }),
+        );
+      }
+    } catch (error) {
+      console.error('Error placing order:', error);
       dispatch(
         showSnackbar({
           type: 'error',
-          title: error || 'Failed to place the order. Please try again later.',
+          title: 'Failed to place the order. Please try again later.',
           placement: 'top',
         }),
       );
+    } finally {
+      setIsPlacingOrder(false);
     }
   };
 
   useEffect(() => {
     CFPaymentGatewayService.setCallback({
       onVerify(orderID: string): void {
-        handlePlaceOrder(orderID);
+        handlePlaceOrder(orderID, currentAddress, quantity);
       },
       onError(error: CFErrorResponse, orderID: string): void {
+        console.log('Payment Error:', error, orderID);
         dispatch(
           showSnackbar({
             type: 'error',
@@ -243,9 +270,9 @@ const BuyNowScreen = () => {
     });
   }, []);
 
-  const onNavigateToHome = () => {
+  const onNavigateToOrder = () => {
     setShowDialog(false);
-    navigation.navigate('HomeTab');
+    navigation.navigate('ViewOrderScreen');
   };
 
   const getAddressText = address => {
@@ -365,35 +392,41 @@ const BuyNowScreen = () => {
         </View>
       )} */}
 
-      <Text style={styles.label}>Select Delivery Address</Text>
-      <View style={styles.pickerContainer}>
-        {isAddressLoading ? (
-          <ActivityIndicator size="small" color="#00008B" />
-        ) : (
-          <Picker
-            selectedValue={currentAddress}
-            onValueChange={itemValue => setCurrentAddress(itemValue)}
-            style={styles.picker}>
-            {isArrayWithValues(addresses) ? (
-              addresses?.map((address: any) => (
-                <Picker.Item
-                  key={address}
-                  label={getAddressText(address)}
-                  value={address?._id}
-                  color={currentAddress === address?._id ? '#00008B' : '#222'}
-                  style={[
-                    styles.pickerItem,
-                    currentAddress === address?._id &&
-                      styles.selectedPickerItem,
-                  ]}
-                />
-              ))
+      {reduxUserRole === 'user' && (
+        <>
+          <Text style={styles.label}>Select Delivery Address</Text>
+          <View style={styles.pickerContainer}>
+            {isAddressLoading ? (
+              <ActivityIndicator size="small" color="#00008B" />
             ) : (
-              <Picker.Item label="No users available" value={null} />
+              <Picker
+                selectedValue={currentAddress}
+                onValueChange={itemValue => setCurrentAddress(itemValue)}
+                style={styles.picker}>
+                {isArrayWithValues(addresses) ? (
+                  addresses?.map((address: any) => (
+                    <Picker.Item
+                      key={address}
+                      label={getAddressText(address)}
+                      value={address?._id}
+                      color={
+                        currentAddress === address?._id ? '#00008B' : '#222'
+                      }
+                      style={[
+                        styles.pickerItem,
+                        currentAddress === address?._id &&
+                          styles.selectedPickerItem,
+                      ]}
+                    />
+                  ))
+                ) : (
+                  <Picker.Item label="No users available" value={null} />
+                )}
+              </Picker>
             )}
-          </Picker>
-        )}
-      </View>
+          </View>
+        </>
+      )}
 
       {/* Price Details */}
       {currentAddress && (
@@ -437,11 +470,17 @@ const BuyNowScreen = () => {
         visible={showDialog}
         title="Order placed"
         message="Your order has been placed successfully."
-        primaryLabel="Go to Home"
-        primaryAction={onNavigateToHome}
+        primaryLabel="Go to orders"
+        primaryAction={onNavigateToOrder}
         secondaryLabel="Cancel"
-        secondaryAction={() => setShowDialog(false)}
-        onDismiss={() => setShowDialog(false)}
+        secondaryAction={() => {
+          setShowDialog(false);
+          navigation.navigate('Home');
+        }}
+        onDismiss={() => {
+          setShowDialog(false);
+          navigation.navigate('Home');
+        }}
       />
     </ScrollView>
   );

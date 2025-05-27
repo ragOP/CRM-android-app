@@ -1,4 +1,4 @@
-import React, {Dispatch, SetStateAction} from 'react';
+import React, {Dispatch, SetStateAction, useEffect} from 'react';
 import {
   View,
   Text,
@@ -53,6 +53,13 @@ const OrderForSelection = ({
       }),
     );
   }
+
+  useEffect(() => {
+    if (isArrayWithValues(users) && !selectedUser && users[0]?._id) {
+      console.log('USERRR', selectedUser);
+      setSelectedUser(users[0]._id);
+    }
+  }, [users, selectedUser, setSelectedUser]);
 
   return (
     <View style={!removeBackground ? styles.container : {}}>
