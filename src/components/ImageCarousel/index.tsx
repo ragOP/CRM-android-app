@@ -1,104 +1,262 @@
-import React, {useState, useEffect, useRef} from 'react';
-import {View, ScrollView, Image, Dimensions, StyleSheet} from 'react-native';
-import { fetchAppBanners } from '../../apis/fetchAppBanners';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import {
+  View,
+  Image,
+  Dimensions,
+  StyleSheet,
+  TouchableOpacity,
+  FlatList,
+  ActivityIndicator,
+} from 'react-native';
 import { useQuery } from '@tanstack/react-query';
-import {ActivityIndicator} from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import { fetchAppBanners } from '../../apis/fetchAppBanners';
+import { fetchProductById } from '../../apis/fetchProductById';
 
-const {width} = Dimensions.get('window');
+const { width } = Dimensions.get('window');
+
+// Constants
+const AUTO_SCROLL_INTERVAL = 3000;
+const RESTART_DELAY = 2000;
+const DEFAULT_IMAGE_URL = 'https://res.cloudinary.com/dacwig3xk/image/upload/v1748346009/uploads/images/uwntevpmelc4kddzqc41.jpg';
+
+interface Banner {
+  _id: string;
+  url?: string;
+  product?: string;
+}
 
 const ImageCarousel: React.FC = () => {
-    const {data, isLoading} = useQuery({
+  const navigation = useNavigation();
+  
+  // API Query
+  const { data, isLoading } = useQuery({
     queryKey: ['app_banners'],
     queryFn: fetchAppBanners,
   });
 
-  const app_banners = data?.banner;
+  // State
   const [activeIndex, setActiveIndex] = useState(0);
-  const scrollViewRef = useRef<ScrollView>(null);
+  
+  // Refs
+  const flatListRef = useRef<FlatList>(null);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
-  const onScroll = (event: { nativeEvent: { contentOffset: { x: number; }; }; }) => {
-    const slide = Math.round(event.nativeEvent.contentOffset.x / width);
-    setActiveIndex(slide);
-  };
+  // Derived data
+  const banners: Banner[] = data?.banner || [];
+  const hasMultipleBanners = banners.length > 1;
 
-  const scrollToNext = () => {
-    const nextIndex = (activeIndex + 1) % app_banners?.length;
-    scrollViewRef.current?.scrollTo({x: nextIndex * width, animated: true});
-
-  };
-
-  useEffect(() => {
-    intervalRef.current = setInterval(scrollToNext, 1000);
-    return () => {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-      }
-    };
-  }, [activeIndex]);
-
-  const handleTouchStart = () => {
+  // Auto-scroll management
+  const clearAutoScroll = useCallback(() => {
     if (intervalRef.current) {
       clearInterval(intervalRef.current);
+      intervalRef.current = null;
     }
-  };
+  }, []);
 
-  const handleTouchEnd = () => {
-    intervalRef.current = setInterval(scrollToNext, 1000);
-  };
+  const startAutoScroll = useCallback(() => {
+    if (!hasMultipleBanners) return;
+    
+    clearAutoScroll();
+    intervalRef.current = setInterval(() => {
+      const nextIndex = (activeIndex + 1) % banners.length;
+      flatListRef.current?.scrollToIndex({
+        index: nextIndex,
+        animated: true,
+      });
+      setActiveIndex(nextIndex);
+    }, AUTO_SCROLL_INTERVAL);
+  }, [activeIndex, banners.length, hasMultipleBanners, clearAutoScroll]);
 
-  return (
-    <View style={styles.container}>
-      {isLoading ? (
-        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-          <ActivityIndicator size="large" color="#007BFF" />
-        </View>
-      ) : (
-        <View>
-        <ScrollView
-        ref={scrollViewRef}
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        onScroll={onScroll}
-        scrollEventThrottle={16}
-        onTouchStart={handleTouchStart}
-        onTouchEnd={handleTouchEnd}>
-        {app_banners && app_banners.map((image, index) => (
-          <Image key={image._id} source={{uri: image.url}} style={styles.image} />
-        ))}
-      </ScrollView>
+  // Scroll handling
+  const handleScroll = useCallback(
+    (event: { nativeEvent: { contentOffset: { x: number } } }) => {
+      const slide = Math.round(event.nativeEvent.contentOffset.x / width);
+      if (slide !== activeIndex && slide >= 0 && slide < banners.length) {
+        setActiveIndex(slide);
+      }
+    },
+    [activeIndex, banners.length]
+  );
 
+  // Touch handling
+  const handleTouchStart = useCallback(() => {
+    clearAutoScroll();
+  }, [clearAutoScroll]);
+
+  const handleTouchEnd = useCallback(() => {
+    if (hasMultipleBanners) {
+      setTimeout(startAutoScroll, RESTART_DELAY);
+    }
+  }, [hasMultipleBanners, startAutoScroll]);
+
+  // Banner press handling
+  const handleBannerPress = useCallback(
+    async (banner: Banner) => {
+      console.log('Banner pressed:', banner);
+      
+      clearAutoScroll();
+
+      try {
+        if (banner.product) {
+          console.log('Fetching product with ID:', banner.product);
+          
+          const productData = await fetchProductById({ id: banner.product });
+          console.log('Product data received:', productData);
+          
+          if (productData) {
+            navigation.navigate('HomeTab', {
+              screen: 'ProductScreen',
+              params: { product: productData },
+            });
+          } else {
+            console.warn('Product data not found for ID:', banner.product);
+          }
+        } else {
+          console.log('No product ID found in banner');
+        }
+      } catch (error) {
+        console.error('Error fetching product:', error);
+      }
+
+      // Restart auto-scroll after delay
+      if (hasMultipleBanners) {
+        setTimeout(startAutoScroll, RESTART_DELAY);
+      }
+    },
+    [navigation, clearAutoScroll, hasMultipleBanners, startAutoScroll]
+  );
+
+  // Render functions
+  const renderBanner = useCallback(
+    ({ item: banner }: { item: Banner }) => (
+      <TouchableOpacity
+        key={banner._id}
+        onPress={() => handleBannerPress(banner)}
+        activeOpacity={0.8}
+        style={styles.bannerContainer}
+      >
+        <Image
+          source={{ uri: banner.url || DEFAULT_IMAGE_URL }}
+          style={styles.bannerImage}
+          onError={(error) => 
+            console.log('Image loading error:', error.nativeEvent.error)
+          }
+          onLoad={() => 
+            console.log('Image loaded successfully:', banner.url)
+          }
+        />
+      </TouchableOpacity>
+    ),
+    [handleBannerPress]
+  );
+
+  const renderDots = useCallback(() => {
+    if (!hasMultipleBanners) return null;
+
+    return (
       <View style={styles.dotsContainer}>
-        {app_banners && app_banners?.map((_, index) => (
+        {banners.map((_, index) => (
           <View
             key={index}
             style={[
               styles.dot,
-              {backgroundColor: index === activeIndex ? '#00008B' : '#ccc'},
-              {width: index === activeIndex ? 100 : 20},
+              index === activeIndex ? styles.activeDot : styles.inactiveDot,
             ]}
           />
         ))}
       </View>
-        </View>
-      )}
+    );
+  }, [banners, activeIndex, hasMultipleBanners]);
+
+  // Effects
+  useEffect(() => {
+    if (hasMultipleBanners) {
+      startAutoScroll();
+    }
+    
+    return clearAutoScroll;
+  }, [hasMultipleBanners, startAutoScroll, clearAutoScroll]);
+
+  // FlatList optimization
+  const getItemLayout = useCallback(
+    (_: any, index: number) => ({
+      length: width,
+      offset: width * index,
+      index,
+    }),
+    []
+  );
+
+  const handleScrollToIndexFailed = useCallback((info: any) => {
+    console.log('Scroll to index failed:', info);
+    flatListRef.current?.scrollTo({
+      x: info.index * width,
+      animated: true,
+    });
+  }, []);
+
+  // Loading state
+  if (isLoading) {
+    return (
+      <View style={[styles.container, styles.loadingContainer]}>
+        <ActivityIndicator size="large" color="#007BFF" />
+      </View>
+    );
+  }
+
+  // Empty state
+  if (banners.length === 0) {
+    return <View style={styles.container} />;
+  }
+
+  return (
+    <View style={styles.container}>
+      <FlatList
+        ref={flatListRef}
+        data={banners}
+        renderItem={renderBanner}
+        keyExtractor={(item) => item._id}
+        horizontal
+        pagingEnabled
+        showsHorizontalScrollIndicator={false}
+        onScroll={handleScroll}
+        scrollEventThrottle={16}
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+        getItemLayout={getItemLayout}
+        onScrollToIndexFailed={handleScrollToIndexFailed}
+        initialNumToRender={1}
+        maxToRenderPerBatch={2}
+        windowSize={3}
+        removeClippedSubviews
+      />
+      
+      {renderDots()}
     </View>
   );
 };
 
-export default ImageCarousel;
-
-export const styles = StyleSheet.create({
+const styles = StyleSheet.create({
   container: {
     marginTop: 40,
+    height: 300,
   },
-  image: {
-    width: width,
+  loadingContainer: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  bannerContainer: {
+    width,
+    height: 250,
+  },
+  bannerImage: {
+    width,
     height: 250,
     borderRadius: 16,
     resizeMode: 'cover',
     shadowColor: '#000',
-    shadowOffset: {width: 0, height: 4},
+    shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,
     shadowRadius: 8,
     elevation: 5,
@@ -108,14 +266,21 @@ export const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginTop: 12,
-    width: "80%",
-    marginHorizontal: "auto",
+    paddingHorizontal: 20,
   },
   dot: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    marginHorizontal: 6,
+    height: 8,
+    borderRadius: 4,
+    marginHorizontal: 4,
+  },
+  activeDot: {
     backgroundColor: '#00008B',
+    width: 30,
+  },
+  inactiveDot: {
+    backgroundColor: '#ccc',
+    width: 8,
   },
 });
+
+export default ImageCarousel;
