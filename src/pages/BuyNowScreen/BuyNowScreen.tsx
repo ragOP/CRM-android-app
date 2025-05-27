@@ -50,7 +50,6 @@ const BuyNowScreen = () => {
   const [showDialog, setShowDialog] = useState(false);
   const [quantity, setQuantity] = useState(1);
 
-  // State for prices and tax
   const [price, setPrice] = useState(0);
   const [discountedPrice, setDiscountedPrice] = useState(0);
   const [taxAmount, setTaxAmount] = useState(0);
@@ -61,7 +60,6 @@ const BuyNowScreen = () => {
   const {product} = route.params || {};
   const productId = product?._id || '';
 
-  // Update prices and tax when dependencies change
   useEffect(() => {
     const newPrice = product?.price || 0;
     const newDiscountedPrice = getDiscountBasedOnRole({
@@ -143,6 +141,10 @@ const BuyNowScreen = () => {
       await AsyncStorage.setItem('selectedUserId', selectedUser);
     }
 
+    if (currentAddress) {
+      await AsyncStorage.setItem('selectedAddressId', currentAddress?._id);
+    }
+
     try {
       const apiResponse = await apiService({
         endpoint: endpoints.payment,
@@ -211,10 +213,15 @@ const BuyNowScreen = () => {
       setIsPlacingOrder(true);
 
       const storedUser = await AsyncStorage.getItem('selectedUserId');
+      const storedAddress = await AsyncStorage.getItem('selectedAddressId');
+
+      console.log('Stored User:', storedUser);
+      console.log('Stored Address:', storedAddress);
+
       const payload = {
         orderId,
         ...(reduxUserRole !== 'salesperson' && reduxUserRole !== 'dnd'
-          ? {addressId: currentAddress?._id}
+          ? {addressId: storedAddress}
           : {}),
         productId,
         quantity: quantity,
@@ -462,10 +469,26 @@ const BuyNowScreen = () => {
           !currentAddress && {backgroundColor: '#ccc'},
         ]}
         onPress={onRedirectToPayment}
-        disabled={!currentAddress}>
-        <Text style={styles.placeOrderText}>Pay & Place Order</Text>
+        disabled={!currentAddress || isPlacingOrder}>
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}>
+          {isPlacingOrder && (
+            <ActivityIndicator
+              size="small"
+              color="#fff"
+              style={{marginRight: 8}}
+            />
+          )}
+          <Text style={styles.placeOrderText}>
+            {isPlacingOrder ? 'Placing order...' : 'Pay & Place Order'}
+          </Text>
+        </View>
       </TouchableOpacity>
-
+      
       <CustomDialog
         visible={showDialog}
         title="Order placed"
@@ -597,7 +620,10 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     borderRadius: 25,
     alignItems: 'center',
+    justifyContent: 'center',
     marginTop: 10,
+    display: 'flex',
+    flexDirection: 'row',
   },
   placeOrderText: {
     color: '#fff',
