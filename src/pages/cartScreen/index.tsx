@@ -27,18 +27,7 @@ import {getDiscountBasedOnRole} from '../../utils/products/getDiscountBasedOnRol
 import OrderForSelection from '../../components/OrderForSelection/OrderForSelection';
 import {showSnackbar} from '../../redux/slice/snackbarSlice';
 import {getTaxAmount} from '../../apis/getTaxAmount';
-
-function formatAddress(address) {
-  if (!address) return '';
-  // Only include non-empty fields
-  const parts = [
-    address.address,
-    address.city,
-    address.state,
-    address.pincode,
-  ].filter(Boolean);
-  return parts.join(', ');
-}
+import { formatAddress } from '../../utils/format_address';
 
 const CartScreen = () => {
   const dispatch = useAppDispatch();

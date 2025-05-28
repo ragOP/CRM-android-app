@@ -93,16 +93,13 @@ const ImageCarousel: React.FC = () => {
   // Banner press handling
   const handleBannerPress = useCallback(
     async (banner: Banner) => {
-      console.log('Banner pressed:', banner);
       
       clearAutoScroll();
 
       try {
         if (banner.product) {
-          console.log('Fetching product with ID:', banner.product);
           
           const productData = await fetchProductById({ id: banner.product });
-          console.log('Product data received:', productData);
           
           if (productData) {
             navigation.navigate('HomeTab', {
@@ -141,9 +138,6 @@ const ImageCarousel: React.FC = () => {
           style={styles.bannerImage}
           onError={(error) => 
             console.log('Image loading error:', error.nativeEvent.error)
-          }
-          onLoad={() => 
-            console.log('Image loaded successfully:', banner.url)
           }
         />
       </TouchableOpacity>

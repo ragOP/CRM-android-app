@@ -1,4 +1,4 @@
-import React, {useState, useCallback} from 'react';
+import React, {useState, useCallback, useEffect} from 'react';
 import {
   View,
   Text,
@@ -15,20 +15,51 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import {useNavigation} from '@react-navigation/native';
 import {useAppSelector, useAppDispatch} from '../../redux/store';
 import {showSnackbar} from '../../redux/slice/snackbarSlice';
+import { fetchUserDetails } from '../../apis/fetchUserDetails';
+import { updateUserDetails } from './helpers/updateUserDetails';
+import { useQuery } from '@tanstack/react-query';
+import AddressManager from '../AddressManager/AddressManager';
 
 const EditProfileScreen = () => {
   const navigation = useNavigation();
   const dispatch = useAppDispatch();
   const user = useAppSelector(state => state.auth.user);
-
-  const [name, setName] = useState(user?.name || '');
-  const [email, setEmail] = useState(user?.email || '');
-  const [phone, setPhone] = useState(user?.phone || '');
+  const [form, setForm] = useState({
+    name: '',
+    email: '',
+    phone: '',
+  })
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
 
+  const {data: userDetails, isLoading} = useQuery({
+    queryKey: ['userDetails'],
+    queryFn: () => fetchUserDetails({id: user?.id}),
+    select: data => data?.response?.data,
+  });
+
+  // Initialize form with user details when they load
+  useEffect(() => {
+    if (userDetails) {
+      setForm({
+        name: userDetails.name || '',
+        email: userDetails.email || '',
+        phone: userDetails.mobile_number || '',
+      });
+    }
+  }, [userDetails]);
+
+  console.log("userDetails", userDetails)
+
+  const handleChange = (key: string, value: string) => {
+    setForm(prevForm => ({
+      ...prevForm,
+      [key]: value,
+    }));
+  };  
+
   const handleSave = async () => {
-    if (!name.trim() || !email.trim() || !phone.trim()) {
+    if (!form.name.trim() || !form.phone.trim()) {
       dispatch(
         showSnackbar({
           type: 'error',
@@ -39,9 +70,16 @@ const EditProfileScreen = () => {
       return;
     }
     setLoading(true);
+    const updatedData = {
+      id: user?.id,
+      updates: {
+        name: form.name,
+        mobile_number: form.phone
+      }
+    }
     try {
       // Call your API to update the profile
-      // await updateUserProfile({ name, email, phone });
+      await updateUserDetails(updatedData);
       dispatch(
         showSnackbar({
           type: 'success',
@@ -72,7 +110,7 @@ const EditProfileScreen = () => {
   }, []);
 
   return (
-    <LinearGradient colors={['#e3e6ee', '#bfc8e4']} style={styles.gradient}>
+    <LinearGradient colors={['#e3e6ee', '#e3e6ee']} style={styles.gradient}>
       <KeyboardAvoidingView
         style={{flex: 1}}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
@@ -94,8 +132,8 @@ const EditProfileScreen = () => {
             <Text style={styles.label}>Name</Text>
             <TextInput
               style={styles.input}
-              value={name}
-              onChangeText={setName}
+              value={form.name}
+              onChangeText={handleChange.bind(null, 'name')}
               placeholder="Enter your name"
             />
           </View>
@@ -106,7 +144,8 @@ const EditProfileScreen = () => {
                 styles.input,
                 {backgroundColor: '#f1f1f1', color: '#888'},
               ]}
-              value={email}
+              value={form.email}
+              onChangeText={handleChange.bind(null, 'email')}
               editable={false}
               placeholder="Enter your email"
               keyboardType="email-address"
@@ -117,13 +156,14 @@ const EditProfileScreen = () => {
             <Text style={styles.label}>Phone Number</Text>
             <TextInput
               style={styles.input}
-              value={phone}
-              onChangeText={setPhone}
+              value={form.phone}
+              onChangeText={handleChange.bind(null, 'phone')}
               placeholder="Enter your phone number"
               keyboardType="phone-pad"
-              maxLength={15}
+              maxLength={10}
             />
           </View>
+          <AddressManager />
           <TouchableOpacity
             style={[styles.saveButton, loading && {opacity: 0.7}]}
             onPress={handleSave}
@@ -186,7 +226,7 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     borderRadius: 25,
     alignItems: 'center',
-    marginTop: 24,
+    marginTop: 40,
   },
   saveButtonText: {
     color: '#fff',
