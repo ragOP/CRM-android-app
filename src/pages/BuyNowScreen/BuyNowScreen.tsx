@@ -36,13 +36,18 @@ import OrderForSelection from '../../components/OrderForSelection/OrderForSelect
 import {Picker} from '@react-native-picker/picker';
 import {isArrayWithValues} from '../../utils/array/isArrayWithValues';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import PrescriptionUpload from '../../components/PrescriptionUpload/PrescriptionUpload';
 
 const BuyNowScreen = () => {
   const navigation = useNavigation();
   const route = useRoute();
   const dispatch = useAppDispatch();
 
+  const {product} = route.params || {};
+  const productId = product?._id || '';
+
   const reduxUser = useAppSelector(state => state.auth.user);
+
   const reduxUserId = reduxUser?.id;
   const reduxUserRole = reduxUser?.role || 'user';
 
@@ -56,9 +61,16 @@ const BuyNowScreen = () => {
   const [totalPayable, setTotalPayable] = useState(0);
   const [selectedUser, setSelectedUser] = useState<string | null>(null);
   const [isPlacingOrder, setIsPlacingOrder] = useState(false);
+  const [isPrescriptionRequired, setIsPrescriptionRequired] = useState(false);
+  const [prescriptionFile, setPrescriptionFile] = useState(null);
 
-  const {product} = route.params || {};
-  const productId = product?._id || '';
+  const handlePrescriptionUpload = file => {
+    setPrescriptionFile(file);
+  };
+
+  const handlePrescriptionRemove = () => {
+    setPrescriptionFile(null);
+  };
 
   useEffect(() => {
     const newPrice = product?.price || 0;
@@ -131,6 +143,30 @@ const BuyNowScreen = () => {
         showSnackbar({
           type: 'error',
           title: 'Please select a delivery address',
+          placement: 'top',
+        }),
+      );
+      return;
+    }
+
+    if (reduxUserRole === 'salesperson' || reduxUserRole === 'dnd') {
+      if (!selectedUser) {
+        dispatch(
+          showSnackbar({
+            type: 'error',
+            title: 'Please select a user to place the order for',
+            placement: 'top',
+          }),
+        );
+        return;
+      }
+    }
+
+    if (isPrescriptionRequired && !prescriptionFile) {
+      dispatch(
+        showSnackbar({
+          type: 'error',
+          title: 'Please upload a prescription file',
           placement: 'top',
         }),
       );
@@ -294,6 +330,14 @@ const BuyNowScreen = () => {
       .filter(Boolean)
       .join(', ');
   };
+
+  useEffect(() => {
+    if (product?.is_prescription_required) {
+      setIsPrescriptionRequired(true);
+    } else {
+      setIsPrescriptionRequired(false);
+    }
+  }, [product]);
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
@@ -463,6 +507,14 @@ const BuyNowScreen = () => {
         </View>
       )}
 
+      {isPrescriptionRequired && (
+        <PrescriptionUpload
+          prescriptionFile={prescriptionFile}
+          onUpload={handlePrescriptionUpload}
+          onRemove={handlePrescriptionRemove}
+        />
+      )}
+      
       <TouchableOpacity
         style={[
           styles.placeOrderButton,
@@ -488,7 +540,7 @@ const BuyNowScreen = () => {
           </Text>
         </View>
       </TouchableOpacity>
-      
+
       <CustomDialog
         visible={showDialog}
         title="Order placed"

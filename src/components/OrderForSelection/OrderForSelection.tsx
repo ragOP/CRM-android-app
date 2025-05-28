@@ -56,7 +56,6 @@ const OrderForSelection = ({
 
   useEffect(() => {
     if (isArrayWithValues(users) && !selectedUser && users[0]?._id) {
-      console.log('USERRR', selectedUser);
       setSelectedUser(users[0]._id);
     }
   }, [users, selectedUser, setSelectedUser]);
