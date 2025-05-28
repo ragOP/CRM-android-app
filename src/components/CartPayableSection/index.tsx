@@ -35,6 +35,8 @@ type CartPayableSectionProps = {
   cartId: string | number;
   couponId: string | number;
   selectedUser: string | null;
+  isPrescriptionRequired: boolean;
+  prescriptionFile?: string | null;
 };
 
 const CartPayableSection = ({
@@ -45,6 +47,8 @@ const CartPayableSection = ({
   cartId,
   couponId,
   selectedUser,
+  prescriptionFile,
+  isPrescriptionRequired,
 }: CartPayableSectionProps) => (
   <View style={styles.payableContainer}>
     <View>
@@ -64,6 +68,8 @@ const CartPayableSection = ({
       couponId={couponId}
       selectedUser={selectedUser}
       totalAmount={totalAmount}
+      prescriptionFile={prescriptionFile}
+      isPrescriptionRequired={isPrescriptionRequired}
     />
   </View>
 );
@@ -92,6 +98,8 @@ type CheckoutType = {
   couponId: string | number;
   selectedUser: string | null;
   totalAmount: number;
+  isPrescriptionRequired: boolean;
+  prescriptionFile?: string | null;
 };
 
 export const Checkout = ({
@@ -101,6 +109,8 @@ export const Checkout = ({
   couponId,
   selectedUser,
   totalAmount,
+  prescriptionFile,
+  isPrescriptionRequired,
 }: CheckoutType) => {
   const navigation = useNavigation();
   const queryClient = useQueryClient();
@@ -131,6 +141,17 @@ export const Checkout = ({
         showSnackbar({
           type: 'error',
           title: 'Please select a user',
+          placement: 'top',
+        }),
+      );
+      return;
+    }
+
+    if (isPrescriptionRequired && !prescriptionFile) {
+      dispatch(
+        showSnackbar({
+          type: 'error',
+          title: 'Please upload a prescription file',
           placement: 'top',
         }),
       );

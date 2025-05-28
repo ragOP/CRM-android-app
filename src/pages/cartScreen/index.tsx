@@ -28,6 +28,7 @@ import OrderForSelection from '../../components/OrderForSelection/OrderForSelect
 import {showSnackbar} from '../../redux/slice/snackbarSlice';
 import {getTaxAmount} from '../../apis/getTaxAmount';
 import { formatAddress } from '../../utils/format_address';
+import PrescriptionUpload from '../../components/PrescriptionUpload/PrescriptionUpload';
 
 const CartScreen = () => {
   const dispatch = useAppDispatch();
@@ -43,6 +44,16 @@ const CartScreen = () => {
   const [discountCoupon, setDiscountCoupon] = useState(null);
   const [refreshing, setRefreshing] = useState(false);
   const [selectedUser, setSelectedUser] = useState<string | null>(null);
+  const [isPrescriptionRequired, setIsPrescriptionRequired] = useState(false);
+  const [prescriptionFile, setPrescriptionFile] = useState(null);
+
+  const handlePrescriptionUpload = file => {
+    setPrescriptionFile(file);
+  };
+
+  const handlePrescriptionRemove = () => {
+    setPrescriptionFile(null);
+  };
 
   const {data: addresses, isLoading: isAddressLoading} = useQuery({
     queryKey: ['user_addresses'],
@@ -144,6 +155,17 @@ const CartScreen = () => {
         return;
       }
     }
+
+    if (isPrescriptionRequired && !prescriptionFile) {
+      dispatch(
+        showSnackbar({
+          type: 'error',
+          title: 'Please upload a prescription file.',
+          placement: 'top',
+        }),
+      );
+      return;
+    }
     // placeOrderMutation(payload);
   };
 
@@ -240,6 +262,17 @@ const CartScreen = () => {
       return false;
     }
 
+    if (isPrescriptionRequired && !prescriptionFile) {
+      dispatch(
+        showSnackbar({
+          type: 'error',
+          title: 'Please upload a prescription file.',
+          placement: 'top',
+        }),
+      );
+      return false;
+    }
+
     return true;
   };
 
@@ -278,6 +311,17 @@ const CartScreen = () => {
     Number(couponDiscountPrice) +
     Number(taxAmount)
   ).toFixed(2);
+
+  useEffect(() => {
+    if (cartData) {
+      const prescriptionNeeded = cartData?.items?.some(
+        item => item.product?.is_prescription_required,
+      );
+      setIsPrescriptionRequired(prescriptionNeeded);
+    } else {
+      setIsPrescriptionRequired(false);
+    }
+  }, [cartData?.items]);
 
   return (
     <>
@@ -339,6 +383,14 @@ const CartScreen = () => {
             />
           )}
 
+          {isArrayWithValues(cartProductsItems) && isPrescriptionRequired && (
+            <PrescriptionUpload
+              prescriptionFile={prescriptionFile}
+              onUpload={handlePrescriptionUpload}
+              onRemove={handlePrescriptionRemove}
+            />
+          )}
+
           {/* Payable Amount & Order Button */}
           {isArrayWithValues(cartProductsItems) && (
             <CartPayableSection
@@ -349,6 +401,8 @@ const CartScreen = () => {
               cartId={cartData?._id}
               couponId={discountCoupon?._id}
               selectedUser={selectedUser}
+              isPrescriptionRequired={isPrescriptionRequired}
+              prescriptionFile={prescriptionFile}
             />
           )}
 
