@@ -123,7 +123,7 @@ const EditProfileScreen = () => {
             <TouchableOpacity
               onPress={() => navigation.goBack()}
               style={styles.backButton}>
-              <Icon name="arrow-back" size={24} color="#fff" />
+              <Icon name="arrow-back" size={24} color="#000" />
             </TouchableOpacity>
             <Text style={styles.headerTitle}>Edit Profile</Text>
           </View>
@@ -185,8 +185,8 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   container: {
-    padding: 24,
-    paddingTop: 60,
+    padding: 16,
+    // paddingTop: 60,
   },
   header: {
     flexDirection: 'row',
@@ -196,13 +196,12 @@ const styles = StyleSheet.create({
   backButton: {
     padding: 8,
     borderRadius: 20,
-    backgroundColor: '#00008B',
-    marginRight: 12,
+    marginRight: 8,
   },
   headerTitle: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#00008B',
+    color: '#000',
   },
   inputGroup: {
     marginBottom: 18,
@@ -214,7 +213,7 @@ const styles = StyleSheet.create({
   },
   input: {
     borderWidth: 1,
-    borderColor: '#00008B',
+    borderColor: '#000',
     borderRadius: 8,
     padding: 12,
     fontSize: 16,
@@ -222,7 +221,7 @@ const styles = StyleSheet.create({
     color: '#222',
   },
   saveButton: {
-    backgroundColor: '#00008B',
+    backgroundColor: '#007AFF',
     paddingVertical: 14,
     borderRadius: 25,
     alignItems: 'center',
