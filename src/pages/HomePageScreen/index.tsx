@@ -246,7 +246,7 @@ const HomePageScreen = () => {
       refreshControl={
         <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
       }>
-      <GradientHeader height={120} title="" description="" isHomePage={true} />
+      <GradientHeader title="" description="" isHomePage={true} />
       <ImageCarousel />
       <ProductGrid
         title="Our Best Products"

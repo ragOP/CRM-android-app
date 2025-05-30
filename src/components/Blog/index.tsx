@@ -125,6 +125,10 @@ const BlogScreen = () => {
     fetchBlogs();
   }, []);
 
+  useEffect(() => {
+    setSelectedBlog(null);
+  }, []);
+
   if (loading) {
     return (
       <LinearGradient
@@ -136,41 +140,41 @@ const BlogScreen = () => {
     );
   }
 
-  if (selectedBlog) {
-    return (
-      <LinearGradient colors={['#f5f7fa', '#c3cfe2']} style={{flex: 1}}>
-        <ScrollView contentContainerStyle={{flexGrow: 1}}>
-          <TouchableOpacity onPress={handleBack} style={styles.customButton}>
-            <IconButton
-              icon="arrow-left"
-              iconColor="#000"
-              size={24}
-              onPress={handleBack}
-            />
-            <Text style={styles.customButtonText}>Back</Text>
-          </TouchableOpacity>
+  // if (selectedBlog) {
+  //   return (
+  //     <LinearGradient colors={['#f5f7fa', '#c3cfe2']} style={{flex: 1}}>
+  //       <ScrollView contentContainerStyle={{flexGrow: 1}}>
+  //         <TouchableOpacity onPress={handleBack} style={styles.customButton}>
+  //           <IconButton
+  //             icon="arrow-left"
+  //             iconColor="#000"
+  //             size={24}
+  //             onPress={handleBack}
+  //           />
+  //           <Text style={styles.customButtonText}>Back</Text>
+  //         </TouchableOpacity>
 
-          <View style={{padding: 16}}>
-            <Image
-              source={{uri: selectedBlog.bannerImageUrl}}
-              style={styles.banner}
-            />
-            <Text style={styles.title}>{selectedBlog.title}</Text>
-            <Text style={styles.author}>
-              By {selectedBlog.author?.name ?? 'Unknown Author'}
-            </Text>
-            <Text style={styles.description}>
-              {selectedBlog.short_description}
-            </Text>
-            {/* <Text style={styles.content}>
-              {stripHtml(selectedBlog.content)}
-            </Text> */}
-            <RenderHTML source={{html: selectedBlog.content}} />
-          </View>
-        </ScrollView>
-      </LinearGradient>
-    );
-  }
+  //         <View style={{padding: 16}}>
+  //           <Image
+  //             source={{uri: selectedBlog.bannerImageUrl}}
+  //             style={styles.banner}
+  //           />
+  //           <Text style={styles.title}>{selectedBlog.title}</Text>
+  //           <Text style={styles.author}>
+  //             By {selectedBlog.author?.name ?? 'Unknown Author'}
+  //           </Text>
+  //           <Text style={styles.description}>
+  //             {selectedBlog.short_description}
+  //           </Text>
+  //           {/* <Text style={styles.content}>
+  //             {stripHtml(selectedBlog.content)}
+  //           </Text> */}
+  //           <RenderHTML source={{html: selectedBlog.content}} />
+  //         </View>
+  //       </ScrollView>
+  //     </LinearGradient>
+  //   );
+  // }
 
   return (
     <LinearGradient colors={['#f5f7fa', '#c3cfe2']} style={{flex: 1}}>

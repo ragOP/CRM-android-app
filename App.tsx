@@ -6,6 +6,12 @@ import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import {Provider} from 'react-redux';
 import {QueryClient, QueryClientProvider} from '@tanstack/react-query';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import {
+  SafeAreaProvider,
+  useSafeAreaInsets,
+} from 'react-native-safe-area-context';
+import {PaperProvider} from 'react-native-paper';
+import {PersistGate} from 'redux-persist/integration/react';
 
 import {persistor, store, useAppSelector} from './src/redux/store';
 
@@ -21,12 +27,9 @@ import Blog from './src/components/Blog';
 import HouseServiceScreen from './src/pages/homeServiceScreen';
 import UserProfileScreen from './src/components/UserProfileScreen/UserProfileScreen';
 import LoginScreen from './src/pages/authScreen/loginScreen';
-import {PersistGate} from 'redux-persist/integration/react';
 import ViewOrdersScreen from './src/components/ViewOrderScreen/ViewOrderScreen';
 import LoginValidation from './src/components/Validation/LoginValidation';
 import CustomSnackbar from './src/components/CustomSnackbar/CustomSnackbar';
-import {SafeAreaProvider} from 'react-native-safe-area-context';
-import {PaperProvider} from 'react-native-paper';
 import TransactionLogs from './src/components/TransactionLogs/TransactionLogs';
 import ForgetPasswordScreen from './src/pages/forgetPasswordScreen';
 import FaqScreen from './src/components/Faq';
@@ -85,10 +88,7 @@ const AccountStack = () => {
         name="TermsConditionsScreen"
         component={TermsConditionsScreen}
       />
-       <Stack.Screen
-        name="EditProfileScreen"
-        component={EditProfileScreen}
-      />
+      <Stack.Screen name="EditProfileScreen" component={EditProfileScreen} />
     </Stack.Navigator>
   );
 };
@@ -108,87 +108,80 @@ const CartStack = () => {
   );
 };
 
-const tabScreenOptions = ({route}: {route: any}) => ({
-  headerShown: false,
-  tabBarIcon: ({
-    color,
-    size,
-    focused,
-  }: {
-    color: string;
-    size: number;
-    focused: boolean;
-  }) => {
-    let iconName = 'home-outline';
-    if (route.name === 'HomeTab') {
-      iconName = focused ? 'home' : 'home-outline';
-    } else if (route.name === 'Pharmacy') {
-      iconName = focused ? 'medical-bag' : 'medical-bag-outline';
-    } else if (route.name === 'Cart') {
-      iconName = focused ? 'cart' : 'cart-outline';
-    } else if (route.name === 'Account') {
-      iconName = focused ? 'account' : 'account-outline';
-    } else if (route.name === 'Blog') {
-      iconName = focused ? 'post' : 'post-outline';
-    }
-    return <MaterialCommunityIcons name={iconName} size={size} color={color} />;
-  },
-});
+const MainTabs = () => {
+  const insets = useSafeAreaInsets();
 
-const App = () => {
-  // const {snackbar, hideSnackbar} = useSnackbar();
+  const tabScreenOptions = ({route}: {route: any}) => ({
+    headerShown: false,
+    tabBarStyle: {
+      height: Platform.OS === 'ios' ? 25 + insets.bottom : 60,
+      paddingBottom: Platform.OS === 'ios' ? insets.bottom : 10,
+      backgroundColor: 'white',
+    },
+    tabBarIcon: ({
+      color,
+      size,
+      focused,
+    }: {
+      color: string;
+      size: number;
+      focused: boolean;
+    }) => {
+      let iconName = 'home-outline';
+      if (route.name === 'HomeTab') {
+        iconName = focused ? 'home' : 'home-outline';
+      } else if (route.name === 'Blog') {
+        iconName = focused ? 'post' : 'post-outline';
+      } else if (route.name === 'Cart') {
+        iconName = focused ? 'cart' : 'cart-outline';
+      } else if (route.name === 'Account') {
+        iconName = focused ? 'account' : 'account-outline';
+      }
+      return (
+        <MaterialCommunityIcons name={iconName} size={size} color={color} />
+      );
+    },
+  });
 
   return (
-    <Provider store={store}>
-      <PersistGate loading={null} persistor={persistor}>
-        <QueryClientProvider client={queryClient}>
-          <NavigationContainer>
-            <PaperProvider>
-              <SafeAreaProvider>
-                <SafeAreaView style={styles.safeArea}>
-                  <CustomSnackbar />
-                  <StatusBar backgroundColor="transparent" translucent />
-                  <Tab.Navigator
-                    initialRouteName="HomeTab"
-                    screenOptions={tabScreenOptions}>
-                    <Tab.Screen
-                      name="HomeTab"
-                      component={HomeStack}
-                      options={{title: 'Home'}}
-                    />
-                    {/* <Tab.Screen
-                  name="Pharmacy"
-                  component={PharmacyScreen}
-                  options={{title: 'Pharmacy'}}
-                /> */}
-                    <Tab.Screen
-                      name="Blog"
-                      component={Blog}
-                      options={{title: 'Blog'}}
-                    />
-                    <Tab.Screen
-                      name="Cart"
-                      component={CartStack}
-                      options={{title: 'Cart'}}
-                    />
-
-                    <Tab.Screen
-                      name="Account"
-                      component={AccountStack}
-                      options={{title: 'Account'}}
-                    />
-                  </Tab.Navigator>
-                </SafeAreaView>
-              </SafeAreaProvider>
-            </PaperProvider>
-          </NavigationContainer>
-        </QueryClientProvider>
-      </PersistGate>
-    </Provider>
+    <Tab.Navigator initialRouteName="HomeTab" screenOptions={tabScreenOptions}>
+      <Tab.Screen
+        name="HomeTab"
+        component={HomeStack}
+        options={{title: 'Home'}}
+      />
+      <Tab.Screen name="Blog" component={Blog} options={{title: 'Blog'}} />
+      <Tab.Screen name="Cart" component={CartStack} options={{title: 'Cart'}} />
+      <Tab.Screen
+        name="Account"
+        component={AccountStack}
+        options={{title: 'Account'}}
+      />
+    </Tab.Navigator>
   );
 };
 
-export default App;
+const App = () => {
+  return (
+    <SafeAreaProvider>
+      <Provider store={store}>
+        <PersistGate loading={null} persistor={persistor}>
+          <QueryClientProvider client={queryClient}>
+            <PaperProvider>
+              <SafeAreaView style={styles.safeArea}>
+                <NavigationContainer>
+                  <MainTabs />
+                  <CustomSnackbar />
+                </NavigationContainer>
+                <StatusBar backgroundColor="transparent" translucent />
+              </SafeAreaView>
+            </PaperProvider>
+          </QueryClientProvider>
+        </PersistGate>
+      </Provider>
+    </SafeAreaProvider>
+  );
+};
 
 const styles = StyleSheet.create({
   safeArea: {
@@ -197,3 +190,5 @@ const styles = StyleSheet.create({
     paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
   },
 });
+
+export default App;

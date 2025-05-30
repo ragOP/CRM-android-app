@@ -81,7 +81,7 @@ const UserProfileScreen = () => {
         <LinearGradient
           colors={['#6C47FF', '#2B9AFF']}
           style={styles.headerBackground}>
-          <Icon name="person-circle" size={64} color="#fff" />
+          <Icon name="person-circle" size={64} color="#fff" style={{marginLeft: 10}} />
           <View>
             <Text style={styles.headerTitle}>
               Hello, {user?.name || 'Guest'} 👋
@@ -161,8 +161,7 @@ const UserProfileScreen = () => {
 
 const styles = StyleSheet.create({
   headerBackground: {
-    paddingVertical: 40,
-    paddingHorizontal: 20,
+    height: 120,
     gap: 10,
     borderBottomLeftRadius: 28,
     borderBottomRightRadius: 28,

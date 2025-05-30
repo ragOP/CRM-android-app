@@ -131,14 +131,15 @@ const GradientHeader = ({
     <LinearGradient
       colors={['#82C8E5', '#F7F7F7']}
       style={[styles.header, {height}]}>
-      <View style={styles.container}>
+      <View style={[styles.container, {paddingTop: isHomePage ? 0 : 20}]}>
         <View style={{display: 'flex', flexDirection: 'row', gap: 1}}>
           {!isHomePage && (
             <IconButton
               icon="arrow-left"
               size={24}
               onPress={() => navigation.goBack()}
-              style={{backgroundColor: 'transparent', color: "#000", }}
+              iconColor='#000'
+              style={{backgroundColor: 'transparent', color: '#000'}}
             />
           )}
           <View style={{display: 'flex', flexDirection: 'column'}}>
@@ -161,7 +162,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'flex-start',
-    paddingHorizontal: 16,
+    paddingHorizontal: 12,
     paddingTop: 10,
   },
   headerTitle: {

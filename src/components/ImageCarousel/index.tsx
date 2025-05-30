@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, {useState, useEffect, useRef, useCallback} from 'react';
 import {
   View,
   Image,
@@ -8,17 +8,18 @@ import {
   FlatList,
   ActivityIndicator,
 } from 'react-native';
-import { useQuery } from '@tanstack/react-query';
-import { useNavigation } from '@react-navigation/native';
-import { fetchAppBanners } from '../../apis/fetchAppBanners';
-import { fetchProductById } from '../../apis/fetchProductById';
+import {useQuery} from '@tanstack/react-query';
+import {useNavigation} from '@react-navigation/native';
+import {fetchAppBanners} from '../../apis/fetchAppBanners';
+import {fetchProductById} from '../../apis/fetchProductById';
 
-const { width } = Dimensions.get('window');
+const {width} = Dimensions.get('window');
 
 // Constants
 const AUTO_SCROLL_INTERVAL = 3000;
 const RESTART_DELAY = 2000;
-const DEFAULT_IMAGE_URL = 'https://res.cloudinary.com/dacwig3xk/image/upload/v1748346009/uploads/images/uwntevpmelc4kddzqc41.jpg';
+const DEFAULT_IMAGE_URL =
+  'https://res.cloudinary.com/dacwig3xk/image/upload/v1748346009/uploads/images/uwntevpmelc4kddzqc41.jpg';
 
 interface Banner {
   _id: string;
@@ -28,16 +29,16 @@ interface Banner {
 
 const ImageCarousel: React.FC = () => {
   const navigation = useNavigation();
-  
+
   // API Query
-  const { data, isLoading } = useQuery({
+  const {data, isLoading} = useQuery({
     queryKey: ['app_banners'],
     queryFn: fetchAppBanners,
   });
 
   // State
   const [activeIndex, setActiveIndex] = useState(0);
-  
+
   // Refs
   const flatListRef = useRef<FlatList>(null);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -56,7 +57,7 @@ const ImageCarousel: React.FC = () => {
 
   const startAutoScroll = useCallback(() => {
     if (!hasMultipleBanners) return;
-    
+
     clearAutoScroll();
     intervalRef.current = setInterval(() => {
       const nextIndex = (activeIndex + 1) % banners.length;
@@ -70,13 +71,13 @@ const ImageCarousel: React.FC = () => {
 
   // Scroll handling
   const handleScroll = useCallback(
-    (event: { nativeEvent: { contentOffset: { x: number } } }) => {
+    (event: {nativeEvent: {contentOffset: {x: number}}}) => {
       const slide = Math.round(event.nativeEvent.contentOffset.x / width);
       if (slide !== activeIndex && slide >= 0 && slide < banners.length) {
         setActiveIndex(slide);
       }
     },
-    [activeIndex, banners.length]
+    [activeIndex, banners.length],
   );
 
   // Touch handling
@@ -93,18 +94,16 @@ const ImageCarousel: React.FC = () => {
   // Banner press handling
   const handleBannerPress = useCallback(
     async (banner: Banner) => {
-      
       clearAutoScroll();
 
       try {
         if (banner.product) {
-          
-          const productData = await fetchProductById({ id: banner.product });
-          
+          const productData = await fetchProductById({id: banner.product});
+
           if (productData) {
             navigation.navigate('HomeTab', {
               screen: 'ProductScreen',
-              params: { product: productData },
+              params: {product: productData},
             });
           } else {
             console.warn('Product data not found for ID:', banner.product);
@@ -121,28 +120,27 @@ const ImageCarousel: React.FC = () => {
         setTimeout(startAutoScroll, RESTART_DELAY);
       }
     },
-    [navigation, clearAutoScroll, hasMultipleBanners, startAutoScroll]
+    [navigation, clearAutoScroll, hasMultipleBanners, startAutoScroll],
   );
 
   // Render functions
   const renderBanner = useCallback(
-    ({ item: banner }: { item: Banner }) => (
+    ({item: banner}: {item: Banner}) => (
       <TouchableOpacity
         key={banner._id}
         onPress={() => handleBannerPress(banner)}
         activeOpacity={0.8}
-        style={styles.bannerContainer}
-      >
+        style={styles.bannerContainer}>
         <Image
-          source={{ uri: banner.url || DEFAULT_IMAGE_URL }}
+          source={{uri: banner.url || DEFAULT_IMAGE_URL}}
           style={styles.bannerImage}
-          onError={(error) => 
+          onError={error =>
             console.log('Image loading error:', error.nativeEvent.error)
           }
         />
       </TouchableOpacity>
     ),
-    [handleBannerPress]
+    [handleBannerPress],
   );
 
   const renderDots = useCallback(() => {
@@ -168,7 +166,7 @@ const ImageCarousel: React.FC = () => {
     if (hasMultipleBanners) {
       startAutoScroll();
     }
-    
+
     return clearAutoScroll;
   }, [hasMultipleBanners, startAutoScroll, clearAutoScroll]);
 
@@ -179,7 +177,7 @@ const ImageCarousel: React.FC = () => {
       offset: width * index,
       index,
     }),
-    []
+    [],
   );
 
   const handleScrollToIndexFailed = useCallback((info: any) => {
@@ -210,7 +208,7 @@ const ImageCarousel: React.FC = () => {
         ref={flatListRef}
         data={banners}
         renderItem={renderBanner}
-        keyExtractor={(item) => item._id}
+        keyExtractor={item => item._id}
         horizontal
         pagingEnabled
         showsHorizontalScrollIndicator={false}
@@ -225,7 +223,6 @@ const ImageCarousel: React.FC = () => {
         windowSize={3}
         removeClippedSubviews
       />
-      
       {renderDots()}
     </View>
   );
@@ -233,7 +230,6 @@ const ImageCarousel: React.FC = () => {
 
 const styles = StyleSheet.create({
   container: {
-    marginTop: 40,
     height: 300,
   },
   loadingContainer: {
@@ -250,7 +246,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     resizeMode: 'cover',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
+    shadowOffset: {width: 0, height: 4},
     shadowOpacity: 0.1,
     shadowRadius: 8,
     elevation: 5,
