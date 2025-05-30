@@ -57,15 +57,6 @@ export interface BlogData {
   __v: number;
 }
 
-const stripHtml = (html: string): string => {
-  return html
-    .replace(/<br\s*\/?>/gi, '\n')
-    .replace(/<h[1-6][^>]*>(.*?)<\/h[1-6]>/gi, '\n$1\n')
-    .replace(/<p[^>]*>(.*?)<\/p>/gi, '\n$1\n')
-    .replace(/<\/?[^>]+(>|$)/g, '') // remove all other tags
-    .trim();
-};
-
 const BlogScreen = () => {
   const navigation = useNavigation();
 
@@ -115,10 +106,7 @@ const BlogScreen = () => {
     fetchBlogDetails(id);
   };
 
-  const handleBack = () => {
-    setSelectedBlog(null);
-    setError(null);
-  };
+
 
   const onRefresh = useCallback(() => {
     setRefreshing(true);
@@ -141,39 +129,7 @@ const BlogScreen = () => {
   }
 
   // if (selectedBlog) {
-  //   return (
-  //     <LinearGradient colors={['#f5f7fa', '#c3cfe2']} style={{flex: 1}}>
-  //       <ScrollView contentContainerStyle={{flexGrow: 1}}>
-  //         <TouchableOpacity onPress={handleBack} style={styles.customButton}>
-  //           <IconButton
-  //             icon="arrow-left"
-  //             iconColor="#000"
-  //             size={24}
-  //             onPress={handleBack}
-  //           />
-  //           <Text style={styles.customButtonText}>Back</Text>
-  //         </TouchableOpacity>
-
-  //         <View style={{padding: 16}}>
-  //           <Image
-  //             source={{uri: selectedBlog.bannerImageUrl}}
-  //             style={styles.banner}
-  //           />
-  //           <Text style={styles.title}>{selectedBlog.title}</Text>
-  //           <Text style={styles.author}>
-  //             By {selectedBlog.author?.name ?? 'Unknown Author'}
-  //           </Text>
-  //           <Text style={styles.description}>
-  //             {selectedBlog.short_description}
-  //           </Text>
-  //           {/* <Text style={styles.content}>
-  //             {stripHtml(selectedBlog.content)}
-  //           </Text> */}
-  //           <RenderHTML source={{html: selectedBlog.content}} />
-  //         </View>
-  //       </ScrollView>
-  //     </LinearGradient>
-  //   );
+  //  
   // }
 
   return (
@@ -199,7 +155,13 @@ const BlogScreen = () => {
             <TouchableOpacity
               key={item._id}
               style={styles.blogCard}
-              onPress={() => handleBlogPress(item._id)}>
+              onPress={() => {
+                console.log('item', item);
+               navigation.navigate('Blog', {
+  screen: 'SingleBlogScreen',
+  params: { blog: item },
+});
+              }}>
               <Image
                 source={{uri: item.bannerImageUrl}}
                 style={styles.banner}

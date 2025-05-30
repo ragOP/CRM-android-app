@@ -37,6 +37,7 @@ import PrivacyPolicyScreen from './src/components/PrivacyPolicy';
 import TermsConditionsScreen from './src/components/TermsCondition';
 import BuyNowScreen from './src/pages/BuyNowScreen/BuyNowScreen';
 import EditProfileScreen from './src/components/EditProfileScreen/EditProfileScreen';
+import SingleBlogScreen from './src/components/SingleBlogScreen';
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -92,6 +93,16 @@ const AccountStack = () => {
     </Stack.Navigator>
   );
 };
+
+const BlogStack = () => {
+  return (
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="BlogListScreen" component={Blog} />
+      <Stack.Screen name="SingleBlogScreen" component={SingleBlogScreen} />
+    </Stack.Navigator>
+  );
+};
+
 
 const CartStack = () => {
   const reduxAuth = useAppSelector(state => state.auth);
@@ -150,7 +161,7 @@ const MainTabs = () => {
         component={HomeStack}
         options={{title: 'Home'}}
       />
-      <Tab.Screen name="Blog" component={Blog} options={{title: 'Blog'}} />
+      <Tab.Screen name="Blog" component={BlogStack} options={{ title: 'Blog' }} />
       <Tab.Screen name="Cart" component={CartStack} options={{title: 'Cart'}} />
       <Tab.Screen
         name="Account"

@@ -1,4 +1,4 @@
-package com.starter
+package com.eracit
 
 import com.facebook.react.ReactActivity
 import com.facebook.react.ReactActivityDelegate

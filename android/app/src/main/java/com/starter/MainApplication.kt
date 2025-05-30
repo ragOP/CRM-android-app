@@ -1,4 +1,4 @@
-package com.starter
+package com.eracit
 
 import android.app.Application
 import com.facebook.react.PackageList
