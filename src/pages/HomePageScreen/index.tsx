@@ -298,7 +298,7 @@ const HomePageScreen = () => {
         highlight={{cleaning: true}}
         data={services}
       /> */}
-      <HealthConditionSection />
+      {/* <HealthConditionSection /> */}
       {/* <ProductGrid
         title="Top Picks For You"
         highlight={{picks: true}}
