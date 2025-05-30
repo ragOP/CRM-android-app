@@ -15,10 +15,11 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import {useNavigation} from '@react-navigation/native';
 import {useAppSelector, useAppDispatch} from '../../redux/store';
 import {showSnackbar} from '../../redux/slice/snackbarSlice';
-import { fetchUserDetails } from '../../apis/fetchUserDetails';
-import { updateUserDetails } from './helpers/updateUserDetails';
-import { useQuery } from '@tanstack/react-query';
+import {fetchUserDetails} from '../../apis/fetchUserDetails';
+import {updateUserDetails} from './helpers/updateUserDetails';
+import {useQuery} from '@tanstack/react-query';
 import AddressManager from '../AddressManager/AddressManager';
+import {setUser} from '../../redux/slice/authSlice';
 
 const EditProfileScreen = () => {
   const navigation = useNavigation();
@@ -28,7 +29,7 @@ const EditProfileScreen = () => {
     name: '',
     email: '',
     phone: '',
-  })
+  });
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
 
@@ -49,14 +50,14 @@ const EditProfileScreen = () => {
     }
   }, [userDetails]);
 
-  console.log("userDetails", userDetails)
+  console.log('userDetails', userDetails);
 
   const handleChange = (key: string, value: string) => {
     setForm(prevForm => ({
       ...prevForm,
       [key]: value,
     }));
-  };  
+  };
 
   const handleSave = async () => {
     if (!form.name.trim() || !form.phone.trim()) {
@@ -74,19 +75,38 @@ const EditProfileScreen = () => {
       id: user?.id,
       updates: {
         name: form.name,
-        mobile_number: form.phone
-      }
-    }
+        mobile_number: form.phone,
+      },
+    };
     try {
-      // Call your API to update the profile
-      await updateUserDetails(updatedData);
-      dispatch(
-        showSnackbar({
-          type: 'success',
-          title: 'Profile updated successfully!',
-          placement: 'top',
-        }),
-      );
+      const apiResponse = await updateUserDetails(updatedData);
+
+      if (apiResponse?.response?.success) {
+        dispatch(
+          setUser({
+            ...user,
+            name: form.name,
+            mobile_number: form.phone,
+          }),
+        );
+        dispatch(
+          showSnackbar({
+            type: 'success',
+            title: 'Profile updated successfully!',
+            placement: 'top',
+          }),
+        );
+      } else {
+        dispatch(
+          showSnackbar({
+            type: 'error',
+            title:
+              apiResponse?.response?.data?.message ||
+              'Failed to update profile.',
+            placement: 'top',
+          }),
+        );
+      }
     } catch (error) {
       dispatch(
         showSnackbar({

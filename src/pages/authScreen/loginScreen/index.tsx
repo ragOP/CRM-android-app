@@ -114,6 +114,7 @@ const LoginScreen = () => {
           userId: userData?.id,
           role: userData?.role,
           name: userData?.name,
+          mobile_number: userData?.mobile_number,
         };
 
         dispatch(
@@ -124,6 +125,7 @@ const LoginScreen = () => {
               name: userData?.name,
               email: userData?.email,
               role: userData?.role,
+              mobile_number: userData?.mobile_number,
             },
           }),
         );

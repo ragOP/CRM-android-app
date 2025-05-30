@@ -15,6 +15,8 @@ import {logout} from '../../redux/slice/authSlice';
 import {useNavigation} from '@react-navigation/native';
 import {showSnackbar} from '../../redux/slice/snackbarSlice';
 import CustomDialog from '../CustomDialog/CustomDialog';
+import {Chip} from 'react-native-paper';
+import { getFirstName } from '../../utils/name/getFirstName';
 
 const Row = ({icon, label, onPress, rightComponent}) => (
   <Pressable onPress={onPress} style={styles.row}>
@@ -81,15 +83,48 @@ const UserProfileScreen = () => {
         <LinearGradient
           colors={['#6C47FF', '#2B9AFF']}
           style={styles.headerBackground}>
-          <Icon name="person-circle" size={64} color="#fff" style={{marginLeft: 10}} />
-          <View>
-            <Text style={styles.headerTitle}>
-              Hello, {user?.name || 'Guest'} 👋
+          <Icon
+            name="person-circle"
+            size={64}
+            color="#fff"
+            style={{marginLeft: 10}}
+          />
+          <View style={{flexShrink: 1}}>
+            <Text
+              style={styles.headerTitle}
+              numberOfLines={1}
+              ellipsizeMode="tail">
+              Hello, {getFirstName(user?.name)} 👋
             </Text>
-            <Text style={styles.subHeader}>{user?.email || 'No Email'}</Text>
-            <Text style={styles.role}>
-              Role: {user?.role?.toUpperCase() || 'USER'}
+            <Text
+              style={styles.subHeader}
+              numberOfLines={1}
+              ellipsizeMode="tail">
+              {user?.email || 'No Email'}
             </Text>
+
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                gap: 8,
+                marginTop: 4,
+              }}>
+              {/* {user?.mobile_number && ( */}
+              <Text
+                style={styles.mobileNumber}
+                numberOfLines={1}
+                ellipsizeMode="tail">
+                {user?.mobile_number || 98181212121212}
+              </Text>
+              {/* )} */}
+
+              <View style={styles.roleBadge}>
+                <Text style={styles.roleBadgeText}>
+                  {user?.role?.toUpperCase() || 'USER'}
+                </Text>
+              </View>
+            </View>
           </View>
         </LinearGradient>
 
@@ -183,6 +218,11 @@ const styles = StyleSheet.create({
     fontSize: 14,
     marginTop: 2,
   },
+  mobileNumber: {
+    color: '#fff',
+    fontSize: 13,
+    marginTop: 4,
+  },
   role: {
     color: '#d9d9d9',
     fontSize: 13,
@@ -223,6 +263,24 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 15,
     color: '#333',
+  },
+  roleBadge: {
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: '#6C47FF',
+    marginLeft: 2,
+    marginTop: 4,
+  },
+  roleBadgeText: {
+    color: '#6C47FF',
+    fontSize: 12,
+    fontWeight: 'bold',
+    letterSpacing: 0.5,
   },
 });
 
